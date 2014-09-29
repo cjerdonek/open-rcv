@@ -1,5 +1,8 @@
 language: python
 python:
   - "3.4"
+# command to install dependencies
+install:
+  - "pip install ."
 # command to run tests
 script: openrcv-test

@@ -10,7 +10,7 @@ For instructions on installing or using the application, consult the
 For instructions on releasing the application to PyPI and understanding
 the `setup.py`, consult the `releasing.md` file in the `docs` folder.
 
-XXX: add instructions for previewing a Markdown file.
+TODO: add instructions for previewing a Markdown file.
 
 
 Setting Up
@@ -19,8 +19,9 @@ Setting Up
 First, clone the repository.
 
 Next, we recommend creating a Python virtual environment to stay
-isolated from your system Python.  You can do this, for example, using
-[pyvenv][venv].  Simply run the following from the repository root:
+isolated from your system Python.  You can do this using [pyvenv][venv],
+which was included in Python as of Python 3.3.  Simply run the following
+from the repository root:
 
     $ pyvenv venv
     $ source venv/bin/activate
@@ -39,7 +40,7 @@ it from PyPI.
 Running Tests
 -------------
 
-XXX: add Tox instructions.
+TODO: add Tox instructions.
 
 
 For Maintainers

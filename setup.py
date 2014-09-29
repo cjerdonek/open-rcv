@@ -68,6 +68,7 @@ setup(
     entry_points={
         'console_scripts': [
             'openrcv=openrcv.main:main',
+            'openrcv-test=openrcv.test.test:run_tests',
         ],
     },
 )

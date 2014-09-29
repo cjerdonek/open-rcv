@@ -1,3 +1,8 @@
+# Initial file contents from: https://github.com/github/gitignore
+#
+# Specifically--
+# https://github.com/github/gitignore/tree/7acb3d6cdcba4a5d7ecba0668a0016df5e6c01f3
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

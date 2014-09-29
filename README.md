@@ -10,32 +10,35 @@ See the [License](#license) section for details.
 **Note: this software is not yet usable.**
 
 
+Requirements
+------------
+
+OpenRCV requires Python 3.4.
+
+
 Setting up
 ----------
 
-The script was written for Python 3.4.
-
-You can download Python [from here][python-download].
-
-Then just clone this repo and follow the usage instructions below.
-Currently, there are no third-party dependencies.
+If you do not already have Python 3.4 installed, you can download it
+[from here][python-download].
 
 
-Usage
------
+Install It
+----------
 
-To run the script, run the following from the repo root--
+    $ pip install openrcv
 
-    $ python3.4 count.py ELECTION.blt OUTPUT.txt
 
-For additional usage notes, see the docstring of the main
-[`count.py`](count.py#L7) file.
+Run it
+------
+
+    $ openrcv ELECTION.blt
 
 
 License
 -------
 
-This project is licensed under the permissive BSD 3-clause license.
+This project is licensed under the permissive MIT license.
 See the [`LICENSE`](LICENSE) file for the actual license wording.
 
 

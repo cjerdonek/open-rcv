@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# **THIS SCRIPT IS WRITTEN FOR PYTHON 3.4.**
+#
 
 """
 Usage: python3.4 count.py ELECTION.blt OUTPUT.txt
@@ -126,6 +129,13 @@ class BLTParser(Parser):
         info.withdrawn = withdrawn
 
         self.parse_ballot_lines(lines)
+
+        # Read candidate list.
+        candidates = []
+        for i in range(candidate_count):
+            line = next(lines)
+            name = line.strip()
+            candidates.append(name)
 
         for line in lines:
             print("%d:%s" % (self.line_no, line))

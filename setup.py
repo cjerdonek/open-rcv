@@ -18,7 +18,7 @@ setup(
     version='0.0.1-alpha',
     license='MIT',
     # The project homepage.
-    url='https://github.com/cjerdonek/ballot-count',
+    url='https://github.com/cjerdonek/open-rcv',
 
     description='open-source software for tallying ranked-choice voting elections',
     keywords='ballot choice election ranked rcv single tally transferable stv vote voting',

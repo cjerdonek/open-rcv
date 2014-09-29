@@ -141,7 +141,9 @@ class BLTParser(Parser):
             print("%d:%s" % (self.line_no, line))
 
 
-def main(argv):
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
     ballots_path = "sample.blt"
     parser = BLTParser()
     info = parser.parse_path(ballots_path)

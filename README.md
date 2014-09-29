@@ -1,6 +1,8 @@
 OpenRCV
 =======
 
+[![Build Status](https://travis-ci.org/cjerdonek/open-rcv.svg?branch=master)](https://travis-ci.org/cjerdonek/open-rcv)
+
 This repository contains open source software for tallying ranked-choice
 voting elections like instant runoff voting and the single transferable vote.
 

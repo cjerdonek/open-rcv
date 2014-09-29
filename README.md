@@ -1,5 +1,5 @@
-ballot-count
-============
+OpenRCV
+=======
 
 This repository contains open source software for tallying ranked-choice
 voting elections like instant runoff voting and the single transferable vote.

@@ -67,6 +67,7 @@ class Parser(object):
         with time_it("parsing %r" % self.name):
             log("parsing...\n  %r" % self.name)
             try:
+                # TODO: move the context manager outside of this method.
                 with f:
                     lines = self.iter_lines(f)
                     self.parse_lines(lines)
@@ -84,10 +85,11 @@ class ContestInfo(object):
 
     """
     Attributes:
-      name:
+      name: name of contest.
       seat_count: integer number of winners.
 
     """
+    # TODO: add __repr__().
 
 class BLTParser(Parser):
 
@@ -99,6 +101,9 @@ class BLTParser(Parser):
     def parse_int_line(self, line):
         """Return a generator of integers."""
         return (int(s) for s in line.split())
+
+    def parse_next_line_text(self, lines):
+        return self.parse_int_line(next(lines))
 
     def parse_next_line_ints(self, lines):
         return self.parse_int_line(next(lines))
@@ -133,21 +138,24 @@ class BLTParser(Parser):
         # Read candidate list.
         candidates = []
         for i in range(candidate_count):
-            line = next(lines)
-            name = line.strip()
+            name = self.parse_next_line_text(lines)
             candidates.append(name)
 
-        for line in lines:
-            print("%d:%s" % (self.line_no, line))
+        name = self.parse_next_line_text(lines)
+        info.name = name
+        # TODO: assert remaining lines empty.
+        # TODO: and add test that these asserts work.
 
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv
-    ballots_path = "sample.blt"
+    # TODO: use argparse.
+    print(repr(argv))
+    ballots_path = argv[1]
     parser = BLTParser()
     info = parser.parse_path(ballots_path)
-    print(info.withdrawn)
+    print(repr(info))
 
 
 if __name__ == "__main__":

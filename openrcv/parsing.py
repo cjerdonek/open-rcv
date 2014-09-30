@@ -5,6 +5,7 @@ from openrcv.utils import log, time_it
 
 class Parser(object):
 
+    # TODO: reinitialize these when parsing a new file.
     line_no = 0
     line = None
 
@@ -30,11 +31,9 @@ class Parser(object):
     def parse_file(self, f):
         with time_it("parsing %r" % self.name):
             log("parsing...\n  %r" % self.name)
+            lines = self.iter_lines(f)
             try:
-                # TODO: move the context manager outside of this method.
-                with f:
-                    lines = self.iter_lines(f)
-                    self.parse_lines(lines)
+                self.parse_lines(lines)
             except:
                 raise Exception("error while parsing line %d: %r" %
                                 (self.line_no, self.line))
@@ -42,7 +41,8 @@ class Parser(object):
 
     def parse_path(self, path):
         log("opening...\n  %s" % path)
-        return self.parse_file(open(path, "r", encoding=FILE_ENCODING))
+        with open(path, "r", encoding=FILE_ENCODING) as f:
+            return self.parse_file(f)
 
 
 class BLTParser(Parser):
@@ -63,13 +63,16 @@ class BLTParser(Parser):
         return self.parse_int_line(next(lines))
 
     def parse_ballot_lines(self, lines):
+        ballot_count = 0
         for line in lines:
             ballot_numbers = self.parse_int_line(line)
             weight = next(ballot_numbers)
             print("weight: %r" % weight)
             if weight == 0:
-                return
+                break
+            ballot_count += 1
             print(tuple(ballot_numbers))
+        return ballot_count
 
     def parse_lines(self, lines):
         info = ContestInfo()
@@ -87,7 +90,8 @@ class BLTParser(Parser):
             withdrawn.append(-1 * number)
         info.withdrawn = withdrawn
 
-        self.parse_ballot_lines(lines)
+        ballot_count = self.parse_ballot_lines(lines)
+        info.ballot_count = ballot_count
 
         # Read candidate list.
         candidates = []

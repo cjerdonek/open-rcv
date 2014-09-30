@@ -12,6 +12,7 @@ from contextlib import contextmanager
 import sys
 import timeit
 
+from openrcv.models import ContestInfo
 
 FILE_ENCODING = "utf-8"
 
@@ -81,16 +82,6 @@ class Parser(object):
         return self.parse_file(open(path, "r", encoding=FILE_ENCODING))
 
 
-class ContestInfo(object):
-
-    """
-    Attributes:
-      name: name of contest.
-      seat_count: integer number of winners.
-
-    """
-    # TODO: add __repr__().
-
 class BLTParser(Parser):
 
     name = "BLT file"
@@ -103,7 +94,7 @@ class BLTParser(Parser):
         return (int(s) for s in line.split())
 
     def parse_next_line_text(self, lines):
-        return self.parse_int_line(next(lines))
+        return next(lines).strip()
 
     def parse_next_line_ints(self, lines):
         return self.parse_int_line(next(lines))

@@ -21,6 +21,7 @@ class MainTestCase(TestCase):
 class BLTParserTest(TestCase):
 
     def test_parse_file(self):
+        # TODO: simplify this string.
         blt = dedent("""\
         4 2
         -3
@@ -41,4 +42,5 @@ class BLTParserTest(TestCase):
 
         with StringIO(blt) as f:
             info = parser.parse_file(f)
+        # TODO: test the other attributes.
         self.assertEqual(type(info), ContestInfo)

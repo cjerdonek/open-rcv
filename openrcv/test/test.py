@@ -4,7 +4,8 @@ from textwrap import dedent
 import unittest
 from unittest import TestCase
 
-from openrcv.main import BLTParser, ContestInfo
+from openrcv.models import ContestInfo
+from openrcv.parsing import BLTParser
 
 
 def run_tests():

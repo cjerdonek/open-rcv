@@ -9,6 +9,17 @@ EXIT_STATUS_FAIL = 1
 EXIT_STATUS_USAGE_ERROR = 2
 
 
+# TODO: switch to logging module
+def log(msg):
+    sys.stderr.write(msg)
+
+
+def log_error(msg, add_trace=False):
+    if add_trace:
+        msg = traceback.format_exc()
+    log(str(msg))
+
+
 def main_status_inner(argv):
     if argv is None:
         argv = sys.argv
@@ -17,11 +28,13 @@ def main_status_inner(argv):
     ballots_path = argv[1]
     do_parse(ballots_path)
 
+
 def main_status(argv):
     try:
-        main_status_inner(ballots_path)
+        main_status_inner(argv)
         status = EXIT_STATUS_SUCCESS
     except Exception as err:
+        log_error(err)
         status = EXIT_STATUS_FAIL
 
     return status

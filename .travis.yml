@@ -5,4 +5,5 @@ python:
 install:
   - "pip install ."
 # command to run tests
-script: rcvtest
+script:
+  - python -m unittest discover openrcv

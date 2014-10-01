@@ -12,9 +12,10 @@ DOCS_PATH = "docs"
 DOCS_BUILD_PATH = os.path.join(DOCS_PATH, "build")
 ENCODING = 'utf-8'
 LONG_DESCRIPTION_PATH = "setup_long_description.rst"
-# We do not import this since pandocfilters might not be installed.
-PANDOC_FILTER_PATH = "openrcv_setup/pandocfilters/urltransform.py"
 README_PATH = "README.md"
+# We do not need to actually import the pandoc filters.
+PANDOC_HTML_FILTER = "pandocfilters/htmlfilter.py"
+PANDOC_RST_FILTER = "pandocfilters/htmlfilter.py"
 
 log = logging.getLogger(os.path.basename(__name__))
 
@@ -69,7 +70,7 @@ def md2html(md_path):
     # --filter ./urltransform.py --write=html --output=README.html README.md
     opath = Path(md_path)
     target_path = html_target_path(str(opath.with_suffix(".html")))
-    filter_path = os.path.relpath(PANDOC_FILTER_PATH)
+    filter_path = os.path.relpath(PANDOC_HTML_FILTER)
     run_pandoc(["--filter", filter_path, "--write=html",
                 "--output", target_path, md_path])
     return target_path

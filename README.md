@@ -29,7 +29,13 @@ Installing
 Running It
 ----------
 
-    $ openrcv ELECTION.blt
+    $ rcvcount ELECTION.blt
+
+
+Testing It
+----------
+
+    $ rcvtest
 
 
 Contributing

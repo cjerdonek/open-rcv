@@ -15,6 +15,7 @@
 include .travis.yml
 include LICENSE
 include README.md
+include HISTORY.md
 include TODO.md
 include setup_long_description.rst
 recursive-include docs *.md

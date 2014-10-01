@@ -18,6 +18,9 @@ Setting Up
 
 First, clone the repository.
 
+
+### Create virtual environment
+
 Next, we recommend creating a Python virtual environment to stay
 isolated from your system Python.  You can do this using [pyvenv][venv],
 which was included in Python as of Python 3.3.  Simply run the following
@@ -32,6 +35,9 @@ also the recommendations in the ["Python Packaging User Guide"][pug].
 Also see [this gist][workon-gist] for a way to automatically enter
 the project's virtualenv when entering its directory with `cd`.
 
+
+### Pip install
+
 Install the project in "develop" mode:
 
     $ pip install -e .[dev]
@@ -42,6 +48,18 @@ it from PyPI.
 The `[dev]` portion of the command means to install the `extras_require`
 dependencies specified in [`setup.py`](setup.py) and with key `dev`.
 These are the development-only dependencies.
+
+### Pandoc
+
+Pandoc is a command-line tool for converting text files to and from
+different formats (e.g. markdown, html, and rst).
+
+It is needed more for [releasing][openrcv-releasing], but in certain
+situations may be useful for other contributors (e.g. previewing
+documentation locally).
+
+To install pandoc, follow the instructions on [pandoc's home page][pandoc].
+
 
 ### TextMate
 
@@ -61,10 +79,11 @@ For Maintainers
 ---------------
 
 For instructions on releasing new versions of OpenRCV and on how to use
-`setup.py`, consult the file [`docs/releasing.md`](docs/releasing.md).
+`setup.py`, consult the file [`docs/releasing.md`][openrcv-releasing].
 
 
 [workon-gist]: https://gist.github.com/cjerdonek/7583644
 [open-rcv]: https://github.com/cjerdonek/open-rcv
+[openrcv-releasing]: releasing.md
 [pug]: https://packaging.python.org/en/latest/tutorial.html
 [venv]: https://docs.python.org/3/library/venv.html

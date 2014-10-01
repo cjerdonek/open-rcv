@@ -29,12 +29,26 @@ from the repository root:
 Alternatively, you can use virtualenv (and virtualenvwrapper).  See
 also the recommendations in the ["Python Packaging User Guide"][pug].
 
-Finally, install the source code in "develop" mode:
+Also see [this gist][workon-gist] for a way to automatically enter
+the project's virtualenv when entering its directory with `cd`.
 
-    $ pip install -e .
+Install the project in "develop" mode:
+
+    $ pip install -e .[dev]
 
 This lets you `openrcv` from the command-line as if you had installed
 it from PyPI.
+
+The `[dev]` portion of the command means to install the `extras_require`
+dependencies specified in [`setup.py`](setup.py) and with key `dev`.
+These are the development-only dependencies.
+
+### TextMate
+
+If you use TextMate, you can include the following at the beginning of
+your `*.tmproj` file's `regexFolderFilter:
+
+    <string>!dist|.*.egg-info|...
 
 
 Running Tests
@@ -50,6 +64,7 @@ For instructions on releasing new versions of OpenRCV and on how to use
 `setup.py`, consult the file [`docs/releasing.md`](docs/releasing.md).
 
 
+[workon-gist]: https://gist.github.com/cjerdonek/7583644
 [open-rcv]: https://github.com/cjerdonek/open-rcv
 [pug]: https://packaging.python.org/en/latest/tutorial.html
 [venv]: https://docs.python.org/3/library/venv.html

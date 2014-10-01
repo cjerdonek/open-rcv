@@ -79,7 +79,9 @@ setup(
     #
     extras_require = {
         'dev':  [
-            'check-manifest'
+            'check-manifest',
+            'pandocfilters >=1.2,<1.3',
+            'twine >=1.3,<1.4'
         ],
     },
 

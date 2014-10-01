@@ -51,7 +51,7 @@ License
 -------
 
 This project is licensed under the permissive MIT license.
-See the [`LICENSE`](LICENSE) file for the actual license wording.
+See the [LICENSE](LICENSE) file for the actual license wording.
 
 
 Author

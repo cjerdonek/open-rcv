@@ -54,7 +54,7 @@ License
 -------
 
 This project is licensed under the permissive MIT license. See the
-```LICENSE`` <https://github.com/cjerdonek/open-rcv/blob/master/LICENSE>`__
+`LICENSE <https://github.com/cjerdonek/open-rcv/blob/master/LICENSE>`__
 file for the actual license wording.
 
 Author

@@ -16,8 +16,10 @@ on the license.
 Requirements
 ------------
 
-OpenRCV requires Python 3.4.  If you do not already have Python 3.4
-installed, you can download it [from here][python-download].
+OpenRCV can be run using Python 3.4.
+
+If you do not already have Python 3.4, you can download it
+[here][python-download].
 
 
 Installing

@@ -8,13 +8,12 @@ import webbrowser
 
 from setuptools import Command
 
-
 DOCS_PATH = "docs"
 DOCS_BUILD_PATH = os.path.join(DOCS_PATH, "build")
 ENCODING = 'utf-8'
 LONG_DESCRIPTION_PATH = "setup_long_description.rst"
 # We do not import this since pandocfilters might not be installed.
-PANDOC_FILTER_PATH = "openrcv_setup/urltransform.py"
+PANDOC_FILTER_PATH = "openrcv_setup/pandocfilters/urltransform.py"
 README_PATH = "README.md"
 
 log = logging.getLogger(os.path.basename(__name__))

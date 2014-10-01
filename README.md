@@ -4,11 +4,11 @@ OpenRCV
 [![Build Status](https://travis-ci.org/cjerdonek/open-rcv.svg?branch=master)](https://travis-ci.org/cjerdonek/open-rcv)
 
 OpenRCV is an open source software project for tallying ranked-choice
-voting elections.  This includes election methods like instant runoff
-voting and the single transferable vote.
+voting elections like instant runoff voting and the single transferable vote.
 
-This software is licensed under a permissive open source license.
-See the [License](#license) section for details.
+It is distributed on [PyPI][openrcv-pypi] and licensed under a permissive
+open source license.  See the [License](#license) section for details
+on the license.
 
 **Note: this software is not yet usable.**
 
@@ -53,4 +53,5 @@ Chris Jerdonek (<chris.jerdonek@gmail.com>)
 
 
 [openrcv-contribute]: docs/contributing.md
+[openrcv-pypi]: https://pypi.python.org/pypi/OpenRCV
 [python-download]: https://www.python.org/downloads/

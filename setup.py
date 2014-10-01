@@ -1,29 +1,33 @@
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
 # TODO: take codecs out.
 # To use a consistent encoding
 from codecs import open
+import logging
+import os
 from os import path
 
-here = path.abspath(path.dirname(__file__))
+from openrcv_setup import utils
 
-# Get the long description from the relevant file
-with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
-    long_description = f.read()
 
-class TestCommand(Command):
+PACKAGE_NAME = "openrcv"
 
-    description = "run my command"
+log = logging.getLogger(os.path.basename(__file__))
 
-    # The following three must all be present to avoid errors.
-    user_options = []
-    def initialize_options(self):
-        pass
-    def finalize_options(self):
-        pass
 
-    def run(self):
-        print("foo")
+def configure_logging():
+    """
+    Configure setup.py logging with simple settings.
+
+    """
+    # Prefix the log messages to distinguish them from other text sent to
+    # the error stream.
+    format_string = ("%s: %%(name)s: [%%(levelname)s] %%(message)s" %
+                     PACKAGE_NAME)
+    logging.basicConfig(format=format_string, level=logging.INFO)
+    log.debug("Debug logging enabled.")
+
+configure_logging()
 
 setup(
     name='OpenRCV',
@@ -38,7 +42,7 @@ setup(
 
     description='open-source software for tallying ranked-choice voting elections',
     keywords='ballot choice election ranked rcv single tally transferable stv vote voting',
-    long_description=long_description,
+    long_description=utils.read(utils.LONG_DESCRIPTION_PATH),
 
     author='Chris Jerdonek',
     author_email='chris.jerdonek@gmail.com',
@@ -97,7 +101,7 @@ setup(
     #   $ python setup.py KEY
     #
     cmdclass={
-        'updatedesc': TestCommand,
+        'update_long_desc': utils.LongDescriptionCommand,
     },
 
     entry_points={

@@ -4,8 +4,6 @@ TODO
 * Stub out argparse and error catch-all.
 * Work on initial "count" algorithm that returns a dict of round-by-round
   totals.
-* Add to docs that it will have both a command-line API and a
-  library API.
 * Add remaining PyPI instructions to releasing.
 * Add auto-generation comment to top of `setup_long_description.rst`.
 * Only include newest changes in README.

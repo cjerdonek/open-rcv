@@ -14,6 +14,14 @@ on the license.
 **Note: this software is not yet usable.**
 
 
+Features
+--------
+
+* Exposes both a command-line API and a Python API.
+* The command-line API returns results as JSON to allow interoperability
+  with other tools (e.g. to use a different results renderer).
+
+
 Requirements
 ------------
 

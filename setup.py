@@ -1,6 +1,8 @@
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
-from codecs import open  # To use a consistent encoding
+from setuptools import setup, find_packages, Command
+# TODO: take codecs out.
+# To use a consistent encoding
+from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
@@ -8,6 +10,20 @@ here = path.abspath(path.dirname(__file__))
 # Get the long description from the relevant file
 with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
     long_description = f.read()
+
+class TestCommand(Command):
+
+    description = "run my command"
+
+    # The following three must all be present to avoid errors.
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        print("foo")
 
 setup(
     name='OpenRCV',
@@ -58,7 +74,9 @@ setup(
     #   $ pip install -e .[dev]
     #
     extras_require = {
-            'dev':  ['check-manifest'],
+        'dev':  [
+            'check-manifest'
+        ],
     },
 
     # If there are data files included in your packages that need to be
@@ -74,10 +92,19 @@ setup(
     # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
     # data_files=[('my_data', ['data/data_file'])],
 
+    # These commands can be run with--
+    #
+    #   $ python setup.py KEY
+    #
+    cmdclass={
+        'updatedesc': TestCommand,
+    },
+
     entry_points={
         'console_scripts': [
             'rcvcount=openrcv.main:main',
             'rcvtest=openrcv.test.test_parsing:run_tests',
         ],
+
     },
 )

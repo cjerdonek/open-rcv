@@ -14,8 +14,9 @@ ENCODING = 'utf-8'
 LONG_DESCRIPTION_PATH = "setup_long_description.rst"
 README_PATH = "README.md"
 # We do not need to actually import the pandoc filters.
-PANDOC_HTML_FILTER = "pandocfilters/htmlfilter.py"
-PANDOC_RST_FILTER = "pandocfilters/htmlfilter.py"
+PANDOC_FILTER_DIR = "pandocfilters"
+PANDOC_HTML_FILTER = "htmlfilter.py"
+PANDOC_RST_FILTER = "rstfilter.py"
 
 log = logging.getLogger(os.path.basename(__name__))
 
@@ -56,7 +57,7 @@ def run_pandoc(args):
     return stdout
 
 
-def run_pandoc_filter(filter_path, output_format, source_path, target_path):
+def run_pandoc_filter(filter_name, output_format, source_path, target_path):
     """
     Example:
 
@@ -64,7 +65,8 @@ def run_pandoc_filter(filter_path, output_format, source_path, target_path):
             --output docs/build/README.html README.md
 
     """
-    return run_pandoc(["--filter", filter_path, "--write=html",
+    filter_path = os.path.join(PANDOC_FILTER_DIR, filter_name)
+    return run_pandoc(["--filter", filter_path, "--write=%s" % output_format,
                        "--output", target_path, source_path])
 
 
@@ -77,10 +79,6 @@ def md2html(md_path):
     target_path = html_target_path(str(opath.with_suffix(".html")))
     run_pandoc_filter(PANDOC_HTML_FILTER, "html", md_path, target_path)
     return target_path
-
-
-def md2rst(md_path):
-    return run_pandoc_filter(PANDOC_HTML_FILTER, "rst", md_path)
 
 
 def build_html():
@@ -99,9 +97,8 @@ def build_html():
 
 
 def update_long_description():
-    rst = run_pandoc(["--write=rst", "README.md"])
-    rst = rst.decode('utf-8')
-    write(rst, "setup_long_description.rst", "long_description")
+    return run_pandoc_filter(PANDOC_RST_FILTER, "rst", "README.md",
+                             "setup_long_description.rst")
 
 
 class CommandBase(Command):

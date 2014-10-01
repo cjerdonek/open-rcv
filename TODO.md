@@ -1,9 +1,9 @@
 TODO
 ====
 
-* Generate long_description from README.
+* Add command to write HTML to docs/build.
+* Add remaining PyPI instructions to releasing.
 * Only include newest changes in README.
-* Generate HTML from RST for local testing.
 * Add logging.
 * Add argparse.
 * Add script to generate sample ballot file.

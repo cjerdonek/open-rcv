@@ -1,11 +1,7 @@
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-# TODO: take codecs out.
-# To use a consistent encoding
-from codecs import open
 import logging
 import os
-from os import path
 
 from openrcv_setup import utils
 
@@ -103,14 +99,13 @@ setup(
     #   $ python setup.py KEY
     #
     cmdclass={
+        'build_html': utils.BuildHtmlCommand,
         'update_long_desc': utils.LongDescriptionCommand,
     },
-
     entry_points={
         'console_scripts': [
             'rcvcount=openrcv.main:main',
             'rcvtest=openrcv.test.test_parsing:run_tests',
         ],
-
     },
 )

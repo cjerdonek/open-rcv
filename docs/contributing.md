@@ -72,7 +72,7 @@ your `*.tmproj` file's `regexFolderFilter:
 Running Tests
 -------------
 
-TODO: add Tox instructions.
+TODO: add test command.
 
 
 For Maintainers

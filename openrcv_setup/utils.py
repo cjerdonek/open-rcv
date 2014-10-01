@@ -1,15 +1,27 @@
 
 import logging
 import os
+from pathlib import Path
 from subprocess import check_output
+import webbrowser
 
 from setuptools import Command
 
+import openrcv_setup.urltransform as urltransform
 
+
+DOCS_BUILD_PATH = Path("docs/build")
 ENCODING = 'utf-8'
 LONG_DESCRIPTION_PATH = "setup_long_description.rst"
+README_PATH = "README.md"
 
 log = logging.getLogger(os.path.basename(__name__))
+
+
+def ensure_dir(path):
+    if not os.path.exists(path):
+        log.info("creating dir: %s" % path)
+        os.makedirs(path)
 
 
 def read(path, encoding=None):
@@ -48,6 +60,26 @@ def update_long_description_file():
     write(rst, "setup_long_description.rst", "long_description")
 
 
+def md2html(md_path):
+    # --filter ./urltransform.py --write=html --output=README.html README.md
+    opath = Path(md_path)
+    target_opath = DOCS_BUILD_PATH / opath.with_suffix(".html")
+    target_path = str(target_opath)
+    filter_path = os.path.relpath(urltransform.__file__)
+    run_pandoc(["--filter", filter_path, "--write=html",
+                "--output", target_path, md_path])
+    return target_opath
+
+
+def build_html():
+    ensure_dir(str(DOCS_BUILD_PATH))
+    target_readme_opath = md2html(README_PATH)
+    # TODO: convert rest of docs files.
+    uri = target_readme_opath.resolve().as_uri()
+    log.info("opening web browser to: %s\n-->%s" % (target_readme_opath, uri))
+    webbrowser.open(uri)
+
+
 class CommandBase(Command):
 
     description = None
@@ -61,10 +93,26 @@ class CommandBase(Command):
     def finalize_options(self):
         pass
 
+    def run(self):
+        try:
+            self._run()
+        except FileNotFoundError as err:
+            # Raise a new exception because distutils/setuptools does
+            # not display the stack trace for these types of errors.
+            raise Exception("error occurred during setuptools command")
+
+
+class BuildHtmlCommand(CommandBase):
+
+    description = "Build HTML from markdown files."
+
+    def _run(self):
+        build_html()
+
 
 class LongDescriptionCommand(CommandBase):
 
     description = "Update the reST long_description file."
 
-    def run(self):
+    def _run(self):
         update_long_description_file()

@@ -56,10 +56,16 @@ def run_pandoc(args):
     return stdout
 
 
-def update_long_description_file():
-    rst = run_pandoc(["--write=rst", "README.md"])
-    rst = rst.decode('utf-8')
-    write(rst, "setup_long_description.rst", "long_description")
+def run_pandoc_filter(filter_path, output_format, source_path, target_path):
+    """
+    Example:
+
+        $ pandoc --filter pandocfilters/htmlfilter.py --write=html \
+            --output docs/build/README.html README.md
+
+    """
+    return run_pandoc(["--filter", filter_path, "--write=html",
+                       "--output", target_path, source_path])
 
 
 def html_target_path(rel_path):
@@ -67,13 +73,14 @@ def html_target_path(rel_path):
 
 
 def md2html(md_path):
-    # --filter ./urltransform.py --write=html --output=README.html README.md
     opath = Path(md_path)
     target_path = html_target_path(str(opath.with_suffix(".html")))
-    filter_path = os.path.relpath(PANDOC_HTML_FILTER)
-    run_pandoc(["--filter", filter_path, "--write=html",
-                "--output", target_path, md_path])
+    run_pandoc_filter(PANDOC_HTML_FILTER, "html", md_path, target_path)
     return target_path
+
+
+def md2rst(md_path):
+    return run_pandoc_filter(PANDOC_HTML_FILTER, "rst", md_path)
 
 
 def build_html():
@@ -89,6 +96,12 @@ def build_html():
     uri = readme_opath.resolve().as_uri()
     log.info("opening web browser to: %s\n-->%s" % (target_readme_path, uri))
     webbrowser.open(uri)
+
+
+def update_long_description():
+    rst = run_pandoc(["--write=rst", "README.md"])
+    rst = rst.decode('utf-8')
+    write(rst, "setup_long_description.rst", "long_description")
 
 
 class CommandBase(Command):
@@ -115,7 +128,7 @@ class CommandBase(Command):
 
 class BuildHtmlCommand(CommandBase):
 
-    description = "Build HTML from markdown files."
+    description = "Build HTML documentation from markdown files."
 
     def _run(self):
         build_html()
@@ -126,4 +139,4 @@ class LongDescriptionCommand(CommandBase):
     description = "Update the reST long_description file."
 
     def _run(self):
-        update_long_description_file()
+        update_long_description()

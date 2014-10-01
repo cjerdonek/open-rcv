@@ -4,20 +4,22 @@ OpenRCV
 |Build Status|
 
 OpenRCV is an open source software project for tallying ranked-choice
-voting elections. This includes election methods like instant runoff
-voting and the single transferable vote.
+voting elections like instant runoff voting and the single transferable
+vote.
 
-This software is licensed under a permissive open source license. See
-the `License <#license>`__ section for details.
+It is distributed on `PyPI <https://pypi.python.org/pypi/OpenRCV>`__ and
+licensed under a permissive open source license. See the
+`License <#license>`__ section for details on the license.
 
 **Note: this software is not yet usable.**
 
 Requirements
 ------------
 
-OpenRCV requires Python 3.4. If you do not already have Python 3.4
-installed, you can download it `from
-here <https://www.python.org/downloads/>`__.
+OpenRCV can be run using Python 3.4.
+
+If you do not already have Python 3.4, you can download it
+`here <https://www.python.org/downloads/>`__.
 
 Installing
 ----------
@@ -31,13 +33,21 @@ Running It
 
 ::
 
-    $ openrcv ELECTION.blt
+    $ rcvcount ELECTION.blt
+
+Testing It
+----------
+
+::
+
+    $ rcvtest
 
 Contributing
 ------------
 
 To contribute to the project, see the
-`Contributing <docs/contributing.md>`__ page.
+`Contributing <https://github.com/cjerdonek/open-rcv/blob/master/docs/contributing.md>`__
+page.
 
 License
 -------

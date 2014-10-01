@@ -10,8 +10,6 @@ For instructions on installing or using the application, consult the
 For instructions on releasing the application to PyPI and understanding
 the `setup.py`, consult the `releasing.md` file in the `docs` folder.
 
-TODO: add instructions for previewing a Markdown file.
-
 
 Setting Up
 ----------
@@ -49,6 +47,7 @@ The `[dev]` portion of the command means to install the `extras_require`
 dependencies specified in [`setup.py`](setup.py) and with key `dev`.
 These are the development-only dependencies.
 
+
 ### Pandoc
 
 Pandoc is a command-line tool for converting text files to and from
@@ -73,6 +72,12 @@ Running Tests
 -------------
 
 TODO: add test command.
+
+
+Viewing Docs
+------------
+
+    $ python setup.py build_html
 
 
 For Maintainers

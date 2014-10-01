@@ -9,7 +9,8 @@ vote.
 
 It is distributed on `PyPI <https://pypi.python.org/pypi/OpenRCV>`__ and
 licensed under a permissive open source license. See the
-`License <#license>`__ section for details on the license.
+`License <https://pypi.python.org/pypi/OpenRCV/#license>`__ section for
+details on the license.
 
 **Note: this software is not yet usable.**
 
@@ -53,7 +54,8 @@ License
 -------
 
 This project is licensed under the permissive MIT license. See the
-```LICENSE`` <LICENSE>`__ file for the actual license wording.
+```LICENSE`` <https://github.com/cjerdonek/open-rcv/blob/master/LICENSE>`__
+file for the actual license wording.
 
 Author
 ------

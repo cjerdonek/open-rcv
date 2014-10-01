@@ -6,7 +6,8 @@ OpenRCV
 OpenRCV is an open source software project for tallying ranked-choice
 voting elections like instant runoff voting and the single transferable vote.
 
-It is distributed on [PyPI][openrcv-pypi] and licensed under a permissive
+It is distributed for free on [PyPI][openrcv-pypi] and the source code
+is hosted on [GitHub][openrcv-github].  It is licensed under a permissive
 open source license.  See the [License](#license) section for details
 on the license.
 
@@ -61,5 +62,6 @@ Chris Jerdonek (<chris.jerdonek@gmail.com>)
 
 
 [openrcv-contribute]: docs/contributing.md
+[openrcv-github]: https://github.com/cjerdonek/open-rcv
 [openrcv-pypi]: https://pypi.python.org/pypi/OpenRCV
 [python-download]: https://www.python.org/downloads/

@@ -5,5 +5,6 @@ TODO
 * Only include newest changes in README.
 * Add logging.
 * Add argparse.
-* Add script to generate sample ballot file.
+* Add command to generate sample ballot file.
+* Add nice online documentation.
 * Add PEP8 checking.

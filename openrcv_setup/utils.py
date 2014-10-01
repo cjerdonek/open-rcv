@@ -9,7 +9,8 @@ import webbrowser
 from setuptools import Command
 
 
-DOCS_BUILD_PATH = Path("docs/build")
+DOCS_PATH = "docs"
+DOCS_BUILD_PATH = os.path.join(DOCS_PATH, "build")
 ENCODING = 'utf-8'
 LONG_DESCRIPTION_PATH = "setup_long_description.rst"
 # We do not import this since pandocfilters might not be installed.
@@ -61,25 +62,32 @@ def update_long_description_file():
     write(rst, "setup_long_description.rst", "long_description")
 
 
+def html_target_path(rel_path):
+    return os.path.join(DOCS_BUILD_PATH, rel_path)
+
+
 def md2html(md_path):
     # --filter ./urltransform.py --write=html --output=README.html README.md
     opath = Path(md_path)
-    target_opath = DOCS_BUILD_PATH / opath.with_suffix(".html")
-    target_path = str(target_opath)
+    target_path = html_target_path(str(opath.with_suffix(".html")))
     filter_path = os.path.relpath(PANDOC_FILTER_PATH)
     run_pandoc(["--filter", filter_path, "--write=html",
                 "--output", target_path, md_path])
-    return target_opath
+    return target_path
 
 
 def build_html():
-    ensure_dir(str(DOCS_BUILD_PATH))
-    target_readme_opath = md2html(README_PATH)
+    ensure_dir(DOCS_BUILD_PATH)
+    target_readme_path = md2html(README_PATH)
 
-    glob.glob(os.path.join(rdir,"*.xls"))
-    # TODO: convert rest of docs files.
-    uri = target_readme_opath.resolve().as_uri()
-    log.info("opening web browser to: %s\n-->%s" % (target_readme_opath, uri))
+    ensure_dir(html_target_path(DOCS_PATH))
+    md_paths = glob.glob(os.path.join(DOCS_PATH, "*.md"))
+    for md_path in md_paths:
+        md2html(md_path)
+
+    readme_opath = Path(target_readme_path)
+    uri = readme_opath.resolve().as_uri()
+    log.info("opening web browser to: %s\n-->%s" % (target_readme_path, uri))
     webbrowser.open(uri)
 
 

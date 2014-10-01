@@ -1,6 +1,6 @@
 
 from openrcv.models import ContestInfo
-from openrcv.utils import log, time_it
+from openrcv.utils import FILE_ENCODING, log, time_it
 
 
 class Parser(object):

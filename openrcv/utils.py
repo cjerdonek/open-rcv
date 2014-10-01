@@ -4,6 +4,9 @@ import timeit
 import sys
 
 
+FILE_ENCODING = "utf-8"
+
+
 # TODO: use Python's logging module.
 # TODO: move this to an utils.py.
 def log(s=None):

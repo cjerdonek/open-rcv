@@ -1,18 +1,23 @@
 Contributing to OpenRCV
 =======================
 
-This document provides assistance for contributors to OpenRCV.  In
-particular, it shows you how to interact with OpenRCV from a source
-checkout.
+This is a guide for contributors to OpenRCV.  In particular, it shows you
+how to interact with the project from a source checkout.
 
 For instructions on installing or using the application, consult the
 [`README`](../README.md) or [project page][open-rcv] instead.
-For instructions on releasing the application to PyPI and understanding
-the `setup.py`, consult the `releasing.md` file in the `docs` folder.
+
+For instructions on releasing new versions of OpenRCV to PyPI, consult
+the file [`docs/releasing.md`][openrcv-releasing].
 
 
 Setting Up
 ----------
+
+This section provides instructions on getting set up to contribute.
+
+
+### Get the code
 
 First, clone the repository.
 
@@ -78,13 +83,6 @@ Viewing Docs
 ------------
 
     $ python setup.py build_html
-
-
-For Maintainers
----------------
-
-For instructions on releasing new versions of OpenRCV and on how to use
-`setup.py`, consult the file [`docs/releasing.md`][openrcv-releasing].
 
 
 [workon-gist]: https://gist.github.com/cjerdonek/7583644

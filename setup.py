@@ -103,6 +103,9 @@ setup(
         'update_long_desc': utils.LongDescriptionCommand,
     },
     entry_points={
+        # "distutils.commands": [
+        #     "foo = mypackage.some_module:foo",
+        # ],
         'console_scripts': [
             'rcvcount=openrcv.main:main',
             'rcvtest=openrcv.test.test_parsing:run_tests',

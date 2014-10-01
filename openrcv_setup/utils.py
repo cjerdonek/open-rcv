@@ -1,4 +1,5 @@
 
+import glob
 import logging
 import os
 from pathlib import Path
@@ -7,12 +8,12 @@ import webbrowser
 
 from setuptools import Command
 
-import openrcv_setup.urltransform as urltransform
-
 
 DOCS_BUILD_PATH = Path("docs/build")
 ENCODING = 'utf-8'
 LONG_DESCRIPTION_PATH = "setup_long_description.rst"
+# We do not import this since pandocfilters might not be installed.
+PANDOC_FILTER_PATH = "openrcv_setup/urltransform.py"
 README_PATH = "README.md"
 
 log = logging.getLogger(os.path.basename(__name__))
@@ -65,7 +66,7 @@ def md2html(md_path):
     opath = Path(md_path)
     target_opath = DOCS_BUILD_PATH / opath.with_suffix(".html")
     target_path = str(target_opath)
-    filter_path = os.path.relpath(urltransform.__file__)
+    filter_path = os.path.relpath(PANDOC_FILTER_PATH)
     run_pandoc(["--filter", filter_path, "--write=html",
                 "--output", target_path, md_path])
     return target_opath
@@ -74,6 +75,8 @@ def md2html(md_path):
 def build_html():
     ensure_dir(str(DOCS_BUILD_PATH))
     target_readme_opath = md2html(README_PATH)
+
+    glob.glob(os.path.join(rdir,"*.xls"))
     # TODO: convert rest of docs files.
     uri = target_readme_opath.resolve().as_uri()
     log.info("opening web browser to: %s\n-->%s" % (target_readme_opath, uri))

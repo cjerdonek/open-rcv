@@ -76,7 +76,9 @@ your `*.tmproj` file's `regexFolderFilter:
 Running Tests
 -------------
 
-TODO: add test command.
+From the repo root:
+
+    $ python -m unittest
 
 
 Viewing Docs

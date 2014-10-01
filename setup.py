@@ -108,7 +108,6 @@ setup(
         # ],
         'console_scripts': [
             'rcvcount=openrcv.scripts.main:main',
-            'rcvtest=openrcv.test.test_parsing:run_tests',
         ],
     },
 )

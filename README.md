@@ -38,7 +38,7 @@ Running It
 Testing It
 ----------
 
-    $ rcvtest
+    $ python -m unittest discover openrcv
 
 
 Contributing

@@ -1,5 +1,6 @@
 
 import sys
+from traceback import format_exc
 
 from openrcv.main import do_parse
 
@@ -34,7 +35,8 @@ def main_status(argv):
         main_status_inner(argv)
         status = EXIT_STATUS_SUCCESS
     except Exception as err:
-        log_error(err)
+        # Log the full exception info for "unexpected" exceptions.
+        log_error(format_exc())
         status = EXIT_STATUS_FAIL
 
     return status

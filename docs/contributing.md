@@ -85,5 +85,6 @@ For instructions on releasing new versions of OpenRCV and on how to use
 [workon-gist]: https://gist.github.com/cjerdonek/7583644
 [open-rcv]: https://github.com/cjerdonek/open-rcv
 [openrcv-releasing]: releasing.md
+[pandoc]: http://johnmacfarlane.net/pandoc/
 [pug]: https://packaging.python.org/en/latest/tutorial.html
 [venv]: https://docs.python.org/3/library/venv.html

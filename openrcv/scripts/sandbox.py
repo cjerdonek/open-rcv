@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-This module houses the "highest-level" programmatic API.
+This module is for trying stuff out while developing.
 
 """
 

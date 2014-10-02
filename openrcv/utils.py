@@ -8,6 +8,7 @@ import timeit
 import sys
 
 
+ENCODING_INTERNAL_BALLOTS = "ascii"
 FILE_ENCODING = "utf-8"
 
 log = logging.getLogger(__name__)

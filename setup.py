@@ -57,11 +57,9 @@ setup(
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=[]),
 
-    # List run-time dependencies here.  These will be installed by pip when your
-    # project is installed. For an analysis of "install_requires" vs pip's
-    # requirements files see:
-    # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
-    # install_requires=['peppercorn'],
+    install_requires=[
+        'colorlog >=2.0,<2.4'
+    ],
 
     # To install dependencies for an extra from a source distribution,
     # you can do the following, for example:

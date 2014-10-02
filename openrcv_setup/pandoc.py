@@ -14,11 +14,12 @@ log = logging.getLogger(__name__)
 
 def configure_logging():
     """
-    Configure setup.py logging with simple settings.
+    Configure logging for pandoc subprocess.
+
+    This is for use when passing Python filter modules to pandoc using
+    the --filter option.
 
     """
-    # Prefix the log messages to distinguish them from other text sent to
-    # the error stream.
     format_string = ("%s: %%(name)s: [%%(levelname)s] %%(message)s" %
                      __name__)
     logging.basicConfig(format=format_string, level=logging.INFO)

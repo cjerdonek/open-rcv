@@ -17,6 +17,8 @@ on the license.
 Features
 --------
 
+* Tested against the publicly available test cases in the
+  [open-rcv-tests][open-rcv-tests] repository.
 * Exposes both a command-line API and a Python API.
 * The command-line API returns results as JSON to allow interoperability
   with other tools (e.g. to use a different results renderer).
@@ -72,4 +74,5 @@ Chris Jerdonek (<chris.jerdonek@gmail.com>)
 [openrcv-contribute]: docs/contributing.md
 [openrcv-github]: https://github.com/cjerdonek/open-rcv
 [openrcv-pypi]: https://pypi.python.org/pypi/OpenRCV
+[open-rcv-tests]: https://github.com/cjerdonek/open-rcv-tests
 [python-download]: https://www.python.org/downloads/

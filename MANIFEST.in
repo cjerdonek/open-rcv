@@ -20,3 +20,4 @@ include TODO.md
 include setup_long_description.rst
 recursive-include docs *.md
 recursive-include data *.blt
+recursive-include pandoc_filters *.py

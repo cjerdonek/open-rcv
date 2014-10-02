@@ -34,7 +34,7 @@ from openrcv_setup.pandoc import init_action
 GITHUB_URL = "https://github.com/cjerdonek/open-rcv/blob/master/"
 PYPI_URL = "https://pypi.python.org/pypi/OpenRCV/"
 
-log = logging.getLogger(os.path.basename(__name__))
+log = logging.getLogger(__file__)
 
 
 def convert_url(url):
@@ -43,6 +43,7 @@ def convert_url(url):
     Returns None if URL should remain same.
     """
     parsed_url = urlparse(url)
+    log.debug(repr(parsed_url))
     url_path = parsed_url[2]
     if not url_path:
         # Then we assume it is a fragment.
@@ -53,8 +54,6 @@ def convert_url(url):
         url_path != "LICENSE"):
         return None
     # Otherwise, we link back to the original GitHub pages.
-    log.info(repr(parsed_url))
-    # Otherwise, change the md extension to html.
     new_url = urlunparse(parsed_url)
     new_url = urljoin(GITHUB_URL, new_url)
     return new_url

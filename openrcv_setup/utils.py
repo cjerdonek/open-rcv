@@ -18,7 +18,7 @@ PANDOC_FILTER_DIR = "pandoc_filters"
 PANDOC_HTML_FILTER = "htmlfilter.py"
 PANDOC_RST_FILTER = "md2rst.py"
 
-log = logging.getLogger(os.path.basename(__name__))
+log = logging.getLogger(__name__)
 
 
 def ensure_dir(path):

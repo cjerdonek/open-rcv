@@ -10,7 +10,7 @@ import os
 from pandocfilters import Link
 
 
-log = logging.getLogger(os.path.basename(__name__))
+log = logging.getLogger(__name__)
 
 def configure_logging():
     """

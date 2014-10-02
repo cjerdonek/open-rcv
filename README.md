@@ -42,7 +42,7 @@ Installing
 Running It
 ----------
 
-    $ rcvcount ELECTION.blt
+    $ rcvcount CONTEST.blt
 
 
 Testing It

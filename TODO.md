@@ -1,7 +1,8 @@
 TODO
 ====
 
-* Delete directory after counting (context manager).
+* Make a count function that simply counts ballots from an intermediate
+  function and a list of candidates.
 * Make count_round() function that uses the intermediate ballot file.
 * Work on initial "count" algorithm that returns a dict of round-by-round
   totals.

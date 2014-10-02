@@ -3,12 +3,16 @@
 """
 Pandoc filter to transform URLs in hyperlinks from .md to .html.
 
-This lets markdown files that hyperlink to each other to continue
-hyperlinking to each other after being converted to HTML.
-
 Sample usage:
 
-pandoc --filter ./urltransform.py --write=html --output=README.html README.md
+    $ pandoc --filter ./md2html.py --write=html --output=README.html README.md
+
+This lets markdown files with relative links that hyperlink to each other
+(as supported by GitHub [1]) continue hyperlinking to each other after
+being converted to HTML.
+
+
+[1]: https://github.com/blog/1395-relative-links-in-markup-files
 
 """
 

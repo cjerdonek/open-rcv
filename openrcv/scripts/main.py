@@ -6,7 +6,7 @@ from traceback import format_exc
 
 import colorlog
 
-from openrcv.scripts.sandbox import do_parse
+from openrcv.scripts.sandbox import main as do_sandbox
 
 
 EXIT_STATUS_SUCCESS = 0
@@ -98,8 +98,8 @@ def main_status_inner(argv):
     config_log()
     # TODO: use argparse.
     print(repr(argv))
-    ballots_path = argv[1]
-    do_parse(ballots_path)
+    blt_path = argv[1]
+    do_sandbox(blt_path)
 
 
 def main_status(argv):

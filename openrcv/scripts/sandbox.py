@@ -7,6 +7,7 @@ This module is for trying stuff out while developing.
 
 import sys
 
+from openrcv import counting
 from openrcv import models
 from openrcv.models import BallotList
 from openrcv.parsing import BLTParser
@@ -29,9 +30,6 @@ def make_json_tests():
 
     print(json)
 
-def do_parse(ballots_path, encoding=None):
-    if encoding is None:
-        encoding = FILE_ENCODING
-    parser = BLTParser()
-    info = parser.parse_path(ballots_path)
-    print(repr(info))
+
+def main(blt_path, encoding=None):
+    counting.count_irv(blt_path)

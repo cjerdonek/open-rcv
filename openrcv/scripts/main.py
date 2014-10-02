@@ -107,7 +107,7 @@ def main_status_inner(argv):
     if argv is None:
         argv = sys.argv
     # TODO: use argparse.
-    print(repr(argv))
+    log.debug("argv: %r" % argv)
     blt_path = argv[1]
     do_sandbox(blt_path)
 

@@ -6,7 +6,7 @@ from traceback import format_exc
 
 import colorlog
 
-from openrcv.main import do_parse
+from openrcv.scripts.sandbox import do_parse
 
 
 EXIT_STATUS_SUCCESS = 0
@@ -36,7 +36,7 @@ class TruncatedDisplayNameFilter(object):
         if len(parts) <= 3:
             display_name = record.name
         else:
-            # For example, "a.b.c.d" become "a.b...d"
+            # For example, "a.b.c.d" becomes "a.b...d".
             display_name = '.'.join(parts[:2] + ['.', parts[-1]])
         record.display_name = display_name
         return True

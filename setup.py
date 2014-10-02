@@ -100,7 +100,7 @@ setup(
         #     "foo = mypackage.some_module:foo",
         # ],
         'console_scripts': [
-            'rcvcount=openrcv.scripts.main:main',
+            'rcv=openrcv.scripts.main:main',
         ],
     },
 )

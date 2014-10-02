@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 
 """
-Pandoc filter for converting GitHub markdown to Python reST long_description.
+Python Pandoc filter [1] for converting a GitHub markdown file to a Python
+reST long_description (suitable for display on PyPI).
+
+Sample usage:
+
+    $ pandoc --filter ./md2rst.py --write=rst --output=long_description.rst README.md
 
 PyPI's reST rendering breaks on things like relative links (supported by
 GitHub [1]), and anchor fragments.  This filter converts these links
 to links that will continue to work once on PyPI.
 
-Sample usage:
+See also this PyPI bug report [3].
 
-pandoc --filter ./md2rst.py --write=rst --output=long_description.rst README.md
 
-[1] https://github.com/blog/1395-relative-links-in-markup-files
+[1]: https://github.com/jgm/pandocfilters
+[2]: https://github.com/blog/1395-relative-links-in-markup-files
+[3]: https://bitbucket.org/pypa/pypi/issue/161/rest-formatting-fails-and-there-is-no-way
 
 """
 
@@ -32,6 +38,10 @@ log = logging.getLogger(os.path.basename(__name__))
 
 
 def convert_url(url):
+    """Convert URL appearing in a markdown file to a new URL.
+
+    Returns None if URL should remain same.
+    """
     parsed_url = urlparse(url)
     url_path = parsed_url[2]
     if not url_path:
@@ -42,7 +52,7 @@ def convert_url(url):
     if (not url_path.endswith(".md") and
         url_path != "LICENSE"):
         return None
-    # Otherwise, we link back to the GitHub pages.
+    # Otherwise, we link back to the original GitHub pages.
     log.info(repr(parsed_url))
     # Otherwise, change the md extension to html.
     new_url = urlunparse(parsed_url)

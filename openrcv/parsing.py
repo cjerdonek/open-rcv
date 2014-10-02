@@ -1,6 +1,12 @@
 
+import logging
+import os
+
 from openrcv.models import ContestInfo
-from openrcv.utils import FILE_ENCODING, log, time_it
+from openrcv import utils
+from openrcv.utils import FILE_ENCODING, time_it
+
+log = logging.getLogger(__name__)
 
 
 class Parser(object):
@@ -20,7 +26,7 @@ class Parser(object):
             self.line = line
             self.line_no = line_no
             yield line
-        log("parsed: %d lines" % line_no)
+        log.info("parsed: %d lines" % line_no)
 
     def get_parse_return_value(self):
         return None
@@ -30,7 +36,6 @@ class Parser(object):
 
     def parse_file(self, f):
         with time_it("parsing %r" % self.name):
-            log("parsing...\n  %r" % self.name)
             lines = self.iter_lines(f)
             try:
                 self.parse_lines(lines)
@@ -40,8 +45,7 @@ class Parser(object):
         return self.get_parse_return_value()
 
     def parse_path(self, path):
-        log("opening...\n  %s" % path)
-        with open(path, "r", encoding=FILE_ENCODING) as f:
+        with utils.logged_open(path, "r", encoding=FILE_ENCODING) as f:
             return self.parse_file(f)
 
 
@@ -49,12 +53,22 @@ class BLTParser(Parser):
 
     name = "BLT file"
 
+    def __init__(self, output_path=None):
+        """
+        Arguments:
+          output_path: path to which to write an internal ballot file.
+
+        """
+        if output_path is None:
+            output_path = os.devnull
+        self.output_path = output_path
+
     def get_parse_return_value(self):
         return self.info
 
     def parse_int_line(self, line):
-        """Return a generator of integers."""
-        return (int(s) for s in line.split())
+        """Return an iterable of integers."""
+        return tuple((int(s) for s in line.split()))
 
     def parse_next_line_text(self, lines):
         return next(lines).strip()
@@ -62,16 +76,22 @@ class BLTParser(Parser):
     def parse_next_line_ints(self, lines):
         return self.parse_int_line(next(lines))
 
-    def parse_ballot_lines(self, lines):
+    def _parse_ballot_lines(self, lines, f=None):
         ballot_count = 0
         for line in lines:
-            ballot_numbers = self.parse_int_line(line)
-            weight = next(ballot_numbers)
-            print("weight: %r" % weight)
+            ints = self.parse_int_line(line)
+            weight = ints[0]
             if weight == 0:
                 break
             ballot_count += 1
-            print(tuple(ballot_numbers))
+            # Leave off the terminal 0.
+            new_line = " ".join((str(n) for n in ints[:-1]))
+            f.write(new_line + "\n")
+        return ballot_count
+
+    def parse_ballot_lines(self, lines):
+        with utils.logged_open(self.output_path, "w", encoding="ascii") as f:
+            ballot_count = self._parse_ballot_lines(lines, f)
         return ballot_count
 
     def parse_lines(self, lines):

@@ -14,7 +14,7 @@ ENCODING = 'utf-8'
 LONG_DESCRIPTION_PATH = "setup_long_description.rst"
 README_PATH = "README.md"
 # We do not need to actually import the pandoc filters.
-PANDOC_FILTER_DIR = "pandocfilters"
+PANDOC_FILTER_DIR = "pandoc_filters"
 PANDOC_HTML_FILTER = "htmlfilter.py"
 PANDOC_RST_FILTER = "rstfilter.py"
 

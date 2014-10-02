@@ -16,7 +16,7 @@ README_PATH = "README.md"
 # We do not need to actually import the pandoc filters.
 PANDOC_FILTER_DIR = "pandoc_filters"
 PANDOC_HTML_FILTER = "htmlfilter.py"
-PANDOC_RST_FILTER = "rstfilter.py"
+PANDOC_RST_FILTER = "md2rst.py"
 
 log = logging.getLogger(os.path.basename(__name__))
 

@@ -20,8 +20,11 @@ Features
 * Tested against the publicly available test cases in the
   [open-rcv-tests][open-rcv-tests] repository.
 * Exposes both a command-line API and a Python API.
-* The command-line API returns results as JSON to allow interoperability
-  with other tools (e.g. to use a different results renderer).
+* Both APIs support neutral input and output text formats to allow
+  interoperability with other applications and programming languages.
+  For example, round-by-round results can be output as JSON to use a
+  your own custom "pretty" HTML renderer.  Or round-by-round totals can
+  be checked against publicly available test data.
 
 
 Requirements

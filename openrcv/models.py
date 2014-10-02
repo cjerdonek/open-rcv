@@ -1,5 +1,11 @@
 
+import json
 from random import randint
+
+
+def to_json(obj):
+    return json.dumps(obj, indent=4)
+
 
 def random_ballot_list(choices, count, max_length=None):
     """
@@ -27,7 +33,19 @@ def random_ballot_list(choices, count, max_length=None):
     return BallotList(ballots)
 
 
-class BallotList(object):
+def random_contest(candidates):
+    ballots = random_ballot_list(range(candidates), 5)
+    contest = MinimalContest(candidates, ballots)
+    return contest
+
+
+class JsonMixin(object):
+
+    def to_json(self):
+        return to_json(self.__jsobj__())
+
+
+class BallotList(JsonMixin):
 
     """
 
@@ -41,6 +59,29 @@ class BallotList(object):
         if ballots is None:
             ballots = []
         self.ballots = ballots
+
+    def __jsobj__(self):
+        return [" ".join((str(c) for c in ballot)) for ballot in self.ballots]
+
+
+class MinimalContest(JsonMixin):
+
+    def __init__(self, candidates, ballots):
+
+        """
+        Arguments:
+          candidates: integer number of candidates
+
+        """
+
+        self.ballots = ballots
+        self.candidates = candidates
+
+    def __jsobj__(self):
+        return {
+            "ballots": self.ballots.__jsobj__(),
+            "candidates": self.candidates,
+        }
 
 
 class ContestInfo(object):
@@ -60,3 +101,12 @@ class ContestInfo(object):
     # TODO: look up the proper return type.
     def __repr__(self):
         return self.name
+
+
+class RoundResult(JsonMixin):
+    """
+    Represents the results for a round.
+
+    """
+    def __init__(self, candidate_count):
+        self.candidate_count = candidate_count

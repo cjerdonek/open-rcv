@@ -1,4 +1,5 @@
 
+from contextlib import contextmanager
 import logging
 import os
 import sys
@@ -60,21 +61,9 @@ def make_formatter():
     formatter = colorlog.ColoredFormatter(format_string, log_colors=colors)
     return formatter
 
-
-def config_log(level=None, stream=None):
-    """
-    Configure logging.
-
-    Arguments:
-
-      level: lowest logging level to log.
-      stream: the stream to use for logging (e.g. sys.stderr).
-
-    """
+def make_log_handler(level, stream=None):
     if stream is None:
         stream = sys.stderr
-    if level is None:
-        level = LOGGING_LEVEL_DEFAULT
 
     # If stream is None, StreamHandler uses sys.stderr.
     handler = logging.StreamHandler(stream)
@@ -85,31 +74,53 @@ def config_log(level=None, stream=None):
     formatter = make_formatter()
     handler.setFormatter(formatter)
 
+    return handler
+
+
+@contextmanager
+def config_log(level=None, stream=None):
+    """
+    A context manager to configure logging and then undo the configuration.
+
+    Undoing the configuration is useful for testing, since otherwise
+    many log handlers might accumulate during the course of testing,
+    due to successive calls to this method.
+
+    Arguments:
+
+      level: lowest logging level to log.
+      stream: the stream to use for logging (e.g. sys.stderr).
+
+    """
+    if level is None:
+        level = LOGGING_LEVEL_DEFAULT
     root = logging.getLogger()
     root.setLevel(level)
+    handler = make_log_handler(level, stream=stream)
     root.addHandler(handler)
-
-    log.debug("debug logging enabled")
+    log.debug("added log handler")
+    yield
+    root.removeHandler(handler)
 
 
 def main_status_inner(argv):
     if argv is None:
         argv = sys.argv
-    config_log()
     # TODO: use argparse.
     print(repr(argv))
     blt_path = argv[1]
     do_sandbox(blt_path)
 
 
-def main_status(argv):
-    try:
-        main_status_inner(argv)
-        status = EXIT_STATUS_SUCCESS
-    except Exception as err:
-        # Log the full exception info for "unexpected" exceptions.
-        log.error(format_exc())
-        status = EXIT_STATUS_FAIL
+def main_status(argv, log_stream=None):
+    with config_log(stream=log_stream):
+        try:
+            main_status_inner(argv)
+            status = EXIT_STATUS_SUCCESS
+        except Exception as err:
+            # Log the full exception info for "unexpected" exceptions.
+            log.error(format_exc())
+            status = EXIT_STATUS_FAIL
 
     return status
 

@@ -1,8 +1,8 @@
 TODO
 ====
 
-* Pass an error stream to main for use when testing (to eliminate the
-  display of log messages).
+* Delete directory after counting (context manager).
+* Make count_round() function that uses the intermediate ballot file.
 * Work on initial "count" algorithm that returns a dict of round-by-round
   totals.
 * Try adding output to test repo.

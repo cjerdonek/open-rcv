@@ -2,7 +2,6 @@ TODO
 ====
 
 * Add remaining PyPI instructions to releasing.
-  - Then upload an sdist to PyPI (just to have at least one).
 * Add logging.
 * Work on initial "count" algorithm that returns a dict of round-by-round
   totals.

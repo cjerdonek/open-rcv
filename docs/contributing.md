@@ -39,7 +39,7 @@ Also see [this gist][workon-gist] for a way to automatically enter
 the project's virtualenv when entering its directory with `cd`.
 
 
-### Pip install
+### Install Requirements
 
 Install the project in "develop" mode:
 

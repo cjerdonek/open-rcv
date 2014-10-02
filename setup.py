@@ -46,16 +46,11 @@ setup(
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 3 - Alpha',
-
-        # Indicate who your project is intended for
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
-
-        # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: MIT License',
-
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
+        'Intended Audience :: Developers',
+        'Topic :: Other/Nonlisted Topic',
     ],
 
     # You can just specify the packages manually here if your project is

@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
 """
-Pandoc filter to transform URLs in hyperlinks from .md to .html.
+Pandoc filter for converting GitHub markdown to Python reST long_description.
 
-This lets markdown files that hyperlink to each other to continue
-hyperlinking to each other after being converted to HTML.
+PyPI's reST rendering breaks on things like relative links (supported by
+GitHub [1]), and anchor fragments.  This filter converts these links
+to links that will continue to work once on PyPI.
 
 Sample usage:
 
-pandoc --filter ./urltransform.py --write=html --output=README.html README.md
+pandoc --filter ./md2rst.py --write=rst --output=long_description.rst README.md
+
+[1] https://github.com/blog/1395-relative-links-in-markup-files
 
 """
 

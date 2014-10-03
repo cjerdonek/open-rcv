@@ -1,6 +1,7 @@
 
 from contextlib import contextmanager
 from datetime import datetime
+import io
 import logging
 import os
 import shutil
@@ -20,7 +21,7 @@ def log_create_dir(path):
 
 
 def logged_open(*args, **kwargs):
-    log.info("opening (%r, %r): %s" % (args[1:], kwargs, args[0]))
+    log.info("opening file (%r, %r): %s" % (args[1:], kwargs, args[0]))
     return open(*args, **kwargs)
 
 
@@ -94,3 +95,25 @@ def time_it(description):
     yield
     elapsed = timeit.default_timer() - start_time
     log.info("done: %s: %.4f seconds" % (description, elapsed))
+
+
+class FileOpener(object):
+
+    def __init__(self, path, *args, **kwargs):
+        self.path = path
+        self.args = args
+        self.kwargs = kwargs
+
+    def open(self):
+        return logged_open(self.path, *self.args, **self.kwargs)
+
+
+class OpenableString(object):
+
+    def __init__(self, text):
+        self.text = text
+
+    # TODO: test this method on short text strings.
+    def open(self):
+        log.info("opening memory stream: %r" % (self.text[:10] + "..."))
+        return io.StringIO(self.text)

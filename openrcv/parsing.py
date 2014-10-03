@@ -39,6 +39,11 @@ class Parser(object):
         raise NotImplementedError()
 
     def parse_file(self, f):
+        """
+        Arguments:
+          f: a file-like object.
+
+        """
         with time_it("parsing %s file" % self.name):
             lines = self.iter_lines(f)
             try:
@@ -48,10 +53,20 @@ class Parser(object):
                                 (self.line_no, self.line))
         return self.get_parse_return_value()
 
+    # TODO: remove this?
     def parse_path(self, path):
         with utils.logged_open(path, "r", encoding=FILE_ENCODING) as f:
             return self.parse_file(f)
 
+    def parse(self, openable):
+        """
+        Arguments:
+          openable: an object with an open() method like a FileOpener or
+            StringOpener.
+
+        """
+        with openable.open() as f:
+            return self.parse_file(f)
 
 class InternalBallotsParser(Parser):
 

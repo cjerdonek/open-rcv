@@ -12,4 +12,5 @@ install:
 script:
   - coverage run --source=openrcv -m unittest discover openrcv
 after_script:
+  - coverage report
   - coveralls

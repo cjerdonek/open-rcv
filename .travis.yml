@@ -3,7 +3,9 @@ python:
   - "3.4"
 # command to install dependencies
 install:
-  - "pip install .[test]"
+  # We need to use --editable here because of this issue:
+  # https://github.com/pypa/pip/issues/1236
+  - "pip install -e .[test]"
   # Travis-specific dependencies
   - pip install coveralls
 # command to run tests

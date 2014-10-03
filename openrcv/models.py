@@ -72,11 +72,10 @@ class ContestInfo(object):
         return self.name
 
 
-# TODO: rename to RoundTestRoundResults.
 class TestRoundResults(JsonMixin):
 
     """
-    Represents vote totals for a round.
+    Represents the results of a round for testing purposes.
 
     """
 
@@ -84,7 +83,6 @@ class TestRoundResults(JsonMixin):
         """
         Arguments:
           candidates: dict of candidate number to vote total.
-          no_candidate: number of ballots counting towards no candidate.
 
         """
         self.candidates = candidates
@@ -95,12 +93,10 @@ class TestRoundResults(JsonMixin):
         }
 
 
-# TODO: do we need more than one results object: one for testing
-# and one for real use?  Should these inherit or compose from each other?
 class TestContestResults(JsonMixin):
 
     """
-    Represents the totals for all rounds.
+    Represents contest results for testing purposes.
 
     """
 

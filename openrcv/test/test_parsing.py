@@ -21,16 +21,6 @@ BLT_STRING = """\
 "My Election"
 """
 
-def run_tests():
-    # TODO: discover all tests.
-    unittest.main(module=__name__)
-
-
-class MainTestCase(TestCase):
-
-    def test(self):
-        self.assertEqual(1, 1)
-
 
 class BLTParserTest(TestCase):
 

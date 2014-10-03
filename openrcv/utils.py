@@ -115,5 +115,5 @@ class OpenableString(object):
 
     # TODO: test this method on short text strings.
     def open(self):
-        log.info("opening memory stream: %r" % (self.text[:10] + "..."))
+        log.info("opening memory stream: %r" % (self.text[:20] + "..."))
         return io.StringIO(self.text)

@@ -16,17 +16,17 @@ from openrcv import utils
 log = logging.getLogger(__name__)
 
 
-def _count_ballots(ballots_path, candidates):
+def count_ballots(openable_ballots, candidates):
     """
     Count one round, and return a TestRoundResults object.
 
     Arguments:
-      ballots_path: path to an internal ballot file.
+      openable_ballots: an openable to an internal ballot file.
       candidates: iterable of candidates eligible to receive votes.
 
     """
     parser = InternalBallotsParser(candidates)
-    results = parser.parse_path(ballots_path)
+    results = parser.parse(openable_ballots)
     return results
 
 
@@ -68,13 +68,13 @@ def _count_irv(sub_dir, blt_path):
     candidates = range(1, len(info.candidates) + 1)
 
     rounds = []
-    # while True:
-    #     results = _count_ballots(ballots_path, candidates)
-    #     rounds.append(results)
-    #     totals = results.candidates
+    while True:
+        results = count_ballots(ballots_path, candidates)
+        rounds.append(results)
+        totals = results.candidates
 
 
-    totals = _count_ballots(ballots_path, candidates)
+    totals = count_ballots(ballots_path, candidates)
     return totals
 
 # This is currently just a test function rather than part of the API.

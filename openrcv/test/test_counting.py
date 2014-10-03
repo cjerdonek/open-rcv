@@ -1,8 +1,12 @@
 
+from textwrap import dedent
 import unittest
 from unittest import TestCase
 
-from openrcv.counting import get_majority, get_winner
+from openrcv.counting import count_ballots, get_majority, get_winner
+from openrcv.models import TestRoundResults
+from openrcv.utils import OpenableString
+
 
 class TestCounting(TestCase):
 
@@ -25,4 +29,14 @@ class TestCounting(TestCase):
         for totals, winner in cases:
             with self.subTest(totals=totals, winner=winner):
                 self.assertEqual(get_winner(totals), winner)
-    
+
+    def test_count_ballots(self):
+        internal_ballots = dedent("""\
+        1 2
+        3 1 4
+        1 2
+        """)
+        openable = OpenableString(internal_ballots)
+        result = count_ballots(openable, (1, 2, 4))
+        self.assertEqual(type(result), TestRoundResults)
+        self.assertEqual(result.totals, {1: 3, 2: 2, 4: 0})

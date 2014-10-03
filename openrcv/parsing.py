@@ -70,6 +70,26 @@ class Parser(object):
 
 class InternalBallotsParser(Parser):
 
+    # TODO: document how to include undervotes.
+    """
+    Parses an internal ballots file.
+
+    The file format is as follows:
+
+    Each line is a space-delimited string of integers.  The first integer
+    is the weight of the ballot, which is 1 for a single voter.  The
+    remaining numbers are the candidates in the order in which they
+    were ranked.
+
+    A sample file:
+
+    2 2
+    1 2 4 3 1
+    2 1 3 4
+    3 1
+
+    """
+
     name = "internal ballots"
 
     def __init__(self, candidates):

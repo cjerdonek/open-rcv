@@ -76,7 +76,11 @@ your `*.tmproj` file's `regexFolderFilter:
 Running Tests
 -------------
 
-From the repo root:
+From the repo root, for tests and a code coverage report:
+
+    $ ./test.sh
+
+Or for just tests--
 
     $ python -m unittest
 

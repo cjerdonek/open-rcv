@@ -64,7 +64,7 @@ setup(
     # To install dependencies for an extra from a source distribution,
     # you can do the following, for example:
     #
-    #   $ pip install -e .[dev]
+    #   $ pip install -e .[dev,testq]
     #
     extras_require = {
         'dev':  [

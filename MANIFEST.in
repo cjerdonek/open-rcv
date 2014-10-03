@@ -12,6 +12,7 @@
 #   setup.py
 #
 
+include .coveragerc
 include .travis.yml
 include LICENSE
 include README.md

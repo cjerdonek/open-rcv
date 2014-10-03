@@ -8,6 +8,7 @@ import timeit
 import sys
 
 
+# We only need ascii for the internal ballot file.
 ENCODING_INTERNAL_BALLOTS = "ascii"
 FILE_ENCODING = "utf-8"
 

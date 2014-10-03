@@ -2,7 +2,7 @@
 import logging
 import os
 
-from openrcv.models import ContestInfo
+from openrcv.models import ContestInfo, Totals
 from openrcv import utils
 from openrcv.utils import FILE_ENCODING, time_it
 
@@ -31,11 +31,15 @@ class Parser(object):
     def get_parse_return_value(self):
         return None
 
+    def parse_int_line(self, line):
+        """Return a tuple of integers."""
+        return tuple((int(s) for s in line.split()))
+
     def parse_lines(self, lines):
         raise NotImplementedError()
 
     def parse_file(self, f):
-        with time_it("parsing %r" % self.name):
+        with time_it("parsing %s file" % self.name):
             lines = self.iter_lines(f)
             try:
                 self.parse_lines(lines)
@@ -49,9 +53,44 @@ class Parser(object):
             return self.parse_file(f)
 
 
+class InternalBallotsParser(Parser):
+
+    name = "internal ballots"
+
+    def __init__(self, candidates):
+        """
+        Arguments:
+          candidates: iterable of candidate numbers.
+
+        """
+        self.candidates = candidates
+
+    def get_parse_return_value(self):
+        totals = Totals(self.candidate_totals)
+        return totals
+
+    def parse_lines(self, lines):
+        candidates = self.candidates
+        totals = {}
+        for candidate in candidates:
+            totals[candidate] = 0
+
+        candidate_set = set(candidates)
+        for line in lines:
+            ints = self.parse_int_line(line)
+            weight = ints[0]
+            for i in ints[1:]:
+                if i in candidate_set:
+                    totals[i] += weight
+                    break
+
+        self.candidate_totals = totals
+
+
+
 class BLTParser(Parser):
 
-    name = "BLT file"
+    name = "BLT"
 
     def __init__(self, output_path=None):
         """
@@ -65,10 +104,6 @@ class BLTParser(Parser):
 
     def get_parse_return_value(self):
         return self.info
-
-    def parse_int_line(self, line):
-        """Return an iterable of integers."""
-        return tuple((int(s) for s in line.split()))
 
     def parse_next_line_text(self, lines):
         return next(lines).strip()
@@ -118,6 +153,7 @@ class BLTParser(Parser):
         for i in range(candidate_count):
             name = self.parse_next_line_text(lines)
             candidates.append(name)
+        info.candidates = candidates
 
         name = self.parse_next_line_text(lines)
         info.name = name

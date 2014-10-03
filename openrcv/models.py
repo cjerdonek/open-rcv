@@ -71,10 +71,23 @@ class ContestInfo(object):
         return self.name
 
 
-class RoundResult(JsonMixin):
-    """
-    Represents the results for a round.
+class Totals(JsonMixin):
 
     """
-    def __init__(self, candidate_count):
-        self.candidate_count = candidate_count
+    Represents vote totals for a round.
+
+    """
+
+    def __init__(self, candidates):
+        """
+        Arguments:
+          candidates: dict of candidate number to vote total.
+          no_candidate: number of ballots counting towards no candidate.
+
+        """
+        self.candidates = candidates
+
+    def __jsobj__(self):
+        return {
+            "candidates": self.candidates,
+        }

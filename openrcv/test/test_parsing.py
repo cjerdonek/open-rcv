@@ -6,6 +6,7 @@ from unittest import TestCase
 
 from openrcv.models import ContestInfo
 from openrcv.parsing import BLTParser
+from openrcv.utils import OpenableString
 
 
 BLT_STRING = """\
@@ -24,11 +25,10 @@ BLT_STRING = """\
 
 class BLTParserTest(TestCase):
 
-
     def parse_string(self, s):
         parser = BLTParser()
-        with StringIO(s) as f:
-            info = parser.parse_file(f)
+        blt = OpenableString(s)
+        info = parser.parse(blt)
         return info
 
     # TODO: test extra blank and non-empty lines at end.

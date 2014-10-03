@@ -7,7 +7,7 @@ Support for counting ballots.
 import os
 import string
 
-from openrcv.models import Totals
+from openrcv.models import TestRoundResults
 from openrcv.parsing import BLTParser, InternalBallotsParser
 from openrcv import utils
 
@@ -16,7 +16,7 @@ def _count_ballots(path, candidates):
     """
     A minimal function to count ballots in one pass.
 
-    Returns a Totals object.
+    Returns a TestRoundResults object.
 
     Arguments:
       path: path to an internal ballot file.

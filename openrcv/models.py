@@ -72,8 +72,8 @@ class ContestInfo(object):
         return self.name
 
 
-# TODO: rename to RoundTotals.
-class Totals(JsonMixin):
+# TODO: rename to RoundTestRoundResults.
+class TestRoundResults(JsonMixin):
 
     """
     Represents vote totals for a round.
@@ -97,7 +97,7 @@ class Totals(JsonMixin):
 
 # TODO: do we need more than one results object: one for testing
 # and one for real use?  Should these inherit or compose from each other?
-class ContestTotals(JsonMixin):
+class TestContestResults(JsonMixin):
 
     """
     Represents the totals for all rounds.
@@ -107,7 +107,7 @@ class ContestTotals(JsonMixin):
     def __init__(self, rounds):
         """
         Arguments:
-          rounds: an iterable of Totals objects.
+          rounds: an iterable of TestRoundResults objects.
 
         """
         self.rounds = rounds

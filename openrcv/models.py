@@ -79,17 +79,17 @@ class TestRoundResults(JsonMixin):
 
     """
 
-    def __init__(self, candidates):
+    def __init__(self, totals):
         """
         Arguments:
-          candidates: dict of candidate number to vote total.
+          totals: dict of candidate number to vote total.
 
         """
-        self.candidates = candidates
+        self.totals = totals
 
     def __jsobj__(self):
         return {
-            "candidates": self.candidates,
+            "totals": self.totals,
         }
 
 

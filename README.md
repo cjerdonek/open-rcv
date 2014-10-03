@@ -2,6 +2,7 @@ OpenRCV
 =======
 
 [![Build Status](https://travis-ci.org/cjerdonek/open-rcv.svg?branch=master)](https://travis-ci.org/cjerdonek/open-rcv)
+[![Coverage Status](https://img.shields.io/coveralls/cjerdonek/open-rcv.svg)](https://coveralls.io/r/cjerdonek/open-rcv?branch=master)
 
 OpenRCV is an open source software project for tallying ranked-choice
 voting elections like instant runoff voting and the single transferable vote.

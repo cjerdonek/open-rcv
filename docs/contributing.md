@@ -43,12 +43,12 @@ the project's virtualenv when entering its directory with `cd`.
 
 Install the project in "develop" mode:
 
-    $ pip install -e .[dev]
+    $ pip install -e .[dev,test]
 
 This lets you `openrcv` from the command-line as if you had installed
 it from PyPI.
 
-The `[dev]` portion of the command means to install the `extras_require`
+The `[dev,test]` portion of the command means to install the `extras_require`
 dependencies specified in [`setup.py`](setup.py) and with key `dev`.
 These are the development-only dependencies.
 

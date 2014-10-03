@@ -72,6 +72,9 @@ setup(
             'pandocfilters >=1.2,<1.3',
             'twine >=1.3,<1.4'
         ],
+        'test':  [
+            'coverage',
+        ],
     },
 
     # If there are data files included in your packages that need to be

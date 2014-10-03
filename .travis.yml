@@ -3,7 +3,11 @@ python:
   - "3.4"
 # command to install dependencies
 install:
-  - "pip install ."
+  - "pip install .[test]"
+  # Travis-specific dependencies
+  - pip install coveralls
 # command to run tests
 script:
-  - python -m unittest discover openrcv
+  - coverage run --source=openrcv -m unittest discover openrcv
+after_script:
+  - coveralls

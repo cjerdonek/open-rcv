@@ -1,11 +1,8 @@
 TODO
 ====
 
-* Make a count function that simply counts ballots from an intermediate
-  function and a list of candidates.
-* Make count_round() function that uses the intermediate ballot file.
-* Work on initial "count" algorithm that returns a dict of round-by-round
-  totals.
+* Work on initial "count" algorithm that returns a list of round-by-round
+  total dicts.
 * Try adding output to test repo.
 * Add remaining PyPI instructions to releasing.
 * Stub out argparse.

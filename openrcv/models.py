@@ -32,6 +32,7 @@ class BallotList(JsonMixin):
         return [" ".join((str(c) for c in ballot)) for ballot in self.ballots]
 
 
+# TODO: document what this class is for.  For test data input?
 class MinimalContest(JsonMixin):
 
     def __init__(self, candidates, ballots):
@@ -71,6 +72,7 @@ class ContestInfo(object):
         return self.name
 
 
+# TODO: rename to RoundTotals.
 class Totals(JsonMixin):
 
     """
@@ -90,4 +92,27 @@ class Totals(JsonMixin):
     def __jsobj__(self):
         return {
             "candidates": self.candidates,
+        }
+
+
+# TODO: do we need more than one results object: one for testing
+# and one for real use?  Should these inherit or compose from each other?
+class ContestTotals(JsonMixin):
+
+    """
+    Represents the totals for all rounds.
+
+    """
+
+    def __init__(self, rounds):
+        """
+        Arguments:
+          rounds: an iterable of Totals objects.
+
+        """
+        self.rounds = rounds
+
+    def __jsobj__(self):
+        return {
+            "rounds": [r.__jsobj__() for r in self.rounds],
         }

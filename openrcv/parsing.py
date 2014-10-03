@@ -87,7 +87,6 @@ class InternalBallotsParser(Parser):
         self.candidate_totals = totals
 
 
-
 class BLTParser(Parser):
 
     name = "BLT"

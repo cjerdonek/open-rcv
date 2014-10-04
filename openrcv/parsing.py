@@ -68,59 +68,6 @@ class Parser(object):
         with openable.open() as f:
             return self.parse_file(f)
 
-class InternalBallotsParser(Parser):
-
-    # TODO: document how to include undervotes.
-    """
-    Parses an internal ballots file.
-
-    The file format is as follows:
-
-    Each line is a space-delimited string of integers.  The first integer
-    is the weight of the ballot, which is 1 for a single voter.  The
-    remaining numbers are the candidates in the order in which they
-    were ranked.
-
-    A sample file:
-
-    2 2
-    1 2 4 3 1
-    2 1 3 4
-    3 1
-
-    """
-
-    name = "internal ballots"
-
-    def __init__(self, candidates):
-        """
-        Arguments:
-          candidates: iterable of candidate numbers.
-
-        """
-        self.candidates = candidates
-
-    def get_parse_return_value(self):
-        totals = TestRoundResults(self.candidate_totals)
-        return totals
-
-    def parse_lines(self, lines):
-        candidates = self.candidates
-        totals = {}
-        for candidate in candidates:
-            totals[candidate] = 0
-
-        candidate_set = set(candidates)
-        for line in lines:
-            ints = self.parse_int_line(line)
-            weight = ints[0]
-            for i in ints[1:]:
-                if i in candidate_set:
-                    totals[i] += weight
-                    break
-
-        self.candidate_totals = totals
-
 
 class BLTParser(Parser):
 
@@ -195,3 +142,57 @@ class BLTParser(Parser):
         info.name = name
         # TODO: assert remaining lines empty.
         # TODO: and add test that these asserts work.
+
+
+class InternalBallotsParser(Parser):
+
+    # TODO: document how to include undervotes.
+    """
+    Parses an internal ballots file.
+
+    The file format is as follows:
+
+    Each line is a space-delimited string of integers.  The first integer
+    is the weight of the ballot, which is 1 for a single voter.  The
+    remaining numbers are the candidates in the order in which they
+    were ranked.
+
+    A sample file:
+
+    2 2
+    1 2 4 3 1
+    2 1 3 4
+    3 1
+
+    """
+
+    name = "internal ballots"
+
+    def __init__(self, candidates):
+        """
+        Arguments:
+          candidates: iterable of candidate numbers.
+
+        """
+        self.candidates = candidates
+
+    def get_parse_return_value(self):
+        totals = TestRoundResults(self.candidate_totals)
+        return totals
+
+    def parse_lines(self, lines):
+        candidates = self.candidates
+        totals = {}
+        for candidate in candidates:
+            totals[candidate] = 0
+
+        candidate_set = set(candidates)
+        for line in lines:
+            ints = self.parse_int_line(line)
+            weight = ints[0]
+            for i in ints[1:]:
+                if i in candidate_set:
+                    totals[i] += weight
+                    break
+
+        self.candidate_totals = totals

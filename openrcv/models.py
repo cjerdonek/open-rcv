@@ -33,6 +33,7 @@ class BallotList(JsonMixin):
 
 
 # TODO: document what this class is for.  For test data input?
+# TODO: add a dict of who breaks ties in each round there is a tie.
 class MinimalContest(JsonMixin):
 
     def __init__(self, candidates, ballots):
@@ -72,6 +73,7 @@ class ContestInfo(object):
         return self.name
 
 
+# TODO: remove "Test" from the name since this is used in real code.
 class TestRoundResults(JsonMixin):
 
     """
@@ -93,6 +95,7 @@ class TestRoundResults(JsonMixin):
         }
 
 
+# TODO: remove "Test" from the name since this is used in real code.
 class TestContestResults(JsonMixin):
 
     """

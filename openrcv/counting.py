@@ -8,7 +8,7 @@ import logging
 import os
 import string
 
-from openrcv.models import TestRoundResults
+from openrcv.models import TestContestResults, TestRoundResults
 from openrcv.parsing import BLTParser, InternalBallotsParser
 from openrcv import utils
 from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
@@ -16,6 +16,13 @@ from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
 
 log = logging.getLogger(__name__)
 
+
+def any_value(dict_):
+    """Return any value in dict."""
+    try:
+        return next(iter(dict_.values()))
+    except StopIteration:
+        raise ValueError("dict has no values")
 
 def count_ballots(ballot_stream, candidates):
     """
@@ -27,8 +34,8 @@ def count_ballots(ballot_stream, candidates):
 
     """
     parser = InternalBallotsParser(candidates)
-    results = parser.parse(ballot_stream)
-    return results
+    round_results = parser.parse(ballot_stream)
+    return round_results
 
 
 def get_majority(total):
@@ -53,11 +60,22 @@ def get_winner(totals):
     return None
 
 
-def _get_eliminated(totals):
-    candidates = totals.keys()
-    candidates = sorted(candidates, key=lambda c: totals[c])
-    # TODO: find lowest.
-    eliminated = candidates[0]
+def get_lowest(totals):
+    """
+    Return which candidate to eliminate.
+
+    Raises a NotImplementedError if there is a tie.
+
+    """
+    lowest_total = any_value(totals)
+    lowest_candidates = []
+    for candidate, total in totals.items():
+        if total < lowest_total:
+            lowest_total = total
+            lowest_candidates = [candidate]
+        elif total == lowest_total:
+            lowest_candidates.append(candidate)
+    return lowest_candidates
 
 
 def _count_irv(sub_dir, blt_path):
@@ -71,16 +89,18 @@ def _count_irv(sub_dir, blt_path):
     candidates = range(1, len(info.candidates) + 1)
 
     rounds = []
-
     while True:
-        results = count_ballots(iballots_stream, candidates)
-        rounds.append(results)
-        totals = results.totals
+        round_results = count_ballots(iballots_stream, candidates)
+        rounds.append(round_results)
+        totals = round_results.totals
+        winner = get_winner(totals)
+        if winner is not None:
+            break
+        lowest_candidates = get_lowest(totals)
         break
 
-
-    totals = count_ballots(iballots_stream, candidates)
-    return totals
+    results = TestContestResults(rounds)
+    return results
 
 # This is currently just a test function rather than part of the API.
 def count_irv(blt_path, temp_dir=None):
@@ -88,8 +108,8 @@ def count_irv(blt_path, temp_dir=None):
         temp_dir = "temp"
     utils.ensure_dir(temp_dir)
     with utils.temp_dir_inside(temp_dir) as sub_dir:
-        totals = _count_irv(sub_dir, blt_path)
+        results = _count_irv(sub_dir, blt_path)
 
-    print(totals.to_json())
+    print(results.to_json())
 
-    return totals
+    return results

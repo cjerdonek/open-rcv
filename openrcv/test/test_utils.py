@@ -8,7 +8,11 @@ class StringInfoTest(TestCase):
 
     def test_init(self):
         stream = StringInfo("abc")
-        self.assertEquals(stream.value, "abc")
+        self.assertEqual(stream.value, "abc")
+
+    def test_init__no_args(self):
+        stream = StringInfo()
+        self.assertEqual(stream.value, "")
 
     def test_reading(self):
         stream = StringInfo("abc")
@@ -29,5 +33,5 @@ class StringInfoTest(TestCase):
         """Test writing to a non-empty string."""
         stream = StringInfo()
         stream.value = "foo"
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             stream.open("w")

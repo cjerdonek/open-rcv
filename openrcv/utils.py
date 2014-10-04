@@ -155,7 +155,8 @@ class StringInfo(StreamInfo):
     # TODO: test this method on short text strings.
     def _open(self, mode):
         # As a precaution, make sure the string is empty if not reading.
-        assert not (self.value and mode != "r")
+        if (self.value and mode != "r"):
+            raise ValueError("Cannot write to string that already has a value")
         log.info("opening memory stream for %r: %r" %
                  (mode, (self.value[:20] + "...")))
         return _EjectingStringIO(self.value, self)

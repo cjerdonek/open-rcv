@@ -40,6 +40,16 @@ class BLTParserTest(TestCase):
     # TODO: test passing
     # TODO: test extra blank and non-empty lines at end.
     def test_parse_file(self):
+        """Test passing an output stream."""
+        output_stream = StringInfo()
+        info = self.parse_blt(BLT_STRING, output_stream=output_stream)
+        # TODO: test the other attributes.
+        self.assertEqual(type(info), ContestInfo)
+        self.assertEqual(info.ballot_count, 2)
+        self.assertEqual(output_stream.value, "2 2\n1 2 4 3 1\n")
+
+    def test_parse_file__no_output(self):
+        """Test passing no output stream."""
         info = self.parse_blt(BLT_STRING)
         # TODO: test the other attributes.
         self.assertEqual(type(info), ContestInfo)

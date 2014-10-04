@@ -124,15 +124,38 @@ class FileInfo(StreamInfo):
         return logged_open(self.path, mode, *self.args, **self.kwargs)
 
 
+class _EjectingStringIO(io.StringIO):
+
+    """A StringIO wrapper that saves its contents when closing."""
+
+    def __init__(self, initial_value, info):
+        """
+        Arguments:
+          info: a StringInfo object.
+
+        """
+        super().__init__(initial_value)
+        self.info = info
+
+    def close(self):
+        self.info.value = self.getvalue()
+        # The memory buffer is discarded when the object is closed.
+        super().close()
+
+
 class StringInfo(StreamInfo):
 
     """A wrapped string that opens to become an in-memory text stream."""
 
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, value=None):
+        if value is None:
+            value = ""
+        self.value = value
 
     # TODO: test this method on short text strings.
     def _open(self, mode):
+        # As a precaution, make sure the string is empty if not reading.
+        assert not (self.value and mode != "r")
         log.info("opening memory stream for %r: %r" %
-                 (mode, (self.text[:20] + "...")))
-        return io.StringIO(self.text)
+                 (mode, (self.value[:20] + "...")))
+        return _EjectingStringIO(self.value, self)

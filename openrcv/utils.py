@@ -21,8 +21,11 @@ def log_create_dir(path):
 
 
 def logged_open(*args, **kwargs):
-    log.info("opening file (%r, %r): %s" % (args[1:], kwargs, args[0]))
-    return open(*args, **kwargs)
+    log.info("opening file: (%r, %r): %s" % (args[1:], kwargs, args[0]))
+    try:
+        return open(*args, **kwargs)
+    except TypeError:
+        raise TypeError("arguments: open(*%r, **%r)" % (args, kwargs))
 
 
 def make_dirs(path):
@@ -97,23 +100,39 @@ def time_it(description):
     log.info("done: %s: %.4f seconds" % (description, elapsed))
 
 
-class OpenableFile(object):
+class StreamInfo(object):
+
+    def open(self, mode=None):
+        if mode is None:
+            mode = "r"
+        return self._open(mode)
+
+class FileInfo(StreamInfo):
+
+    """A wrapped file path that opens to become a file object."""
 
     def __init__(self, path, *args, **kwargs):
+        """
+        The `mode` argument to open() should not be included here.
+
+        """
         self.path = path
         self.args = args
         self.kwargs = kwargs
 
-    def open(self):
-        return logged_open(self.path, *self.args, **self.kwargs)
+    def _open(self, mode):
+        return logged_open(self.path, mode, *self.args, **self.kwargs)
 
 
-class OpenableString(object):
+class StringInfo(StreamInfo):
+
+    """A wrapped string that opens to become an in-memory text stream."""
 
     def __init__(self, text):
         self.text = text
 
     # TODO: test this method on short text strings.
-    def open(self):
-        log.info("opening memory stream: %r" % (self.text[:20] + "..."))
+    def _open(self, mode):
+        log.info("opening memory stream for %r: %r" %
+                 (mode, (self.text[:20] + "...")))
         return io.StringIO(self.text)

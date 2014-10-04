@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from openrcv.counting import count_ballots, get_majority, get_winner
 from openrcv.models import TestRoundResults
-from openrcv.utils import OpenableString
+from openrcv.utils import StringInfo
 
 
 class TestCounting(TestCase):
@@ -36,7 +36,7 @@ class TestCounting(TestCase):
         3 1 4
         1 2
         """)
-        openable = OpenableString(internal_ballots)
+        openable = StringInfo(internal_ballots)
         result = count_ballots(openable, (1, 2, 4))
         self.assertEqual(type(result), TestRoundResults)
         self.assertEqual(result.totals, {1: 3, 2: 2, 4: 0})

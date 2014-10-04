@@ -11,23 +11,23 @@ import string
 from openrcv.models import TestRoundResults
 from openrcv.parsing import BLTParser, InternalBallotsParser
 from openrcv import utils
-from openrcv.utils import OpenableFile
+from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
 
 
 log = logging.getLogger(__name__)
 
 
-def count_ballots(openable_ballots, candidates):
+def count_ballots(ballot_stream, candidates):
     """
     Count one round, and return a TestRoundResults object.
 
     Arguments:
-      openable_ballots: an openable to an internal ballot file.
+      ballot_stream: a StreamInfo object for an internal ballot file.
       candidates: iterable of candidates eligible to receive votes.
 
     """
     parser = InternalBallotsParser(candidates)
-    results = parser.parse(openable_ballots)
+    results = parser.parse(ballot_stream)
     return results
 
 
@@ -60,32 +60,26 @@ def _get_eliminated(totals):
     eliminated = candidates[0]
 
 
-def make_openable_iballots(path, mode=None):
-    if mode is None:
-        mode = "r"
-    return OpenableFile(path, mode, encoding=utils.ENCODING_INTERNAL_BALLOTS)
-
 def _count_irv(sub_dir, blt_path):
     iballots_path = os.path.join(sub_dir, "ballots.txt")
-    openable_iballots = make_openable_iballots(iballots_path, "w")
-    openable_blt = OpenableFile(blt_path)
+    iballots_stream = FileInfo(iballots_path, encoding=utils.ENCODING_INTERNAL_BALLOTS)
+    blt_stream = FileInfo(blt_path)
 
-    parser = BLTParser(openable_iballots)
-    info = parser.parse(openable_blt)
+    parser = BLTParser(iballots_stream)
+    info = parser.parse(blt_stream)
     # TODO: make a helper function for the following?
     candidates = range(1, len(info.candidates) + 1)
 
     rounds = []
-    openable_iballots = make_openable_iballots(iballots_path)
 
     while True:
-        results = count_ballots(openable_iballots, candidates)
+        results = count_ballots(iballots_stream, candidates)
         rounds.append(results)
         totals = results.totals
         break
 
 
-    totals = count_ballots(openable_iballots, candidates)
+    totals = count_ballots(iballots_stream, candidates)
     return totals
 
 # This is currently just a test function rather than part of the API.

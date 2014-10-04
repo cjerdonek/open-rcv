@@ -58,14 +58,13 @@ class Parser(object):
         with utils.logged_open(path, "r", encoding=FILE_ENCODING) as f:
             return self.parse_file(f)
 
-    def parse(self, openable):
+    def parse(self, stream_info):
         """
         Arguments:
-          openable: an object with an open() method like a FileOpener or
-            StringOpener.
+          stream_info: a StreamInfo object.
 
         """
-        with openable.open() as f:
+        with stream_info.open() as f:
             return self.parse_file(f)
 
 
@@ -75,17 +74,21 @@ class BLTParser(Parser):
 
     # TODO: test the contents of the internal ballot file.
     # TODO: this should accept an openable.
-    def __init__(self, output_openable=None):
+    def __init__(self, output_stream=None):
         """
         Arguments:
-          output_openable: path to which to write an internal ballot file.
+          output_stream: a StreamInfo object to which to write an internal ballot file.
 
         """
-        if output_openable is None:
-            output_openable = os.devnull
-        self.output_openable = output_openable
+        if output_stream is None:
+            output_stream = utils.FileInfo(os.devnull)
+        # We check the argument here to fail fast and help the user locate
+        # the source of the issue more quickly.
+        assert isinstance(output_stream, utils.StreamInfo)
+        self.output_stream = output_stream
 
     def get_parse_return_value(self):
+        """Return a ContestInfo object."""
         return self.info
 
     def parse_next_line_text(self, lines):
@@ -108,7 +111,7 @@ class BLTParser(Parser):
         return ballot_count
 
     def parse_ballot_lines(self, lines):
-        with self.output_openable.open() as f:
+        with self.output_stream.open("w") as f:
             ballot_count = self._parse_ballot_lines(lines, f)
         return ballot_count
 

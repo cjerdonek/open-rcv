@@ -6,6 +6,7 @@ Support for generating random ballots and test data.
 
 from openrcv.models import BallotList, MinimalContest
 
+# TODO: rename this module to datagen.
 
 def random_ballot_list(choices, count, max_length=None):
     """

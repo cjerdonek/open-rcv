@@ -1,11 +1,10 @@
 TODO
 ====
 
-* Test BLT parsing to write the internal ballot file.
+* Add tests as a submodule and document.
+* Create and test a function to generate an input test file.
 * Create a "top-level" function to tabulate an election from a path to
   an internal ballot file and a ContestInfo object.
-* Work on initial "count" algorithm that returns a list of round-by-round
-  total dicts.
 * Add remaining PyPI instructions to releasing.
 * Try adding output to test repo.
 * Stub out argparse.

@@ -52,12 +52,12 @@ class TestCounting(TestCase):
 
     def test_get_lowest(self):
         cases = [
-            ({1: 6, 2: 5}, [2]),
-            ({1: 5, 2: 6}, [1]),
-            ({1: 1, 2: 6, 3: 4}, [1]),
+            ({1: 6, 2: 5}, {2}),
+            ({1: 5, 2: 6}, {1}),
+            ({1: 1, 2: 6, 3: 4}, {1}),
             # Test ties.
-            ({1: 5, 2: 5}, [1, 2]),
-            ({1: 5, 2: 6, 3: 5}, [1, 3]),
+            ({1: 5, 2: 5}, {1, 2}),
+            ({1: 5, 2: 6, 3: 5}, {1, 3}),
         ]
         for totals, lowest in cases:
             with self.subTest(totals=totals, lowest=lowest):

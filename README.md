@@ -26,6 +26,7 @@ Features
   For example, round-by-round results can be output as JSON to use
   your own custom "pretty" HTML renderer.  And round-by-round totals can
   be checked against publicly available test data.
+* Detailed logging while counting contests.
 
 
 Requirements
@@ -46,7 +47,7 @@ Installing
 Running It
 ----------
 
-To count the ballots for a contest, pass the path to a [BLT file][blt-description]:
+To count the ballots for a contest, pass a path to a [BLT file][blt-description]:
 
     $ rcv CONTEST.blt
 

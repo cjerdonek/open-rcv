@@ -46,7 +46,9 @@ Installing
 Running It
 ----------
 
-    $ rcvcount CONTEST.blt
+To count the ballots for a contest, pass the path to a [BLT file][blt-description]:
+
+    $ rcv CONTEST.blt
 
 
 Testing It
@@ -75,6 +77,7 @@ Author
 Chris Jerdonek (<chris.jerdonek@gmail.com>)
 
 
+[blt-description]: https://code.google.com/p/droop/wiki/BltFileFormat
 [openrcv-contribute]: docs/contributing.md
 [openrcv-github]: https://github.com/cjerdonek/open-rcv
 [openrcv-pypi]: https://pypi.python.org/pypi/OpenRCV

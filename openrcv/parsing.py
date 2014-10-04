@@ -71,19 +71,19 @@ class Parser(object):
 
 class BLTParser(Parser):
 
-    name = "BLT"
+    name = "BLT (ballot)"
 
     # TODO: test the contents of the internal ballot file.
     # TODO: this should accept an openable.
-    def __init__(self, output_path=None):
+    def __init__(self, output_openable=None):
         """
         Arguments:
-          output_path: path to which to write an internal ballot file.
+          output_openable: path to which to write an internal ballot file.
 
         """
-        if output_path is None:
-            output_path = os.devnull
-        self.output_path = output_path
+        if output_openable is None:
+            output_openable = os.devnull
+        self.output_openable = output_openable
 
     def get_parse_return_value(self):
         return self.info
@@ -108,7 +108,7 @@ class BLTParser(Parser):
         return ballot_count
 
     def parse_ballot_lines(self, lines):
-        with utils.logged_open(self.output_path, "w", encoding="ascii") as f:
+        with self.output_openable.open() as f:
             ballot_count = self._parse_ballot_lines(lines, f)
         return ballot_count
 

@@ -11,6 +11,7 @@ import string
 from openrcv.models import TestRoundResults
 from openrcv.parsing import BLTParser, InternalBallotsParser
 from openrcv import utils
+from openrcv.utils import OpenableFile
 
 
 log = logging.getLogger(__name__)
@@ -59,25 +60,32 @@ def _get_eliminated(totals):
     eliminated = candidates[0]
 
 
+def make_openable_iballots(path, mode=None):
+    if mode is None:
+        mode = "r"
+    return OpenableFile(path, mode, encoding=utils.ENCODING_INTERNAL_BALLOTS)
 
 def _count_irv(sub_dir, blt_path):
-    ballots_path = os.path.join(sub_dir, "ballots.txt")
-    parser = BLTParser(ballots_path)
-    info = parser.parse_path(blt_path)
+    iballots_path = os.path.join(sub_dir, "ballots.txt")
+    openable_iballots = make_openable_iballots(iballots_path, "w")
+    openable_blt = OpenableFile(blt_path)
+
+    parser = BLTParser(openable_iballots)
+    info = parser.parse(openable_blt)
     # TODO: make a helper function for the following?
     candidates = range(1, len(info.candidates) + 1)
 
     rounds = []
-    internal_ballots = utils.OpenableFile(ballots_path, "r",
-                                          encoding=utils.ENCODING_INTERNAL_BALLOTS)
+    openable_iballots = make_openable_iballots(iballots_path)
+
     while True:
-        results = count_ballots(internal_ballots, candidates)
+        results = count_ballots(openable_iballots, candidates)
         rounds.append(results)
         totals = results.totals
         break
 
 
-    totals = count_ballots(internal_ballots, candidates)
+    totals = count_ballots(openable_iballots, candidates)
     return totals
 
 # This is currently just a test function rather than part of the API.

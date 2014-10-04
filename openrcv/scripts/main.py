@@ -98,7 +98,7 @@ def config_log(level=None, stream=None):
     root.setLevel(level)
     handler = make_log_handler(level, stream=stream)
     root.addHandler(handler)
-    log.info("logging configured to: %s" % level)
+    log.info("logging configured to: %s" % logging.getLevelName(level))
     yield
     root.removeHandler(handler)
 

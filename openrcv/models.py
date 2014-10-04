@@ -58,6 +58,7 @@ class ContestInfo(object):
 
     """
     Attributes:
+      candidates: a list of the names of all candidates, in numeric order.
       name: name of contest.
       seat_count: integer number of winners.
 
@@ -67,6 +68,10 @@ class ContestInfo(object):
 
     def __init__(self):
         pass
+
+    def get_candidates(self):
+        """Return an iterable of the candidate numbers."""
+        return range(1, len(self.candidates) + 1)
 
     # TODO: look up the proper return type.
     def __repr__(self):

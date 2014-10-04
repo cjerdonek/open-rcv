@@ -39,8 +39,11 @@ def count_ballots(ballot_stream, candidates):
 
 
 def get_majority(total):
-    """Return the majority threshold for a single-winner election."""
-    assert total > 0  # If not, the calling code has a bug!
+    """Return the majority threshold for a single-winner election.
+
+    Note that this returns 1 for a 0 total.
+
+    """
     return total // 2 + 1
 
 
@@ -68,13 +71,13 @@ def get_lowest(totals):
 
     """
     lowest_total = any_value(totals)
-    lowest_candidates = []
+    lowest_candidates = set()
     for candidate, total in totals.items():
         if total < lowest_total:
             lowest_total = total
-            lowest_candidates = [candidate]
+            lowest_candidates = set((candidate,))
         elif total == lowest_total:
-            lowest_candidates.append(candidate)
+            lowest_candidates.add(candidate)
     return lowest_candidates
 
 
@@ -84,10 +87,10 @@ def _count_irv(sub_dir, blt_path):
     blt_stream = FileInfo(blt_path)
 
     parser = BLTParser(iballots_stream)
-    info = parser.parse(blt_stream)
-    # TODO: make a helper function for the following?
-    candidates = range(1, len(info.candidates) + 1)
+    contest = parser.parse(blt_stream)
+    candidates = set(contest.get_candidates())
 
+    # TODO: handle case of 0 total?
     rounds = []
     while True:
         round_results = count_ballots(iballots_stream, candidates)
@@ -96,8 +99,12 @@ def _count_irv(sub_dir, blt_path):
         winner = get_winner(totals)
         if winner is not None:
             break
-        lowest_candidates = get_lowest(totals)
-        break
+        eliminated = get_lowest(totals)
+        print(eliminated)
+        if len(eliminated) > 1:
+            raise NotImplementedError()
+
+        candidates -= eliminated
 
     results = TestContestResults(rounds)
     return results

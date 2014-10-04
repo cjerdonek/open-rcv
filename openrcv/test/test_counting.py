@@ -22,13 +22,17 @@ class TestCounting(TestCase):
         self.assertEqual(result.totals, {1: 3, 2: 2, 4: 0})
 
     def test_get_majority(self):
-        self.assertEqual(get_majority(1), 1)
-        self.assertEqual(get_majority(2), 2)
-        self.assertEqual(get_majority(3), 2)
-        self.assertEqual(get_majority(4), 3)
-        self.assertEqual(get_majority(100), 51)
-        self.assertRaises(AssertionError, get_majority, 0)
-        self.assertRaises(AssertionError, get_majority, -1)
+        cases = [
+            (0, 1),
+            (1, 1),
+            (2, 2),
+            (3, 2),
+            (4, 3),
+            (100, 51),
+        ]
+        for total, expected in cases:
+            with self.subTest(total=total, expected=expected):
+                self.assertEqual(get_majority(total), expected)
 
     def test_get_winner(self):
         self.assertIs(get_winner({1: 5, 2: 5}), None)

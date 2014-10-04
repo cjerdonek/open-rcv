@@ -23,8 +23,8 @@ Features
 * Exposes both a command-line API and a Python API.
 * Both APIs support neutral input and output text formats to allow
   interoperability with other applications and programming languages.
-  For example, round-by-round results can be output as JSON to use a
-  your own custom "pretty" HTML renderer.  Or round-by-round totals can
+  For example, round-by-round results can be output as JSON to use
+  your own custom "pretty" HTML renderer.  And round-by-round totals can
   be checked against publicly available test data.
 
 

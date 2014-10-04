@@ -1,0 +1,3 @@
+[submodule "open-rcv-tests"]
+	path = sub/submodule
+	url = git@github.com:cjerdonek/open-rcv-tests.git

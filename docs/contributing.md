@@ -21,6 +21,10 @@ This section provides instructions on getting set up to contribute.
 
 First, clone the repository.
 
+And optionally,g pull in the [open-rcv-tests][open-rcv-tests] test cases:
+
+    $ git submodule update --init
+
 
 ### Create virtual environment
 
@@ -93,6 +97,7 @@ Viewing Docs
 
 [workon-gist]: https://gist.github.com/cjerdonek/7583644
 [open-rcv]: https://github.com/cjerdonek/open-rcv
+[open-rcv-tests]: https://github.com/cjerdonek/open-rcv-tests
 [openrcv-releasing]: releasing.md
 [pandoc]: http://johnmacfarlane.net/pandoc/
 [pug]: https://packaging.python.org/en/latest/tutorial.html

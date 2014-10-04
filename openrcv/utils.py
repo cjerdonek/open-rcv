@@ -97,7 +97,7 @@ def time_it(description):
     log.info("done: %s: %.4f seconds" % (description, elapsed))
 
 
-class FileOpener(object):
+class OpenableFile(object):
 
     def __init__(self, path, *args, **kwargs):
         self.path = path

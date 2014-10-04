@@ -126,6 +126,8 @@ class BLTParser(Parser):
 
     name = "BLT"
 
+    # TODO: test the contents of the internal ballot file.
+    # TODO: this should accept an openable.
     def __init__(self, output_path=None):
         """
         Arguments:

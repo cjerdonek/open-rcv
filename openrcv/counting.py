@@ -68,13 +68,16 @@ def _count_irv(sub_dir, blt_path):
     candidates = range(1, len(info.candidates) + 1)
 
     rounds = []
+    internal_ballots = utils.OpenableFile(ballots_path, "r",
+                                          encoding=utils.ENCODING_INTERNAL_BALLOTS)
     while True:
-        results = count_ballots(ballots_path, candidates)
+        results = count_ballots(internal_ballots, candidates)
         rounds.append(results)
-        totals = results.candidates
+        totals = results.totals
+        break
 
 
-    totals = count_ballots(ballots_path, candidates)
+    totals = count_ballots(internal_ballots, candidates)
     return totals
 
 # This is currently just a test function rather than part of the API.

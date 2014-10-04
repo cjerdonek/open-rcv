@@ -1,10 +1,9 @@
 
 import json
-from random import randint
 
 
 def to_json(obj):
-    return json.dumps(obj, indent=4)
+    return json.dumps(obj, indent=4, sort_keys=True)
 
 
 class JsonMixin(object):

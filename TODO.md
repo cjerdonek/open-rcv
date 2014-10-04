@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Add tests as a submodule and document.
 * Create and test a function to generate an input test file.
 * Create a "top-level" function to tabulate an election from a path to
   an internal ballot file and a ContestInfo object.

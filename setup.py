@@ -104,6 +104,7 @@ setup(
         # ],
         'console_scripts': [
             'rcv=openrcv.scripts.main:main',
+            'rcvgen=openrcv.datagen:main',
         ],
     },
 )

@@ -1,12 +1,19 @@
 
 """
-Support for generating random ballots and test data.
+Support for generating and managing election data.
+
+This module provides functions to help work with the test cases
+in the open-rcv-tests repo.
 
 """
 
+from random import randint
+
+from openrcv import models
 from openrcv.models import BallotList, MinimalContest
 
-# TODO: rename this module to datagen.
+def main():
+    create_json_tests(target_path="sub/open-rcv-tests/contests.json")
 
 def random_ballot_list(choices, count, max_length=None):
     """
@@ -40,16 +47,18 @@ def random_contest(candidates):
     return contest
 
 
-def make_json_tests():
+def create_json_tests(target_path):
     contests = []
     for count in range(3, 6):
-        contest = models.random_contest(count)
+        contest = random_contest(count)
         contests.append(contest)
 
     contests_obj = [c.__jsobj__() for c in contests]
 
     tests_jobj = {
-        "_version": "0.1.0-alpha",
+        "_meta": {
+            "version": "0.1.0-alpha",
+        },
         "contests": contests_obj
     }
     json = models.to_json(tests_jobj)

@@ -58,11 +58,6 @@ class Parser(object):
                                    (self.line_no, self.line))
         return self.get_parse_return_value()
 
-    # TODO: remove this?
-    def parse_path(self, path):
-        with utils.logged_open(path, "r", encoding=FILE_ENCODING) as f:
-            return self.parse_file(f)
-
     def parse(self, stream_info):
         """
         Arguments:
@@ -80,7 +75,8 @@ class BLTParser(Parser):
     def __init__(self, output_info=None):
         """
         Arguments:
-          output_info: a StreamInfo object to which to write an internal ballot file.
+          output_info: a StreamInfo object to which to write an internal
+            ballot file.
 
         """
         if output_info is None:

@@ -9,6 +9,11 @@ from openrcv.utils import FILE_ENCODING, time_it
 log = logging.getLogger(__name__)
 
 
+# TODO: add the line number, etc. as attributes.
+class ParsingError(Exception):
+    pass
+
+
 class Parser(object):
 
     # TODO: reinitialize these when parsing a new file.
@@ -49,8 +54,8 @@ class Parser(object):
             try:
                 self.parse_lines(lines)
             except:
-                raise Exception("error while parsing line %d: %r" %
-                                (self.line_no, self.line))
+                raise ParsingError("error while parsing line %d: %r" %
+                                   (self.line_no, self.line))
         return self.get_parse_return_value()
 
     # TODO: remove this?
@@ -72,20 +77,18 @@ class BLTParser(Parser):
 
     name = "BLT (ballot)"
 
-    # TODO: test the contents of the internal ballot file.
-    # TODO: this should accept an openable.
-    def __init__(self, output_stream=None):
+    def __init__(self, output_info=None):
         """
         Arguments:
-          output_stream: a StreamInfo object to which to write an internal ballot file.
+          output_info: a StreamInfo object to which to write an internal ballot file.
 
         """
-        if output_stream is None:
-            output_stream = utils.FileInfo(os.devnull)
+        if output_info is None:
+            output_info = utils.FileInfo(os.devnull)
         # We check the argument here to fail fast and help the user locate
         # the source of the issue more quickly.
-        assert isinstance(output_stream, utils.StreamInfo)
-        self.output_stream = output_stream
+        assert isinstance(output_info, utils.StreamInfo)
+        self.output_info = output_info
 
     def get_parse_return_value(self):
         """Return a ContestInfo object."""
@@ -111,7 +114,7 @@ class BLTParser(Parser):
         return ballot_count
 
     def parse_ballot_lines(self, lines):
-        with self.output_stream.open("w") as f:
+        with self.output_info.open("w") as f:
             ballot_count = self._parse_ballot_lines(lines, f)
         return ballot_count
 
@@ -143,8 +146,10 @@ class BLTParser(Parser):
 
         name = self.parse_next_line_text(lines)
         info.name = name
-        # TODO: assert remaining lines empty.
-        # TODO: and add test that these asserts work.
+
+        for line in lines:
+            if line.strip():
+                raise ValueError("the BLT has non-empty lines at the end")
 
 
 class InternalBallotsParser(Parser):

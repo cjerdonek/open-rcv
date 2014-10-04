@@ -7,7 +7,7 @@ from traceback import format_exc
 
 import colorlog
 
-from openrcv.scripts.sandbox import main as do_sandbox
+from openrcv import counting
 
 
 EXIT_STATUS_SUCCESS = 0
@@ -103,13 +103,17 @@ def config_log(level=None, stream=None):
     root.removeHandler(handler)
 
 
+def run_count(blt_path):
+    counting.count_irv(blt_path)
+
+
 def main_status_inner(argv):
     if argv is None:
         argv = sys.argv
     # TODO: use argparse.
     log.debug("argv: %r" % argv)
     blt_path = argv[1]
-    do_sandbox(blt_path)
+    run_count(blt_path)
 
 
 def main_status(argv, log_stream=None):

@@ -10,7 +10,7 @@ in the open-rcv-tests repo.
 from random import randint
 
 from openrcv import models
-from openrcv.models import BallotList, MinimalContest
+from openrcv.models import BallotList, TestContestInput
 
 def main():
     create_json_tests(target_path="sub/open-rcv-tests/contests.json")
@@ -43,7 +43,7 @@ def random_ballot_list(choices, count, max_length=None):
 
 def random_contest(candidates):
     ballots = random_ballot_list(range(candidates), 5)
-    contest = MinimalContest(candidates, ballots)
+    contest = TestContestInput(candidates, ballots)
     return contest
 
 

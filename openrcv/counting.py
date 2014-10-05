@@ -8,7 +8,7 @@ import logging
 import os
 import string
 
-from openrcv.models import TestContestResults, TestRoundResults
+from openrcv.models import RawContestResults, RawRoundResults
 from openrcv.parsing import BLTParser, InternalBallotsParser
 from openrcv import utils
 from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
@@ -26,7 +26,7 @@ def any_value(dict_):
 
 def count_ballots(ballot_stream, candidates):
     """
-    Count one round, and return a TestRoundResults object.
+    Count one round, and return a RawRoundResults object.
 
     Arguments:
       ballot_stream: a StreamInfo object for an internal ballot file.
@@ -106,7 +106,7 @@ def _count_irv(sub_dir, blt_path):
 
         candidates -= eliminated
 
-    results = TestContestResults(rounds)
+    results = RawContestResults(rounds)
     return results
 
 # This is currently just a test function rather than part of the API.

@@ -6,6 +6,7 @@ def to_json(obj):
     return json.dumps(obj, indent=4, sort_keys=True)
 
 
+
 class JsonMixin(object):
 
     def to_json(self):
@@ -29,28 +30,6 @@ class BallotList(JsonMixin):
 
     def __jsobj__(self):
         return [" ".join((str(c) for c in ballot)) for ballot in self.ballots]
-
-
-# TODO: document what this class is for.  For test data input?
-# TODO: add a dict of who breaks ties in each round there is a tie.
-class MinimalContest(JsonMixin):
-
-    def __init__(self, candidates, ballots):
-
-        """
-        Arguments:
-          candidates: integer number of candidates
-
-        """
-
-        self.ballots = ballots
-        self.candidates = candidates
-
-    def __jsobj__(self):
-        return {
-            "ballots": self.ballots.__jsobj__(),
-            "candidates": self.candidates,
-        }
 
 
 class ContestInfo(object):
@@ -77,8 +56,7 @@ class ContestInfo(object):
         return self.name
 
 
-# TODO: remove "Test" from the name since this is used in real code.
-class TestRoundResults(JsonMixin):
+class RawRoundResults(JsonMixin):
 
     """
     Represents the results of a round for testing purposes.
@@ -99,8 +77,7 @@ class TestRoundResults(JsonMixin):
         }
 
 
-# TODO: remove "Test" from the name since this is used in real code.
-class TestContestResults(JsonMixin):
+class RawContestResults(JsonMixin):
 
     """
     Represents contest results for testing purposes.
@@ -110,7 +87,7 @@ class TestContestResults(JsonMixin):
     def __init__(self, rounds):
         """
         Arguments:
-          rounds: an iterable of TestRoundResults objects.
+          rounds: an iterable of RawRoundResults objects.
 
         """
         self.rounds = rounds
@@ -118,4 +95,63 @@ class TestContestResults(JsonMixin):
     def __jsobj__(self):
         return {
             "rounds": [r.__jsobj__() for r in self.rounds],
+        }
+
+
+# TODO: add a dict of who breaks ties in each round there is a tie.
+class TestContestInput(JsonMixin):
+
+    """
+    Represents a contest for an open-rcv-tests input file.
+
+    """
+
+    def __init__(self, candidates, ballots):
+
+        """
+        Arguments:
+          candidates: integer number of candidates
+
+        """
+
+        self.ballots = ballots
+        self.candidates = candidates
+
+    def __jsobj__(self):
+        # TODO: include _meta: id, notes.
+        return {
+            "ballots": self.ballots.__jsobj__(),
+            "candidates": self.candidates,
+        }
+
+
+# tests_jobj = {
+#     "_meta": {
+#         "version": "0.1.0-alpha",
+#     },
+#     "contests": contests_obj
+# }
+class TestInputFile(JsonMixin):
+
+    """
+    Represents an open-rcv-tests input file.
+
+    """
+
+    def __init__(self, contests, version=None):
+
+        """
+        Arguments:
+          contests: an iterable of TestContestInput objects.
+
+        """
+
+        self.contests = contests
+        self.version = version
+
+    def __jsobj__(self):
+        # TODO: include _meta: id, notes.
+        return {
+            "ballots": self.ballots.__jsobj__(),
+            "candidates": self.candidates,
         }

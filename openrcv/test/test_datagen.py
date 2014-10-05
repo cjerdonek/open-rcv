@@ -2,7 +2,7 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from openrcv.datagen import gen_random_list
+from openrcv.datagen import gen_random_list, gen_random_ballot_list
 
 
 class ModuleTest(TestCase):
@@ -17,7 +17,10 @@ class ModuleTest(TestCase):
         return randint
 
     def test_gen_random_list(self):
+        # args=(choices, max_length=None), randint_vals, expected
         cases = (
+            # Normal case.
+            (([1, 2], ), [0, 1], [1, 2]),
             # Check terminating the list early.
             (([1, 2], ), [2], []),
             # Check that duplications are allowed.
@@ -32,3 +35,16 @@ class ModuleTest(TestCase):
                 randint = self.make_randint(randint_vals)
                 with patch('random.randint', randint):
                     self.assertEqual(gen_random_list(*args), expected)
+
+    def test_gen_random_ballot_list(self):
+        cases = (
+            # args=(choices, ballot_count, max_length=None),
+            (([1, 2], 2), [0, 2, 1, 2], ([1], [2])),
+        )
+        for args, randint_vals, expected in cases:
+            with self.subTest(args=args, expected=expected, randint_vals=randint_vals):
+                randint = self.make_randint(randint_vals)
+                with patch('random.randint', randint):
+                    ballots = gen_random_ballot_list(*args)
+                    actual = tuple((b.choices for b in ballots))
+                    self.assertEqual(actual, expected)

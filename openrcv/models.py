@@ -1,35 +1,48 @@
 
+"""
+Contains models used throughout this project.
+
+For the purposes of this project, "JSON object" (abbreviated "jsobj")
+means a Python object with a natural conversion to JSON.
+These are objects composed of built-in type instances -- things like
+Python lists, dicts, strings, ints, etc.
+
+Instances of most models in this module (those inheriting from JsonMixin)
+can be converted to JSON by calling a to_json() method on the instance.
+We call these objects "jsonable."
+
+"""
+
 import json
 
 
-def to_json(obj):
-    return json.dumps(obj, indent=4, sort_keys=True)
+def seq_to_jsobj(seq):
+    return tuple((jsonable.to_jsobj() for jsonable in seq))
 
+def to_json(jsobj):
+    return json.dumps(jsobj, indent=4, sort_keys=True)
 
 
 class JsonMixin(object):
 
+    meta = ()
+
+    def get_meta(self):
+        meta = {}
+        for attr in self.meta:
+            value = getattr(self, attr)
+            meta[attr] = value
+        return meta if meta else None
+
+    def to_jsobj(self):
+        meta = self.get_meta()
+        jsobj = self.__jsdata__()
+        if meta:
+            jsobj['_meta'] = meta
+        return jsobj
+
     def to_json(self):
-        return to_json(self.__jsobj__())
-
-
-class BallotList(JsonMixin):
-
-    """
-
-    This should be used only for tests and small sets of ballots.
-    For large numbers of ballots, ballot data should be kept on the
-    file system for memory reasons.
-
-    """
-
-    def __init__(self, ballots=None):
-        if ballots is None:
-            ballots = []
-        self.ballots = ballots
-
-    def __jsobj__(self):
-        return [" ".join((str(c) for c in ballot)) for ballot in self.ballots]
+        return to_json(self.to_jsobj())
 
 
 class ContestInfo(object):
@@ -71,7 +84,7 @@ class RawRoundResults(JsonMixin):
         """
         self.totals = totals
 
-    def __jsobj__(self):
+    def __jsdata__(self):
         return {
             "totals": self.totals,
         }
@@ -92,10 +105,28 @@ class RawContestResults(JsonMixin):
         """
         self.rounds = rounds
 
-    def __jsobj__(self):
+    def __jsdata__(self):
         return {
-            "rounds": [r.__jsobj__() for r in self.rounds],
+            "rounds": [r.__jsdata__() for r in self.rounds],
         }
+
+
+class TestBallot(JsonMixin):
+
+    """
+    Represents a ballot.
+
+    This should be used only for tests and small sets of ballots.
+    For large numbers of ballots, ballot data should be kept on the
+    file system for memory reasons.
+
+    """
+
+    def __init__(self, choices):
+        self.choices = choices
+
+    def __jsdata__(self):
+        return " ".join((str(c) for c in self.choices))
 
 
 # TODO: add a dict of who breaks ties in each round there is a tie.
@@ -105,6 +136,8 @@ class TestContestInput(JsonMixin):
     Represents a contest for an open-rcv-tests input file.
 
     """
+
+    _meta = ('id', 'notes')
 
     def __init__(self, candidates, ballots):
 
@@ -117,26 +150,21 @@ class TestContestInput(JsonMixin):
         self.ballots = ballots
         self.candidates = candidates
 
-    def __jsobj__(self):
+    def __jsdata__(self):
         # TODO: include _meta: id, notes.
         return {
-            "ballots": self.ballots.__jsobj__(),
+            "ballots": seq_to_jsobj(self.ballots),
             "candidates": self.candidates,
         }
 
-
-# tests_jobj = {
-#     "_meta": {
-#         "version": "0.1.0-alpha",
-#     },
-#     "contests": contests_obj
-# }
 class TestInputFile(JsonMixin):
 
     """
-    Represents an open-rcv-tests input file.
+    Represents an input file for open-rcv-tests.
 
     """
+
+    meta = ('version', )
 
     def __init__(self, contests, version=None):
 
@@ -149,9 +177,7 @@ class TestInputFile(JsonMixin):
         self.contests = contests
         self.version = version
 
-    def __jsobj__(self):
-        # TODO: include _meta: id, notes.
+    def __jsdata__(self):
         return {
-            "ballots": self.ballots.__jsobj__(),
-            "candidates": self.candidates,
+            "contests": seq_to_jsobj(self.contests),
         }

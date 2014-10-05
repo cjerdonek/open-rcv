@@ -19,11 +19,13 @@ This section provides instructions on getting set up to contribute.
 
 ### Get the code
 
-First, clone the repository.
+Clone the repository.
 
-And optionally,g pull in the [open-rcv-tests][open-rcv-tests] test cases:
+Then, download the [open-rcv-tests][open-rcv-tests] test cases:
 
     $ git submodule update --init
+
+(Downloading the test cases is optional but recommended.)
 
 
 ### Create virtual environment

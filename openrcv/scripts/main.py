@@ -7,8 +7,6 @@ from traceback import format_exc
 
 import colorlog
 
-from openrcv import counting
-
 
 EXIT_STATUS_SUCCESS = 0
 EXIT_STATUS_FAIL = 1
@@ -103,23 +101,11 @@ def config_log(level=None, stream=None):
     root.removeHandler(handler)
 
 
-def run_count(blt_path):
-    counting.count_irv(blt_path)
-
-
-def main_status_inner(argv):
-    if argv is None:
-        argv = sys.argv
-    # TODO: use argparse.
-    log.debug("argv: %r" % argv)
-    blt_path = argv[1]
-    run_count(blt_path)
-
-
-def main_status(argv, log_stream=None):
+def main_status(do_func, argv, log_stream=None):
     with config_log(stream=log_stream):
+        log.debug("argv: %r" % argv)
         try:
-            main_status_inner(argv)
+            do_func(argv)
             status = EXIT_STATUS_SUCCESS
         except Exception as err:
             # Log the full exception info for "unexpected" exceptions.
@@ -133,6 +119,6 @@ def main_status(argv, log_stream=None):
 # functions (though we choose _main() as the function that returns an exit
 # status rather than main()):
 # http://www.artima.com/weblogs/viewpost.jsp?thread=4829
-def main(argv=None):
-    status = main_status(argv)
+def main(do_func, argv=None):
+    status = main_status(do_func, argv)
     sys.exit(status)

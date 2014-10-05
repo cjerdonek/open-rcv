@@ -103,7 +103,7 @@ setup(
         #     "foo = mypackage.some_module:foo",
         # ],
         'console_scripts': [
-            'rcv=openrcv.scripts.main:main',
+            'rcv=openrcv.scripts.rcv:run_main',
             'rcvgen=openrcv.datagen:main',
         ],
     },

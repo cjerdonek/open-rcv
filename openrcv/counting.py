@@ -24,7 +24,7 @@ def any_value(dict_):
     except StopIteration:
         raise ValueError("dict has no values")
 
-def count_ballots(ballot_stream, candidates):
+def count_internal_ballots(ballot_stream, candidates):
     """
     Count one round, and return a RawRoundResults object.
 
@@ -93,7 +93,7 @@ def _count_irv(sub_dir, blt_path):
     # TODO: handle case of 0 total?
     rounds = []
     while True:
-        round_results = count_ballots(iballots_stream, candidates)
+        round_results = count_internal_ballots(iballots_stream, candidates)
         rounds.append(round_results)
         totals = round_results.totals
         winner = get_winner(totals)

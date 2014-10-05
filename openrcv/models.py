@@ -19,8 +19,23 @@ import json
 def seq_to_jsobj(seq):
     return tuple((jsonable.to_jsobj() for jsonable in seq))
 
+
+def call_json(json_func, *args, **kwargs):
+    return json_func(*args, indent=4, sort_keys=True, **kwargs)
+
+
 def to_json(jsobj):
-    return json.dumps(jsobj, indent=4, sort_keys=True)
+    return call_json(json.dumps, jsobj)
+
+
+def write_json(jsobj, stream_info):
+    """
+    Arguments:
+      stream_info: a StreamInfo object.
+
+    """
+    with stream_info.open("w") as f:
+        return call_json(json.dump, jsobj, f)
 
 
 class JsonMixin(object):
@@ -137,21 +152,20 @@ class TestContestInput(JsonMixin):
 
     """
 
-    _meta = ('id', 'notes')
+    meta = ('id', 'notes')
 
-    def __init__(self, candidates, ballots):
-
+    def __init__(self, candidates, ballots, id_=None, notes=None):
         """
         Arguments:
           candidates: integer number of candidates
 
         """
-
         self.ballots = ballots
         self.candidates = candidates
+        self.id = id_
+        self.notes = notes
 
     def __jsdata__(self):
-        # TODO: include _meta: id, notes.
         return {
             "ballots": seq_to_jsobj(self.ballots),
             "candidates": self.candidates,

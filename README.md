@@ -18,6 +18,7 @@ on the license.
 Features
 --------
 
+* Completely open and extensible.
 * Tested against the publicly available test cases in the
   [open-rcv-tests][open-rcv-tests] repository.
 * Exposes both a command-line API and a Python API.

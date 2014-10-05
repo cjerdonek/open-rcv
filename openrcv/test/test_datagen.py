@@ -18,11 +18,14 @@ class ModuleTest(TestCase):
 
     def test_gen_random_list(self):
         cases = (
-            # Check that max_length defaults to the number of choices.
-            (([1, 2], ), [0, 0, 0], [1, 1]),
             # Check terminating the list early.
             (([1, 2], ), [2], []),
-            # TODO: more.
+            # Check that duplications are allowed.
+            (([1, 2], ), [0, 0], [1, 1]),
+            # Check that max_length defaults to the number of choices.
+            (([1, 2], ), [0, 0, 0, 0], [1, 1]),
+            # Check that max_length is respected.
+            (([1, 2], 3), [0, 0, 0, 0], [1, 1, 1]),
         )
         for args, randint_vals, expected in cases:
             with self.subTest(args=args, expected=expected, randint_vals=randint_vals):

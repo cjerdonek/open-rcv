@@ -7,13 +7,39 @@ in the open-rcv-tests repo.
 
 """
 
-from random import randint
+import random
 
 from openrcv import models
-from openrcv.models import BallotList, TestContestInput
+from openrcv.models import BallotList, TestContestInput, TestInputFile
 
 def main():
     create_json_tests(target_path="sub/open-rcv-tests/contests.json")
+
+
+def gen_random_list(choices, max_length=None):
+    """
+    Generate a "random" list (allowing repetitions).
+
+    Arguments:
+      choices: a sequence of elements to choose from.
+
+    """
+    if max_length is None:
+        max_length = len(choices)
+
+    seq = []
+    choice_count = len(choices)
+    for i in range(max_length):
+        # This choice satisifes: 0 <= choice <= choice_count
+        choice_index = random.randint(0, choice_count)
+        try:
+            choice = choices[choice_index]
+        except IndexError:
+            # Then choice_index equals choice_count.
+            break
+        seq.append(choice)
+    return seq
+
 
 def random_ballot_list(choices, count, max_length=None):
     """
@@ -21,21 +47,9 @@ def random_ballot_list(choices, count, max_length=None):
       choices: a sequence of integers.
 
     """
-    if max_length is None:
-        max_length = len(choices)
-
     ballots = []
-    choice_count = len(choices)
     for i in range(count):
-        ballot = []
-        for j in range(max_length):
-            choice_index = randint(0, choice_count)
-            try:
-                choice = choices[choice_index]
-            except IndexError:
-                # Then end the ballot early.
-                break
-            ballot.append(choice)
+        ballot = gen_random_list(choices, max_length=max_length)
         ballots.append(ballot)
 
     return BallotList(ballots)
@@ -61,6 +75,8 @@ def create_json_tests(target_path):
         },
         "contests": contests_obj
     }
-    json = models.to_json(tests_jobj)
+
+    test_file = TestInputFile(contests, version="0.2.0-alpha")
+    json = test_file.to_json()
 
     print(json)

@@ -11,6 +11,7 @@ import sys
 
 # We only need ascii for the internal ballot file.
 ENCODING_INTERNAL_BALLOTS = "ascii"
+ENCODING_JSON = "utf-8"
 FILE_ENCODING = "utf-8"
 
 log = logging.getLogger(__name__)
@@ -122,6 +123,12 @@ class FileInfo(StreamInfo):
 
     def _open(self, mode):
         return logged_open(self.path, mode, *self.args, **self.kwargs)
+
+
+class JsonFileInfo(FileInfo):
+
+    def __init__(self, path):
+        super().__init__(path, encoding=ENCODING_JSON)
 
 
 class _EjectingStringIO(io.StringIO):

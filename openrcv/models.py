@@ -16,11 +16,8 @@ We call these objects "jsonable."
 import json
 
 
+# TODO: change this to null?
 NO_VALUE = object()
-
-
-def seq_to_jsobj(seq):
-    return tuple((jsonable.to_jsobj() for jsonable in seq))
 
 
 def call_json(json_func, *args, **kwargs):
@@ -28,6 +25,7 @@ def call_json(json_func, *args, **kwargs):
 
 
 def to_json(jsobj):
+    """Convert a JSON object to a human-readable string."""
     return call_json(json.dumps, jsobj)
 
 
@@ -41,14 +39,28 @@ def write_json(jsobj, stream_info):
         return call_json(json.dump, jsobj, f)
 
 
+def seq_to_jsobj(seq):
+    return tuple((jsonable.to_jsobj() for jsonable in seq))
+
+
+def jsobj_to_seq(cls, jsobjs):
+    return [cls.from_jsobj(jsobj) for jsobj in jsobjs]
+
 class JsonMixin(object):
 
     meta_attrs = ()
 
+    def __add_jsdata__(self, jsobj):
+        pass
+
     @classmethod
     def from_jsobj(cls, jsobj):
         """Convert a JSON object to an object of the class."""
-        obj = cls()
+        try:
+            obj = cls()
+        except TypeError:
+            # We don't get the class name otherwise.
+            raise Exception("error constructing class: %s" % cls.__name__)
         meta_dict = jsobj['_meta']
         for attr in cls.meta_attrs:
             value = meta_dict.get(attr, NO_VALUE)
@@ -71,8 +83,10 @@ class JsonMixin(object):
             jsobj['_meta'] = meta
         return jsobj
 
-    # TODO: remove this from the mixin.
+    # This method should be thought of like __repr__() in that it is
+    # useful for debugging.
     def to_json(self):
+        """Convert the object to a human-readable JSON string."""
         return to_json(self.to_jsobj())
 
 
@@ -173,7 +187,7 @@ class TestContestInput(JsonMixin):
     meta_attrs = ('id', 'notes')
 
     # TODO: rename candidates to candidate_count.
-    def __init__(self, candidates, ballots, id_=None, notes=None):
+    def __init__(self, candidates=None, ballots=None, id_=None, notes=None):
         """
         Arguments:
           candidates: integer number of candidates
@@ -186,6 +200,7 @@ class TestContestInput(JsonMixin):
 
     def __jsdata__(self):
         return {
+            # TODO: work out how None and null should be handled.
             "ballots": seq_to_jsobj(self.ballots),
             "candidates": self.candidates,
         }
@@ -207,13 +222,12 @@ class TestInputFile(JsonMixin):
           contests: an iterable of TestContestInput objects.
 
         """
-
         self.contests = contests
         self.version = version
 
-    def __add_jsdata__(cls, jsobj):
-        # TODO
-        pass
+    def __add_jsdata__(self, jsobj):
+        jsobjs = jsobj['contests']
+        self.contests = jsobj_to_seq(TestContestInput, jsobjs)
 
     def __jsdata__(self):
         return {

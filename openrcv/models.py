@@ -42,6 +42,11 @@ class JsonMixin(object):
 
     meta = ()
 
+    @classmethod
+    def from_jsobj(cls, jsobj):
+        """Return an instance of the class."""
+        return cls.__from_jsobj__(jsobj)
+
     def get_meta(self):
         meta = {}
         for attr in self.meta:
@@ -56,6 +61,7 @@ class JsonMixin(object):
             jsobj['_meta'] = meta
         return jsobj
 
+    # TODO: remove this from the mixin.
     def to_json(self):
         return to_json(self.to_jsobj())
 
@@ -174,6 +180,7 @@ class TestContestInput(JsonMixin):
             "candidates": self.candidates,
         }
 
+
 class TestInputFile(JsonMixin):
 
     """
@@ -182,6 +189,11 @@ class TestInputFile(JsonMixin):
     """
 
     meta = ('version', )
+
+    @classmethod
+    def __from_jsobj__(cls, jsobj):
+        # TODO
+        return jsobj
 
     def __init__(self, contests, version=None):
 

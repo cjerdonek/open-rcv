@@ -100,7 +100,6 @@ def _count_irv(sub_dir, blt_path):
         if winner is not None:
             break
         eliminated = get_lowest(totals)
-        print(eliminated)
         if len(eliminated) > 1:
             raise NotImplementedError()
 

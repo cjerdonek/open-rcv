@@ -16,6 +16,9 @@ We call these objects "jsonable."
 import json
 
 
+NO_VALUE = object()
+
+
 def seq_to_jsobj(seq):
     return tuple((jsonable.to_jsobj() for jsonable in seq))
 
@@ -40,22 +43,29 @@ def write_json(jsobj, stream_info):
 
 class JsonMixin(object):
 
-    meta = ()
+    meta_attrs = ()
 
     @classmethod
     def from_jsobj(cls, jsobj):
-        """Return an instance of the class."""
-        return cls.__from_jsobj__(jsobj)
+        """Convert a JSON object to an object of the class."""
+        obj = cls()
+        meta_dict = jsobj['_meta']
+        for attr in cls.meta_attrs:
+            value = meta_dict.get(attr, NO_VALUE)
+            setattr(obj, attr, value)
+        obj.__add_jsdata__(jsobj)
+        return obj
 
-    def get_meta(self):
+    def get_meta_dict(self):
+        """Return a dict containing the object metadata."""
         meta = {}
-        for attr in self.meta:
+        for attr in self.meta_attrs:
             value = getattr(self, attr)
             meta[attr] = value
         return meta if meta else None
 
     def to_jsobj(self):
-        meta = self.get_meta()
+        meta = self.get_meta_dict()
         jsobj = self.__jsdata__()
         if meta:
             jsobj['_meta'] = meta
@@ -160,7 +170,7 @@ class TestContestInput(JsonMixin):
 
     """
 
-    meta = ('id', 'notes')
+    meta_attrs = ('id', 'notes')
 
     # TODO: rename candidates to candidate_count.
     def __init__(self, candidates, ballots, id_=None, notes=None):
@@ -188,14 +198,9 @@ class TestInputFile(JsonMixin):
 
     """
 
-    meta = ('version', )
+    meta_attrs = ('version', )
 
-    @classmethod
-    def __from_jsobj__(cls, jsobj):
-        # TODO
-        return jsobj
-
-    def __init__(self, contests, version=None):
+    def __init__(self, contests=None, version=None):
 
         """
         Arguments:
@@ -205,6 +210,10 @@ class TestInputFile(JsonMixin):
 
         self.contests = contests
         self.version = version
+
+    def __add_jsdata__(cls, jsobj):
+        # TODO
+        pass
 
     def __jsdata__(self):
         return {

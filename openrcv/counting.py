@@ -9,7 +9,7 @@ import os
 import string
 
 from openrcv.models import RawContestResults, RawRoundResults
-from openrcv.parsing import BLTParser, InternalBallotsParser
+from openrcv.parsing import BLTParser, InternalBallotsCounter
 from openrcv import utils
 from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
 
@@ -33,7 +33,7 @@ def count_internal_ballots(ballot_stream, candidates):
       candidates: iterable of candidates eligible to receive votes.
 
     """
-    parser = InternalBallotsParser(candidates)
+    parser = InternalBallotsCounter(candidates)
     round_results = parser.parse(ballot_stream)
     return round_results
 
@@ -81,19 +81,20 @@ def get_lowest(totals):
     return lowest_candidates
 
 
-def _count_irv(sub_dir, blt_path):
-    iballots_path = os.path.join(sub_dir, "ballots.txt")
-    iballots_stream = FileInfo(iballots_path, encoding=utils.ENCODING_INTERNAL_BALLOTS)
-    blt_stream = FileInfo(blt_path)
+def count_irv_contest(ballot_stream, candidates):
+    """
+    Tabulate a contest using IRV, and return a RawContestResults object.
 
-    parser = BLTParser(iballots_stream)
-    contest = parser.parse(blt_stream)
-    candidates = set(contest.get_candidates())
+    Arguments:
+      ballot_stream: a StreamInfo object for an internal ballot file.
+      candidates: iterable of candidates eligible to receive votes.
 
-    # TODO: handle case of 0 total?
+    """
+    # TODO: handle case of 0 total (no winner, probably)?  And add a test case.
+    # TODO: add tests for degenerate cases (0 candidates, 1 candidate, 0 votes, etc).
     rounds = []
     while True:
-        round_results = count_internal_ballots(iballots_stream, candidates)
+        round_results = count_internal_ballots(ballot_stream, candidates)
         rounds.append(round_results)
         totals = round_results.totals
         winner = get_winner(totals)
@@ -101,12 +102,28 @@ def _count_irv(sub_dir, blt_path):
             break
         eliminated = get_lowest(totals)
         if len(eliminated) > 1:
+            # Then there is a tie for last place.
             raise NotImplementedError()
 
         candidates -= eliminated
 
     results = RawContestResults(rounds)
     return results
+
+
+def _count_irv(sub_dir, blt_path):
+    ballot_path = os.path.join(sub_dir, "ballots.txt")
+    ballot_stream = FileInfo(ballot_path, encoding=utils.ENCODING_INTERNAL_BALLOTS)
+    blt_stream = FileInfo(blt_path)
+
+    parser = BLTParser(ballot_stream)
+    contest = parser.parse(blt_stream)
+    candidates = set(contest.get_candidates())
+
+    results = count_irv_contest(ballot_stream, candidates)
+
+    return results
+
 
 # This is currently just a test function rather than part of the API.
 def count_irv(blt_path, temp_dir=None):

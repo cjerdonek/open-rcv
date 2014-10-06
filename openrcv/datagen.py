@@ -55,18 +55,20 @@ def gen_random_ballot_list(choices, ballot_count, max_length=None):
     return ballots
 
 
-def random_contest(candidates):
-    ballots = gen_random_ballot_list(range(candidates), 5)
-    contest = TestContestInput(candidates, ballots)
+def random_contest(candidate_count):
+    choices = range(1, candidate_count + 1)
+    ballots = gen_random_ballot_list(choices, 5)
+    contest = TestContestInput(candidate_count, ballots)
     return contest
 
 
 def create_json_tests():
     contests = []
-    for id_, count in enumerate(range(3, 6)):
-        contest = random_contest(count)
+    for id_, candidate_count in enumerate(range(3, 6), start=1):
+        contest = random_contest(candidate_count)
         contest.id = id_
-        contest.note = "foo"
+        contest.notes = ("Random contest with {0:d} candidates".
+                         format(candidate_count))
         contests.append(contest)
 
     test_file = TestInputFile(contests, version="0.2.0-alpha")

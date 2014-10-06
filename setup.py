@@ -109,6 +109,9 @@ setup(
         # "distutils.commands": [
         #     "foo = mypackage.some_module:foo",
         # ],
-        'console_scripts': get_console_scripts(("rcv", "rcvgen"))
+        'console_scripts': get_console_scripts((
+            "rcv",
+            "rcvgen"
+        ))
     },
 )

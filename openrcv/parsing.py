@@ -148,7 +148,7 @@ class BLTParser(Parser):
                 raise ValueError("the BLT has non-empty lines at the end")
 
 
-class InternalBallotsParser(Parser):
+class InternalBallotsCounter(Parser):
 
     # TODO: document how to include undervotes.
     """

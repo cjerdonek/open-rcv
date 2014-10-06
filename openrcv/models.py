@@ -137,11 +137,13 @@ class TestBallot(JsonMixin):
 
     """
 
-    def __init__(self, choices):
+    def __init__(self, choices, weight=1):
         self.choices = choices
+        self.weight = weight
 
     def __jsdata__(self):
-        return " ".join((str(c) for c in self.choices))
+        values = [self.weight] + self.choices
+        return " ".join((str(v) for v in values))
 
 
 # TODO: add a dict of who breaks ties in each round there is a tie.
@@ -154,6 +156,7 @@ class TestContestInput(JsonMixin):
 
     meta = ('id', 'notes')
 
+    # TODO: rename candidates to candidate_count.
     def __init__(self, candidates, ballots, id_=None, notes=None):
         """
         Arguments:

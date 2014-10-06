@@ -14,9 +14,6 @@ from openrcv.models import TestBallot, TestContestInput, TestInputFile
 from openrcv import utils
 from openrcv.utils import FileInfo
 
-def main():
-    create_json_tests(target_path="sub/open-rcv-tests/contests.json")
-
 
 def gen_random_list(choices, max_length=None):
     """
@@ -64,7 +61,7 @@ def random_contest(candidates):
     return contest
 
 
-def create_json_tests(target_path):
+def create_json_tests():
     contests = []
     for id_, count in enumerate(range(3, 6)):
         contest = random_contest(count)
@@ -73,7 +70,4 @@ def create_json_tests(target_path):
         contests.append(contest)
 
     test_file = TestInputFile(contests, version="0.2.0-alpha")
-    stream_info = FileInfo("temp.json")
-    models.write_json(test_file.to_jsobj(), stream_info)
-
-    #print(json)
+    return test_file

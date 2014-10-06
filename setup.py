@@ -23,7 +23,14 @@ def configure_logging():
     logging.basicConfig(format=format_string, level=logging.INFO)
     log.debug("Debug logging enabled.")
 
+
+def get_console_scripts(names):
+    fmt_str = '{0}=openrcv.scripts.{0}:run_main'
+    return [fmt_str.format(name) for name in names]
+
+
 configure_logging()
+
 
 setup(
     name='OpenRCV',
@@ -102,9 +109,6 @@ setup(
         # "distutils.commands": [
         #     "foo = mypackage.some_module:foo",
         # ],
-        'console_scripts': [
-            'rcv=openrcv.scripts.rcv:run_main',
-            'rcvgen=openrcv.datagen:main',
-        ],
+        'console_scripts': get_console_scripts(("rcv", "rcvgen"))
     },
 )

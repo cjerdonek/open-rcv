@@ -6,6 +6,7 @@ from openrcv.models import ContestInfo, RawRoundResults
 from openrcv import utils
 from openrcv.utils import FILE_ENCODING, time_it
 
+
 log = logging.getLogger(__name__)
 
 

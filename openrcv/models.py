@@ -1,23 +1,31 @@
 
 """
-Contains models used throughout this project.
+Contains object models for this project.
 
-For the purposes of this project, "JSON object" (abbreviated "jsobj")
-means a Python object with a natural conversion to JSON.
-These are objects composed of built-in type instances -- things like
-Python lists, dicts, strings, ints, etc.
+For the purposes of this project, "JSON object" (abbreviated in code
+as "jsobj") means a Python object with a natural conversion to JSON.
+These are objects composed of built-in type instances like Python
+lists, dicts, strings, ints, etc.
 
 Instances of most models in this module (those inheriting from JsonMixin)
 can be converted to JSON by calling a to_json() method on the instance.
 We call these objects "jsonable."
 
+We use the convention that "None" attribute values do not get converted
+to JSON, and JSON null values correspond to the NO_VALUE object.
+This decision is based on the thinking that having "null" appear in the
+JSON should be a deliberate decision (and in the Python world, None
+is the usual default value).
+
 """
 
 import json
-
+import logging
 
 # TODO: change this to null?
 NO_VALUE = object()
+
+log = logging.getLogger(__name__)
 
 
 def call_json(json_func, *args, **kwargs):
@@ -44,14 +52,28 @@ def seq_to_jsobj(seq):
 
 
 def jsobj_to_seq(cls, jsobjs):
+    log.info("%s: %r" % (cls.__name__, jsobjs))
     return [cls.from_jsobj(jsobj) for jsobj in jsobjs]
 
 class JsonMixin(object):
 
     meta_attrs = ()
 
-    def __add_jsdata__(self, jsobj):
+    def __read_jsobj__(self, jsobj):
+        """
+        Read data from the given JSON object and save it to attributes.
+
+        This method does not read metadata.
+
+        """
         pass
+
+    def __fill_jsobj__(self, jsobj):
+        """
+        Write the state of the current object to the given JSON object.
+
+        """
+        raise NotImplementedError()
 
     @classmethod
     def from_jsobj(cls, jsobj):
@@ -61,11 +83,17 @@ class JsonMixin(object):
         except TypeError:
             # We don't get the class name otherwise.
             raise Exception("error constructing class: %s" % cls.__name__)
-        meta_dict = jsobj['_meta']
-        for attr in cls.meta_attrs:
-            value = meta_dict.get(attr, NO_VALUE)
-            setattr(obj, attr, value)
-        obj.__add_jsdata__(jsobj)
+        try:
+            meta_dict = jsobj['_meta']
+        except TypeError:
+            # Then jsobj could be a string, for example.
+            # In this case, there is no metadata.
+            pass
+        else:
+            for attr in cls.meta_attrs:
+                value = meta_dict.get(attr, NO_VALUE)
+                setattr(obj, attr, value)
+        obj.__read_jsobj__(jsobj)
         return obj
 
     def get_meta_dict(self):
@@ -76,11 +104,20 @@ class JsonMixin(object):
             meta[attr] = value
         return meta if meta else None
 
+    def add_to_jsobj(self, jsobj, attr):
+        """Add the given attribute value to the given JSON object."""
+        value = getattr(self, attr)
+        # TODO: handle NULL.
+        if value is None:
+            return
+        jsobj[attr] = seq_to_jsobj(value)
+
     def to_jsobj(self):
+        jsobj = {}
         meta = self.get_meta_dict()
-        jsobj = self.__jsdata__()
         if meta:
             jsobj['_meta'] = meta
+        self.__fill_jsobj__(jsobj)
         return jsobj
 
     # This method should be thought of like __repr__() in that it is
@@ -167,14 +204,23 @@ class TestBallot(JsonMixin):
 
     """
 
-    def __init__(self, choices, weight=1):
+    def __init__(self, choices=None, weight=1):
         self.choices = choices
         self.weight = weight
 
-    def __jsdata__(self):
+    def __read_jsobj__(self, jsobj):
+        """
+        Arguments:
+          jsobj: a string of the form "WEIGHT N1 N2 N3".
+
+        """
+        numbers = [int(s) for s in jsobj.split()]
+        weight = numbers.pop(0)
+        self.__init__(choices=numbers, weight=weight)
+
+    def to_jsobj(self):
         values = [self.weight] + self.choices
         return " ".join((str(v) for v in values))
-
 
 # TODO: add a dict of who breaks ties in each round there is a tie.
 class TestContestInput(JsonMixin):
@@ -198,12 +244,12 @@ class TestContestInput(JsonMixin):
         self.id = id_
         self.notes = notes
 
-    def __jsdata__(self):
-        return {
-            # TODO: work out how None and null should be handled.
-            "ballots": seq_to_jsobj(self.ballots),
-            "candidates": self.candidates,
-        }
+    def __read_jsobj__(self, jsobj):
+        self.ballots = jsobj_to_seq(TestBallot, jsobj['ballots'])
+
+    def __fill_jsobj__(self, jsobj):
+        self.add_to_jsobj(jsobj, "ballots")
+        self.add_to_jsobj(jsobj, "candidates")
 
 
 class TestInputFile(JsonMixin):
@@ -225,11 +271,11 @@ class TestInputFile(JsonMixin):
         self.contests = contests
         self.version = version
 
-    def __add_jsdata__(self, jsobj):
+    def __read_jsobj__(self, jsobj):
         jsobjs = jsobj['contests']
+        # TODO: use a general jsobj_to_obj instead.
         self.contests = jsobj_to_seq(TestContestInput, jsobjs)
 
-    def __jsdata__(self):
-        return {
-            "contests": seq_to_jsobj(self.contests),
-        }
+    def __fill_jsobj__(self, jsobj):
+        """Write the state of the current object to the given JSON object."""
+        self.add_to_jsobj(jsobj, "contests")

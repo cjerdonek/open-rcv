@@ -68,6 +68,11 @@ def jsobj_to_seq(cls, jsobjs):
     log.info("%s: %r" % (cls.__name__, jsobjs))
     return [cls.from_jsobj(jsobj) for jsobj in jsobjs]
 
+
+class JsonObjError(Exception):
+    pass
+
+
 class JsonMixin(object):
 
     meta_attrs = ()
@@ -255,7 +260,12 @@ class TestBallot(JsonMixin):
             "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
 
         """
-        numbers = [int(s) for s in jsobj.split(" ")]
+        try:
+            numbers = [int(s) for s in jsobj.split(" ")]
+        except ValueError:
+            # Can happen for example with: "2 ".
+            # ValueError: invalid literal for int() with base 10: ''
+            raise JsonObjError("error parsing: %r" % jsobj)
         weight = numbers.pop(0)
         self.__init__(choices=numbers, weight=weight)
 

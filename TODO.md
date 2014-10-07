@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Start testing some of the serialization stuff (e.g. TestBallot).
 * Create a function to read a test input file, tabulate each contest,
   and write the results to a new file.
 * Add the expected output to the JSON tests.

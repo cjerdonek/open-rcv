@@ -17,6 +17,7 @@ class ContestInfoTest(TestCase):
         contest.candidates = ["Alice", "Bob", "Carl"]
         self.assertEqual(contest.get_candidates(), range(1, 4))
 
+
 class TestBallotTest(TestCase):
 
     def test_init(self):
@@ -60,3 +61,7 @@ class TestBallotTest(TestCase):
     def test_from_jsobj(self):
         ballot = TestBallot.from_jsobj("2 3 4")
         self.assertEqual(ballot, TestBallot(choices=[3, 4], weight=2))
+
+    def test_from_jsobj(self):
+        with self.assertRaises(ValueError):
+            ballot = TestBallot.from_jsobj("2 ")

@@ -13,7 +13,7 @@ instance.  Similarly, calling to_json() on the object returns JSON.  We
 call these objects "jsonable."
 
 We use the convention that "None" attribute values do not get converted
-to JSON, and JSON null values correspond to the NULL object.
+to JSON, and JSON null values correspond to the JSNULL object.
 This decision is based on the thinking that having "null" appear in the
 JSON should be a deliberate decision (and in the Python world, None
 is the usual default value).
@@ -27,9 +27,11 @@ import json
 import logging
 
 
-NULL = object()
-
 log = logging.getLogger(__name__)
+
+# TODO: refactor this to be a JSON object?  This would give us things
+# like a nice repr() and the chance to reduce special-casing.
+JSNULL = object()
 
 
 def call_json(json_func, *args, **kwargs):
@@ -77,6 +79,17 @@ class JsonMixin(object):
 
     meta_attrs = ()
 
+    @classmethod
+    def from_jsobj(cls, jsobj):
+        """Convert a JSON object to an object of the class."""
+        try:
+            obj = cls()
+        except TypeError:
+            # We don't get the class name otherwise.
+            raise Exception("error constructing class: %s" % cls.__name__)
+        obj.load_jsobj(jsobj)
+        return obj
+
     def __repr__(self):
         desc = self.repr_desc()
         return "<%s: %s%s%s>" % (self.__class__.__name__, desc,
@@ -122,26 +135,31 @@ class JsonMixin(object):
         """
         raise NotImplementedError()
 
-    @classmethod
-    def from_jsobj(cls, jsobj):
-        """Convert a JSON object to an object of the class."""
-        try:
-            obj = cls()
-        except TypeError:
-            # We don't get the class name otherwise.
-            raise Exception("error constructing class: %s" % cls.__name__)
+    def _load_attrs(self, attrs, jsobj):
+        """
+        Read data from the given JSON object and save it to attributes.
+
+        Arguments:
+          attrs: iterable of attribute names.
+          jsobj: a JSON object that is a mapping object.
+
+        """
+        for attr in attrs:
+            # TODO: test and handle null, etc.
+            value = jsobj.get(attr)
+            if value is None:
+                value = JSNULL
+            setattr(self, attr, value)
+
+    def load_jsobj(self, jsobj):
         try:
             meta_dict = jsobj['_meta']
-        except TypeError:
-            # Then jsobj could be a string, for example.
-            # In this case, there is no metadata.
+        except KeyError:
+            # The metadata dict is optional.
             pass
         else:
-            for attr in cls.meta_attrs:
-                value = meta_dict.get(attr, NULL)
-                setattr(obj, attr, value)
-        obj.load_jsobj(jsobj)
-        return obj
+            self._load_attrs(self.meta_attrs, meta_dict)
+        self._load_attrs(self.data_attrs, jsobj)
 
     def get_meta_dict(self):
         """Return a dict containing the object metadata."""
@@ -154,7 +172,7 @@ class JsonMixin(object):
     def add_to_jsobj(self, jsobj, attr):
         """Add the given attribute value to the given JSON object."""
         value = getattr(self, attr)
-        # TODO: handle NULL.
+        # TODO: handle JSNULL.
         if value is None:
             return
         jsobj[attr] = to_jsobj(value)
@@ -240,7 +258,7 @@ class RawContestResults(JsonMixin):
         }
 
 
-class TestBallot(JsonMixin):
+class JsonBallot(JsonMixin):
 
     """
     Represents a ballot for a JSON test case.
@@ -285,6 +303,7 @@ class TestBallot(JsonMixin):
         self.__init__(choices=numbers, weight=weight)
 
     def to_jsobj(self):
+        """Convert the ballot to a string."""
         values = [self.weight] + self.choices
         return " ".join((str(v) for v in values))
 
@@ -296,8 +315,9 @@ class JsonContest(JsonMixin):
 
     """
 
-    attrs = ('ballots', 'candidate_count', 'id', 'notes')
+    data_attrs = ('ballots', 'candidate_count')
     meta_attrs = ('id', 'notes')
+    attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self, candidate_count=None, ballots=None, id_=None, notes=None):
         """
@@ -314,9 +334,14 @@ class JsonContest(JsonMixin):
         """Return additional info for __repr__()."""
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
-    def load_jsobj(self, jsobj):
-        ballots = jsobj_to_seq(TestBallot, jsobj["ballots"])
-        candidate_count = jsobj["candidate_count"]
+    def load_jsobj_old(self, jsobj):
+        # def _set_attrs(self, **kwargs):
+        #     for attr, value in kwargs.items():
+        #         setattr(self, attr, value)
+
+
+        ballots = jsobj_to_seq(JsonBallot, jsobj["ballots"])
+        candidate_count = jsobj["candidates"]
         self.__init__(ballots=ballots, candidate_count=candidate_count)
 
     def __fill_jsobj__(self, jsobj):

@@ -2,11 +2,18 @@
 from contextlib import contextmanager
 from unittest import TestCase
 
-from openrcv.models import ContestInfo, JsonContest, JsonObjError, TestBallot
+from openrcv.models import (ContestInfo, JsonContest, JsonObjError, JsonBallot,
+                            JSNULL)
 
 
 @contextmanager
 def change_attr(obj, name, value):
+    """Context manager to temporarily change the value of an attribute.
+
+    This is useful for testing __eq__() by modifying one attribute
+    at a time.
+
+    """
     initial_value = getattr(obj, name)
     setattr(obj, name, value)
     yield
@@ -27,10 +34,10 @@ class ContestInfoTest(TestCase):
         self.assertEqual(contest.get_candidates(), range(1, 4))
 
 
-class TestBallotTest(TestCase):
+class JsonBallotTest(TestCase):
 
     def make_ballot(self):
-        return TestBallot(choices=[1, 2], weight=3)
+        return JsonBallot(choices=[1, 2], weight=3)
 
     def test_init(self):
         ballot = self.make_ballot()
@@ -38,14 +45,14 @@ class TestBallotTest(TestCase):
         self.assertEqual(ballot.weight, 3)
 
     def test_init__defaults(self):
-        ballot = TestBallot()
+        ballot = JsonBallot()
         self.assertEqual(ballot.choices, [])
         self.assertEqual(ballot.weight, 1)
 
     def test_repr(self):
         ballot = self.make_ballot()
         self.assertEqual(repr(ballot),
-                         "<TestBallot: jsobj='3 1 2' %s>" % hex(id(ballot)))
+                         "<JsonBallot: jsobj='3 1 2' %s>" % hex(id(ballot)))
 
     def test_eq(self):
         ballot1 = self.make_ballot()
@@ -55,36 +62,38 @@ class TestBallotTest(TestCase):
             self.assertNotEqual(ballot1, ballot2)
         with change_attr(ballot2, "weight", 100):
             self.assertNotEqual(ballot1, ballot2)
+        self.assertEqual(ballot1, ballot2)  # sanity check
 
     def test_to_jsobj(self):
-        ballot = TestBallot(choices=[1, 2], weight=3)
+        ballot = JsonBallot(choices=[1, 2], weight=3)
         jsobj = ballot.to_jsobj()
         self.assertEqual(jsobj, "3 1 2")
 
     def test_to_jsobj__undervote(self):
-        ballot = TestBallot(weight=3)
+        ballot = JsonBallot(weight=3)
         jsobj = ballot.to_jsobj()
         self.assertEqual(jsobj, "3")
 
     def test_to_jsobj__none_choices(self):
         """Test having None for choices."""
-        ballot = TestBallot(weight=3)
+        ballot = JsonBallot(weight=3)
         ballot.choices = None
         with self.assertRaises(TypeError):
             jsobj = ballot.to_jsobj()
 
-    def test_load_jsdata(self):
-        ballot = TestBallot()
+    def test_load_jsobj(self):
+        ballot = JsonBallot()
         ballot.load_jsobj("2")
-        self.assertEqual(ballot, TestBallot(weight=2))
+        self.assertEqual(ballot, JsonBallot(weight=2))
 
     def test_from_jsobj(self):
-        ballot = TestBallot.from_jsobj("2 3 4")
-        self.assertEqual(ballot, TestBallot(choices=[3, 4], weight=2))
+        ballot = JsonBallot.from_jsobj("2 3 4")
+        self.assertEqual(ballot, JsonBallot(choices=[3, 4], weight=2))
 
-    def test_from_jsobj(self):
+    def test_from_jsobj__trailing_space(self):
+        """This checks that the format is strict (i.e. doesn't call strip())."""
         with self.assertRaises(JsonObjError):
-            ballot = TestBallot.from_jsobj("2 ")
+            ballot = JsonBallot.from_jsobj("2 ")
 
 
 class JsonContestTest(TestCase):
@@ -92,14 +101,14 @@ class JsonContestTest(TestCase):
     def make_contest(self, ballots=None):
         """Return a test contest."""
         if ballots is None:
-            ballots = [TestBallot(choices=[1, 2]),
-                       TestBallot(choices=[2], weight=3)]
+            ballots = [JsonBallot(choices=[1, 2]),
+                       JsonBallot(choices=[2], weight=3)]
         contest = JsonContest(candidate_count=2, ballots=ballots, id_=3, notes="foo")
         return contest
 
     def test_init(self):
-        ballots = [TestBallot(choices=[1, 2]),
-                   TestBallot(choices=[2], weight=3)]
+        ballots = [JsonBallot(choices=[1, 2]),
+                   JsonBallot(choices=[2], weight=3)]
         contest = self.make_contest(ballots=ballots)
         cases = [
             ("candidate_count", 2),
@@ -147,3 +156,21 @@ class JsonContestTest(TestCase):
                 with change_attr(contest2, attr, value):
                     self.assertNotEqual(contest1, contest2)
         self.assertEqual(contest1, contest2)  # sanity check
+
+    def test_load_jsobj(self):
+        contest = JsonContest()
+
+        # Check loading metadata.
+        #
+        # Check that the id needs to be in the meta dict.
+        contest.load_jsobj({"id": 5})
+        self.assertEqual(contest.id, None)
+        contest.load_jsobj({"_meta": {"id": 5}})
+        self.assertEqual(contest.id, 5)
+        # Check Javascript null (which the json module converts to None).
+        contest.load_jsobj({"_meta": {"id": None}})
+        self.assertEqual(contest.id, JSNULL)
+
+
+        contest.load_jsobj({"candidate_count": 5})
+        self.assertEqual(contest.candidate_count, 5)

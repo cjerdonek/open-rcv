@@ -10,7 +10,7 @@ in the open-rcv-tests repo.
 import random
 
 from openrcv import models
-from openrcv.models import TestBallot, JsonContest, TestInputFile
+from openrcv.models import JsonBallot, JsonContest, TestInputFile
 from openrcv import utils
 from openrcv.utils import FileInfo
 
@@ -49,7 +49,7 @@ def gen_random_ballot_list(choices, ballot_count, max_length=None):
     ballots = []
     for i in range(ballot_count):
         ballot_choices = gen_random_list(choices, max_length=max_length)
-        ballot = TestBallot(ballot_choices)
+        ballot = JsonBallot(ballot_choices)
         ballots.append(ballot)
 
     return ballots

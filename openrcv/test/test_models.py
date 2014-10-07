@@ -2,8 +2,9 @@
 from contextlib import contextmanager
 from unittest import TestCase
 
-from openrcv.models import (ContestInfo, JsonContest, JsonObjError, JsonAttr,
-                            JsonBallot, JsonMixin, JSNULL)
+from openrcv.models import (from_jsobj, ContestInfo, JsonContest,
+                            JsonObjError, JsonAttr,
+                            JsonBallot, JsonMixin, JS_NULL)
 
 
 @contextmanager
@@ -22,8 +23,26 @@ def change_attr(obj, name, value):
 
 class JsonSample(JsonMixin):
 
-    attrs = (JsonAttr('foo'),
-             JsonAttr('bar'))
+    data_attrs = (JsonAttr('bar'),
+                  JsonAttr('foo'))
+    attrs = data_attrs
+
+    def __init__(self, bar=None, foo=None):
+        self.bar = bar
+        self.foo = foo
+
+    def __repr__(self):
+        return "bar=%r foo=%r" % (self.bar, self.foo)
+
+
+class ModuleTest(TestCase):
+
+    def test_from_jsobj(self):
+        self.assertEqual(from_jsobj(None), JS_NULL)
+
+    def test_from_jsobj__with_cls(self):
+        expected_sample = JsonSample(foo="fooval")
+        self.assertEqual(from_jsobj({'foo': 'fooval'}, cls=JsonSample), expected_sample)
 
 
 class JsonMixinTest(TestCase):
@@ -191,7 +210,7 @@ class JsonContestTest(TestCase):
         contest = JsonContest()
         self.assertEqual(contest.candidate_count, None)
         # Check loading an empty dict.
-        # In particular, attributes should not get set to JsNull.
+        # In particular, attributes should not get set to JS_NULL.
         contest.load_jsobj({})
         self.assertEqual(contest.candidate_count, None)
 
@@ -201,9 +220,9 @@ class JsonContestTest(TestCase):
         self.assertEqual(contest.id, None)
         contest.load_jsobj({"_meta": {"id": 5}})
         self.assertEqual(contest.id, 5)
-        # Check Javascript null (which the json module converts to None).
+        # Check explicit None (to which the json module converts Javascript null).
         contest.load_jsobj({"_meta": {"id": None}})
-        self.assertEqual(contest.id, JSNULL)
+        self.assertEqual(contest.id, JS_NULL)
 
         contest.load_jsobj({"candidate_count": 5})
         self.assertEqual(contest.candidate_count, 5)
@@ -211,7 +230,7 @@ class JsonContestTest(TestCase):
         expected_ballots = self.make_ballots()
         contest.load_jsobj({"ballots": ["3 2 1"]})
         # TODO
-        # self.assertEqual(contest.ballots, expected_ballots)
+        #self.assertEqual(contest.ballots, expected_ballots)
 
     def test_to_jsobj(self):
         # TODO

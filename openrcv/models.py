@@ -13,7 +13,7 @@ instance.  Similarly, calling to_json() on the object returns JSON.  We
 call these objects "jsonable."
 
 We use the convention that "None" attribute values do not get converted
-to JSON, and JSON null values correspond to the JSNULL object.
+to JSON, and JSON null values correspond to the JS_NULL object.
 This decision is based on the thinking that having "null" appear in the
 JSON should be a deliberate decision (and in the Python world, None
 is the usual default value).
@@ -33,7 +33,7 @@ log = logging.getLogger(__name__)
 # like a nice repr() and the chance to reduce special-casing.
 class JsNull(object):
     pass
-JSNULL = JsNull()
+JS_NULL = JsNull()
 
 
 def call_json(json_func, *args, **kwargs):
@@ -68,6 +68,34 @@ def to_jsobj(obj):
     return obj.to_jsobj()
 
 
+def from_jsobj(jsobj, cls=None):
+    """
+    Convert a JSON object to a Python object.
+
+    Arguments:
+      cls: a class that serves as a "type hint."
+
+    """
+    log.debug("executing from_jsobj(jsobj, cls=%s)" % (None if cls is None else
+                                                       cls.__name__))
+    if isinstance(jsobj, (list, tuple)):
+        return tuple((from_jsobj(o, cls=cls) for o in jsobj))
+
+    if cls is not None:
+        try:
+            obj = cls()
+        except TypeError:
+            # We don't get the class name otherwise.
+            raise Exception("error constructing class: %s" % cls.__name__)
+        obj.load_jsobj(jsobj)
+        return obj
+
+    # The json module converts Javascript null to and from None.
+    if jsobj is None:
+        return JS_NULL
+    return jsobj
+
+
 def jsobj_to_seq(cls, jsobjs):
     log.info("%s: %r" % (cls.__name__, jsobjs))
     return [cls.from_jsobj(jsobj) for jsobj in jsobjs]
@@ -90,6 +118,7 @@ class JsonMixin(object):
 
     meta_attrs = ()
 
+    # TODO: remove this method (the function from_jsobj() replaces it).
     @classmethod
     def from_jsobj(cls, jsobj):
         """Convert a JSON object to an object of the class."""
@@ -152,18 +181,16 @@ class JsonMixin(object):
 
         """
         for attr in attrs:
-            name = attr.name
+            name, cls = attr.name, attr.cls
             try:
                 value = jsdict[name]
             except KeyError:
                 value = None
             else:
-                # An explicit None should be JsNull.
+                # An explicit None should be JS_NULL.
                 if value is None:
-                    value = JSNULL
-                else:
-                    # TODO: deserialize with a type.
-                    pass
+                    value = JS_NULL
+                from_jsobj(value, cls=cls)
             setattr(self, name, value)
 
     def load_jsobj(self, jsobj):
@@ -189,7 +216,7 @@ class JsonMixin(object):
 
         """
         for attr in attrs:
-            # TODO: handle and test None/JsNull.
+            # TODO: handle and test None/JS_NULL.
             value = getattr(self, attr)
             jsdict[attr] = value
 
@@ -203,7 +230,7 @@ class JsonMixin(object):
     def add_to_jsobj(self, jsobj, attr):
         """Add the given attribute value to the given JSON object."""
         value = getattr(self, attr)
-        # TODO: handle JSNULL.
+        # TODO: handle JS_NULL.
         if value is None:
             return
         jsobj[attr] = to_jsobj(value)
@@ -324,7 +351,7 @@ class JsonBallot(JsonMixin):
         """
         try:
             numbers = [int(s) for s in jsobj.split(" ")]
-        except ValueError:
+        except (AttributeError, ValueError):
             # Can happen for example with: "2 ".
             # ValueError: invalid literal for int() with base 10: ''
             raise JsonObjError("error parsing: %r" % jsobj)
@@ -346,7 +373,7 @@ class JsonContest(JsonMixin):
 
     meta_attrs = (JsonAttr('id'),
                   JsonAttr('notes'))
-    data_attrs = (JsonAttr('ballots'),
+    data_attrs = (JsonAttr('ballots', cls=JsonBallot),
                   JsonAttr('candidate_count'))
     attrs = tuple(list(data_attrs) + list(meta_attrs))
 

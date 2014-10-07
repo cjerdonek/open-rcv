@@ -65,6 +65,7 @@ def make_log_handler(level, stream=None):
 
     # If stream is None, StreamHandler uses sys.stderr.
     handler = logging.StreamHandler(stream)
+    handler.setLevel(level)
 
     filter_ = get_filter(level)
     handler.addFilter(filter_)
@@ -93,7 +94,6 @@ def config_log(level=None, stream=None):
     if level is None:
         level = LOGGING_LEVEL_DEFAULT
     root = logging.getLogger()
-    root.setLevel(level)
     handler = make_log_handler(level, stream=stream)
     root.addHandler(handler)
     log.info("logging configured to: %s" % logging.getLevelName(level))

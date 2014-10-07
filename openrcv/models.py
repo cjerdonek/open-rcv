@@ -72,7 +72,24 @@ class JsonMixin(object):
 
     meta_attrs = ()
 
-    def load_jsdata(self, jsobj):
+    def __eq__(self, other):
+        raise NotImplementedError()
+
+    # From the Python documentation:
+    #
+    #   There are no implied relationships among the comparison operators.
+    #   The truth of x==y does not imply that x!=y is false. Accordingly,
+    #   when defining __eq__(), one should also define __ne__() so that the
+    #   operators will behave as expected.
+    #
+    # (from https://docs.python.org/3/reference/datamodel.html#object.__ne__ )
+    #
+    #    HOWEVER, I did observe that Python 3.4 will call __eq__() if
+    # __ne__() is not implemented.
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def load_jsobj(self, jsobj):
         """
         Read data from the given JSON object and save it to attributes.
 
@@ -106,7 +123,7 @@ class JsonMixin(object):
             for attr in cls.meta_attrs:
                 value = meta_dict.get(attr, NULL)
                 setattr(obj, attr, value)
-        obj.load_jsdata(jsobj)
+        obj.load_jsobj(jsobj)
         return obj
 
     def get_meta_dict(self):
@@ -224,13 +241,21 @@ class TestBallot(JsonMixin):
         self.choices = choices
         self.weight = weight
 
-    def load_jsdata(self, jsobj):
+    def __repr__(self):
+        return "<TestBallot: jsobj=%r>" % self.to_jsobj()
+
+    def __eq__(self, other):
+        return ((other.choices == self.choices) and
+                (other.weight == self.weight))
+
+    def load_jsobj(self, jsobj):
         """
         Arguments:
-          jsobj: a string of the form "WEIGHT N1 N2 N3".
+          jsobj: a space-delimited string of integers of the form
+            "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
 
         """
-        numbers = [int(s) for s in jsobj.split()]
+        numbers = [int(s) for s in jsobj.split(" ")]
         weight = numbers.pop(0)
         self.__init__(choices=numbers, weight=weight)
 
@@ -261,7 +286,7 @@ class TestContestInput(JsonMixin):
         self.id = id_
         self.notes = notes
 
-    def load_jsdata(self, jsobj):
+    def load_jsobj(self, jsobj):
         ballots = jsobj_to_seq(TestBallot, jsobj["ballots"])
         candidates = jsobj["candidates"]
         self.__init__(ballots=ballots, candidates=candidates)
@@ -290,7 +315,7 @@ class TestInputFile(JsonMixin):
         self.contests = contests
         self.version = version
 
-    def load_jsdata(self, jsobj):
+    def load_jsobj(self, jsobj):
         jsobjs = jsobj['contests']
         # TODO: use a general jsobj_to_obj instead.
         self.contests = jsobj_to_seq(TestContestInput, jsobjs)

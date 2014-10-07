@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from unittest import TestCase
 
 from openrcv.models import (ContestInfo, JsonContest, JsonObjError, JsonBallot,
-                            JSNULL)
+                            JsonMixin, JSNULL)
 
 
 @contextmanager
@@ -20,11 +20,35 @@ def change_attr(obj, name, value):
     setattr(obj, name, initial_value)
 
 
+class JsonSample(JsonMixin):
+
+    attrs = ('foo', 'bar')
+
 class JsonMixinTest(TestCase):
 
-    def test_ne(self):
-        pass
+    def test_eq(self):
+        sample1 = JsonSample()
+        sample2 = JsonSample()
+        self.assertEqual(sample1, sample2)
 
+    def test_eq__wrong_type(self):
+        sample = JsonSample()
+        self.assertNotEqual(sample, "abc")
+
+    def test_eq__missing_attribute(self):
+        """
+        Check if the objects don't have one of the attributes set.
+
+        """
+        sample1 = JsonSample()
+        sample2 = JsonSample()
+        sample1.foo = "abc"
+        self.assertNotEqual(sample1, sample2)
+        sample1 = JsonSample()
+        sample2.foo = "abc"
+        self.assertNotEqual(sample1, sample2)
+        sample1.foo = "abc"
+        self.assertEqual(sample1, sample2)
 
 class ContestInfoTest(TestCase):
 
@@ -181,7 +205,12 @@ class JsonContestTest(TestCase):
 
         contest.load_jsobj({"candidate_count": 5})
         self.assertEqual(contest.candidate_count, 5)
-
+        # Check that objects deserialize okay.
+        expected_ballots = self.make_ballots()
+        contest.load_jsobj({"ballots": ["3 2 1"]})
         # TODO
-        ballots = self.make_ballots()
-        contest.load_jsobj({"ballots": ""})
+        # self.assertEqual(contest.ballots, expected_ballots)
+
+    def test_to_jsobj(self):
+        # TODO
+        pass

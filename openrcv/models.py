@@ -79,6 +79,8 @@ class JsonObjError(Exception):
 
 class JsonMixin(object):
 
+    __no_attribute__ = object()  # used in __eq__()
+
     meta_attrs = ()
 
     @classmethod
@@ -99,8 +101,11 @@ class JsonMixin(object):
                                  " " if desc else "", hex(id(self)))
 
     def __eq__(self, other):
+        if type(self) != type(other):
+            return False
         for attr in self.attrs:
-            if getattr(self, attr) != getattr(other, attr):
+            if (getattr(self, attr, self.__no_attribute__) !=
+                getattr(other, attr, other.__no_attribute__)):
                 return False
         return True
 
@@ -129,25 +134,27 @@ class JsonMixin(object):
         """
         raise NotImplementedError()
 
-    def _load_attrs(self, attrs, jsobj):
+    def _load_attrs(self, attrs, jsdict):
         """
-        Read data from the given JSON object and save it to attributes.
+        Read data from a JSON object and save it to attributes.
 
         Arguments:
           attrs: iterable of attribute names.
-          jsobj: a JSON object that is a mapping object.
+          jsdict: a JSON object that is a mapping object.
 
         """
         for attr in attrs:
-            # TODO: test and handle null, etc.
             try:
-                value = jsobj[attr]
+                value = jsdict[attr]
             except KeyError:
                 value = None
             else:
-                # An explicit None should become JsNull.
+                # An explicit None should be JsNull.
                 if value is None:
                     value = JSNULL
+                else:
+                    # TODO: deserialize with a type.
+                    pass
             setattr(self, attr, value)
 
     def load_jsobj(self, jsobj):
@@ -164,12 +171,24 @@ class JsonMixin(object):
             self._load_attrs(self.meta_attrs, meta_dict)
         self._load_attrs(self.data_attrs, jsobj)
 
+    # This is the reverse of _load_attrs().
+    # TODO: choose less ambiguous names for _load_attrs and _write_attrs,
+    # so that the "direction" is clear.
+    def _write_attrs(self, attrs, jsdict):
+        """
+        Read object attributes and write them to a JSON object.
+
+        """
+        for attr in attrs:
+            # TODO: handle and test None/JsNull.
+            value = getattr(self, attr)
+            jsdict[attr] = value
+
+    # TODO: convert this into a method similar to _load_attrs().
     def get_meta_dict(self):
         """Return a dict containing the object metadata."""
         meta = {}
-        for attr in self.meta_attrs:
-            value = getattr(self, attr)
-            meta[attr] = value
+        self._write_attrs(self.meta_attrs, meta)
         return meta if meta else None
 
     def add_to_jsobj(self, jsobj, attr):

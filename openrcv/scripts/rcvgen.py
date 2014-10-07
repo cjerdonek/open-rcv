@@ -33,6 +33,7 @@ def count_test_file(argv):
     with stream_info.open() as f:
         jsobj = json.load(f)
     test_file = TestInputFile.from_jsobj(jsobj)
+    log.info("printing TestInputFile")
     print(test_file.to_json())
 
 

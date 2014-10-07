@@ -8,22 +8,26 @@ These are objects composed of built-in type instances like Python
 lists, dicts, strings, ints, etc.
 
 Instances of most models in this module (those inheriting from JsonMixin)
-can be converted to JSON by calling a to_json() method on the instance.
-We call these objects "jsonable."
+can be converted to a JSON object by calling a to_jsobj() method on the
+instance.  Similarly, calling to_json() on the object returns JSON.  We
+call these objects "jsonable."
 
 We use the convention that "None" attribute values do not get converted
-to JSON, and JSON null values correspond to the NO_VALUE object.
+to JSON, and JSON null values correspond to the NULL object.
 This decision is based on the thinking that having "null" appear in the
 JSON should be a deliberate decision (and in the Python world, None
 is the usual default value).
 
 """
 
+# TODO: move non-serializable models to a different location?
+# TODO: move JSON-specific code to a jsonio module.
+
 import json
 import logging
 
-# TODO: change this to null?
-NO_VALUE = object()
+
+NULL = object()
 
 log = logging.getLogger(__name__)
 
@@ -68,14 +72,14 @@ class JsonMixin(object):
 
     meta_attrs = ()
 
-    def __read_jsobj__(self, jsobj):
+    def load_jsdata(self, jsobj):
         """
         Read data from the given JSON object and save it to attributes.
 
-        This method does not read metadata.
+        This method skips over metadata.
 
         """
-        pass
+        raise NotImplementedError()
 
     def __fill_jsobj__(self, jsobj):
         """
@@ -100,9 +104,9 @@ class JsonMixin(object):
             pass
         else:
             for attr in cls.meta_attrs:
-                value = meta_dict.get(attr, NO_VALUE)
+                value = meta_dict.get(attr, NULL)
                 setattr(obj, attr, value)
-        obj.__read_jsobj__(jsobj)
+        obj.load_jsdata(jsobj)
         return obj
 
     def get_meta_dict(self):
@@ -215,10 +219,12 @@ class TestBallot(JsonMixin):
     """
 
     def __init__(self, choices=None, weight=1):
+        if choices is None:
+            choices = []
         self.choices = choices
         self.weight = weight
 
-    def __read_jsobj__(self, jsobj):
+    def load_jsdata(self, jsobj):
         """
         Arguments:
           jsobj: a string of the form "WEIGHT N1 N2 N3".
@@ -255,7 +261,7 @@ class TestContestInput(JsonMixin):
         self.id = id_
         self.notes = notes
 
-    def __read_jsobj__(self, jsobj):
+    def load_jsdata(self, jsobj):
         ballots = jsobj_to_seq(TestBallot, jsobj["ballots"])
         candidates = jsobj["candidates"]
         self.__init__(ballots=ballots, candidates=candidates)
@@ -284,7 +290,7 @@ class TestInputFile(JsonMixin):
         self.contests = contests
         self.version = version
 
-    def __read_jsobj__(self, jsobj):
+    def load_jsdata(self, jsobj):
         jsobjs = jsobj['contests']
         # TODO: use a general jsobj_to_obj instead.
         self.contests = jsobj_to_seq(TestContestInput, jsobjs)

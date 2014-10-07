@@ -78,7 +78,10 @@ class JsonMixin(object):
     meta_attrs = ()
 
     def __eq__(self, other):
-        raise NotImplementedError()
+        for attr in self.attrs:
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return True
 
     # From the Python documentation:
     #
@@ -231,7 +234,7 @@ class RawContestResults(JsonMixin):
 class TestBallot(JsonMixin):
 
     """
-    Represents a ballot.
+    Represents a ballot for a JSON test case.
 
     This class should be used only for tests and small sets of ballots.
     For large numbers of ballots, ballot data should be kept on the
@@ -239,6 +242,12 @@ class TestBallot(JsonMixin):
     user-defined classes.
 
     """
+
+    attrs = ('choices', 'weight')
+
+    # def _set_attrs(self, **kwargs):
+    #     for attr, value in kwargs.items():
+    #         setattr(self, attr, value)
 
     def __init__(self, choices=None, weight=1):
         if choices is None:
@@ -248,10 +257,6 @@ class TestBallot(JsonMixin):
 
     def __repr__(self):
         return "<TestBallot: jsobj=%r>" % self.to_jsobj()
-
-    def __eq__(self, other):
-        return ((other.choices == self.choices) and
-                (other.weight == self.weight))
 
     def load_jsobj(self, jsobj):
         """
@@ -274,36 +279,35 @@ class TestBallot(JsonMixin):
         return " ".join((str(v) for v in values))
 
 
-# TODO: add a dict of who breaks ties in each round there is a tie.
-class TestContestInput(JsonMixin):
+class JsonContest(JsonMixin):
 
     """
-    Represents a contest for an open-rcv-tests input file.
+    Represents a contest for a JSON test case.
 
     """
 
+    attrs = ('ballots', 'candidate_count', 'id', 'notes')
     meta_attrs = ('id', 'notes')
 
-    # TODO: rename candidates to candidate_count.
-    def __init__(self, candidates=None, ballots=None, id_=None, notes=None):
+    def __init__(self, candidate_count=None, ballots=None, id_=None, notes=None):
         """
         Arguments:
-          candidates: integer number of candidates
+          candidate_count: integer number of candidates
 
         """
         self.ballots = ballots
-        self.candidates = candidates
+        self.candidate_count = candidate_count
         self.id = id_
         self.notes = notes
 
     def load_jsobj(self, jsobj):
         ballots = jsobj_to_seq(TestBallot, jsobj["ballots"])
-        candidates = jsobj["candidates"]
-        self.__init__(ballots=ballots, candidates=candidates)
+        candidate_count = jsobj["candidate_count"]
+        self.__init__(ballots=ballots, candidate_count=candidate_count)
 
     def __fill_jsobj__(self, jsobj):
         self.add_to_jsobj(jsobj, "ballots")
-        self.add_to_jsobj(jsobj, "candidates")
+        self.add_to_jsobj(jsobj, "candidate_count")
 
 
 class TestInputFile(JsonMixin):
@@ -319,7 +323,7 @@ class TestInputFile(JsonMixin):
 
         """
         Arguments:
-          contests: an iterable of TestContestInput objects.
+          contests: an iterable of JsonContest objects.
 
         """
         self.contests = contests
@@ -328,7 +332,7 @@ class TestInputFile(JsonMixin):
     def load_jsobj(self, jsobj):
         jsobjs = jsobj['contests']
         # TODO: use a general jsobj_to_obj instead.
-        self.contests = jsobj_to_seq(TestContestInput, jsobjs)
+        self.contests = jsobj_to_seq(JsonContest, jsobjs)
 
     def __fill_jsobj__(self, jsobj):
         """Write the state of the current object to the given JSON object."""

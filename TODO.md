@@ -7,7 +7,6 @@ TODO
 * Create a "top-level" function to tabulate an election from a path to
   an internal ballot file and a ContestInfo object.
 * Add remaining PyPI instructions to releasing.
-* Try adding output to test repo.
 * Stub out argparse.
 * Add auto-generation comment to top of `setup_long_description.rst`.
 * Only include newest changes in README.

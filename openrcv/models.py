@@ -47,8 +47,17 @@ def write_json(jsobj, stream_info):
         return call_json(json.dump, jsobj, f)
 
 
+# TODO: remove this.
 def seq_to_jsobj(seq):
     return tuple((jsonable.to_jsobj() for jsonable in seq))
+
+
+def to_jsobj(obj):
+    if isinstance(obj, (list, tuple)):
+        return tuple((to_jsobj(o) for o in obj))
+    if obj.__class__.__module__ == "builtins":
+        return obj
+    return obj.to_jsobj()
 
 
 def jsobj_to_seq(cls, jsobjs):
@@ -110,7 +119,7 @@ class JsonMixin(object):
         # TODO: handle NULL.
         if value is None:
             return
-        jsobj[attr] = seq_to_jsobj(value)
+        jsobj[attr] = to_jsobj(value)
 
     def to_jsobj(self):
         jsobj = {}
@@ -198,9 +207,10 @@ class TestBallot(JsonMixin):
     """
     Represents a ballot.
 
-    This should be used only for tests and small sets of ballots.
+    This class should be used only for tests and small sets of ballots.
     For large numbers of ballots, ballot data should be kept on the
-    file system for memory reasons.
+    file system, and ballots should not be converted to instances of
+    user-defined classes.
 
     """
 
@@ -221,6 +231,7 @@ class TestBallot(JsonMixin):
     def to_jsobj(self):
         values = [self.weight] + self.choices
         return " ".join((str(v) for v in values))
+
 
 # TODO: add a dict of who breaks ties in each round there is a tie.
 class TestContestInput(JsonMixin):
@@ -245,7 +256,9 @@ class TestContestInput(JsonMixin):
         self.notes = notes
 
     def __read_jsobj__(self, jsobj):
-        self.ballots = jsobj_to_seq(TestBallot, jsobj['ballots'])
+        ballots = jsobj_to_seq(TestBallot, jsobj["ballots"])
+        candidates = jsobj["candidates"]
+        self.__init__(ballots=ballots, candidates=candidates)
 
     def __fill_jsobj__(self, jsobj):
         self.add_to_jsobj(jsobj, "ballots")

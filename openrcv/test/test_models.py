@@ -63,5 +63,5 @@ class TestBallotTest(TestCase):
         self.assertEqual(ballot, TestBallot(choices=[3, 4], weight=2))
 
     def test_from_jsobj(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(JsonObjError):
             ballot = TestBallot.from_jsobj("2 ")

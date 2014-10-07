@@ -32,8 +32,13 @@ def count_test_file(argv):
     stream_info = utils.JsonFileInfo(TEST_INPUT_PATH)
     with stream_info.open() as f:
         jsobj = json.load(f)
+    log.info("printing TestInputFile JSON object")
+    print(repr(jsobj))
     test_file = TestInputFile.from_jsobj(jsobj)
-    log.info("printing TestInputFile")
+    log.info("printing TestInputFile Python object")
+    for contest in test_file.contests:
+        print(repr(contest))
+    log.info("printing TestInputFile JSON")
     print(test_file.to_json())
 
 

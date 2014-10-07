@@ -31,7 +31,9 @@ log = logging.getLogger(__name__)
 
 # TODO: refactor this to be a JSON object?  This would give us things
 # like a nice repr() and the chance to reduce special-casing.
-JSNULL = object()
+class JsNull(object):
+    pass
+JSNULL = JsNull()
 
 
 def call_json(json_func, *args, **kwargs):
@@ -82,6 +84,7 @@ class JsonMixin(object):
     @classmethod
     def from_jsobj(cls, jsobj):
         """Convert a JSON object to an object of the class."""
+        log.debug("called %s.from_jsobj()" % cls.__name__)
         try:
             obj = cls()
         except TypeError:
@@ -119,15 +122,6 @@ class JsonMixin(object):
         """Return additional info for __repr__()."""
         return ""
 
-    def load_jsobj(self, jsobj):
-        """
-        Read data from the given JSON object and save it to attributes.
-
-        This method skips over metadata.
-
-        """
-        raise NotImplementedError()
-
     def __fill_jsobj__(self, jsobj):
         """
         Write the state of the current object to the given JSON object.
@@ -146,12 +140,21 @@ class JsonMixin(object):
         """
         for attr in attrs:
             # TODO: test and handle null, etc.
-            value = jsobj.get(attr)
-            if value is None:
-                value = JSNULL
+            try:
+                value = jsobj[attr]
+            except KeyError:
+                value = None
+            else:
+                # An explicit None should become JsNull.
+                if value is None:
+                    value = JSNULL
             setattr(self, attr, value)
 
     def load_jsobj(self, jsobj):
+        """
+        Read data from the given JSON object and save it to attributes.
+
+        """
         try:
             meta_dict = jsobj['_meta']
         except KeyError:
@@ -270,11 +273,8 @@ class JsonBallot(JsonMixin):
 
     """
 
-    attrs = ('choices', 'weight')
-
-    # def _set_attrs(self, **kwargs):
-    #     for attr, value in kwargs.items():
-    #         setattr(self, attr, value)
+    data_attrs = ('choices', 'weight')
+    attrs = data_attrs
 
     def __init__(self, choices=None, weight=1):
         if choices is None:
@@ -331,7 +331,6 @@ class JsonContest(JsonMixin):
         self.notes = notes
 
     def repr_desc(self):
-        """Return additional info for __repr__()."""
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
     def load_jsobj_old(self, jsobj):

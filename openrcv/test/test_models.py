@@ -98,11 +98,15 @@ class JsonBallotTest(TestCase):
 
 class JsonContestTest(TestCase):
 
+    def make_ballots(self):
+        ballots = [JsonBallot(choices=[1, 2]),
+                   JsonBallot(choices=[2], weight=3)]
+        return ballots
+
     def make_contest(self, ballots=None):
         """Return a test contest."""
         if ballots is None:
-            ballots = [JsonBallot(choices=[1, 2]),
-                       JsonBallot(choices=[2], weight=3)]
+            ballots = self.make_ballots()
         contest = JsonContest(candidate_count=2, ballots=ballots, id_=3, notes="foo")
         return contest
 
@@ -159,9 +163,13 @@ class JsonContestTest(TestCase):
 
     def test_load_jsobj(self):
         contest = JsonContest()
+        self.assertEqual(contest.candidate_count, None)
+        # Check loading an empty dict.
+        # In particular, attributes should not get set to JsNull.
+        contest.load_jsobj({})
+        self.assertEqual(contest.candidate_count, None)
 
         # Check loading metadata.
-        #
         # Check that the id needs to be in the meta dict.
         contest.load_jsobj({"id": 5})
         self.assertEqual(contest.id, None)
@@ -171,6 +179,9 @@ class JsonContestTest(TestCase):
         contest.load_jsobj({"_meta": {"id": None}})
         self.assertEqual(contest.id, JSNULL)
 
-
         contest.load_jsobj({"candidate_count": 5})
         self.assertEqual(contest.candidate_count, 5)
+
+        # TODO
+        ballots = self.make_ballots()
+        contest.load_jsobj({"ballots": ""})

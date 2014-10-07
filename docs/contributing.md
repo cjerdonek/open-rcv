@@ -90,6 +90,10 @@ Or for just tests--
 
     $ python -m unittest
 
+To run a single test, for example--
+
+    $ python -m unittest openrcv.test.test_models.JsonContestTest.test_load_jsobj
+
 
 Viewing Docs
 ------------

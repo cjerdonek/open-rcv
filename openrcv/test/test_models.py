@@ -1,7 +1,16 @@
 
+from contextlib import contextmanager
 from unittest import TestCase
 
 from openrcv.models import ContestInfo, JsonContest, JsonObjError, TestBallot
+
+
+@contextmanager
+def change_attr(obj, name, value):
+    initial_value = getattr(obj, name)
+    setattr(obj, name, value)
+    yield
+    setattr(obj, name, initial_value)
 
 
 class JsonMixinTest(TestCase):
@@ -20,8 +29,11 @@ class ContestInfoTest(TestCase):
 
 class TestBallotTest(TestCase):
 
+    def make_ballot(self):
+        return TestBallot(choices=[1, 2], weight=3)
+
     def test_init(self):
-        ballot = TestBallot(choices=[1, 2], weight=3)
+        ballot = self.make_ballot()
         self.assertEqual(ballot.choices, [1, 2])
         self.assertEqual(ballot.weight, 3)
 
@@ -30,11 +42,19 @@ class TestBallotTest(TestCase):
         self.assertEqual(ballot.choices, [])
         self.assertEqual(ballot.weight, 1)
 
+    def test_repr(self):
+        ballot = self.make_ballot()
+        self.assertEqual(repr(ballot),
+                         "<TestBallot: jsobj='3 1 2' %s>" % hex(id(ballot)))
+
     def test_eq(self):
-        ballot = TestBallot(choices=[1, 2], weight=3)
-        self.assertEqual(ballot, TestBallot(choices=[1, 2], weight=3))
-        self.assertNotEqual(ballot, TestBallot(choices=[1], weight=3))
-        self.assertNotEqual(ballot, TestBallot(choices=[1, 2], weight=2))
+        ballot1 = self.make_ballot()
+        ballot2 = self.make_ballot()
+        self.assertEqual(ballot1, ballot2)
+        with change_attr(ballot2, "choices", [1]):
+            self.assertNotEqual(ballot1, ballot2)
+        with change_attr(ballot2, "weight", 100):
+            self.assertNotEqual(ballot1, ballot2)
 
     def test_to_jsobj(self):
         ballot = TestBallot(choices=[1, 2], weight=3)
@@ -105,7 +125,25 @@ class JsonContestTest(TestCase):
                 actual = getattr(contest, attr)
                 self.assertEqual(actual, expected)
 
+    def test_repr(self):
+        contest = self.make_contest()
+        self.assertEqual(repr(contest), "<JsonContest: id=3 candidate_count=2 %s>" %
+                         hex(id(contest)))
+
     def test_eq(self):
         contest1 = self.make_contest()
         contest2 = self.make_contest()
         self.assertEqual(contest1, contest2)
+
+        # Check that each attribute can trigger inequality.
+        cases = [
+            ("candidate_count", 3),
+            ("ballots", []),
+            ("id", 4),
+            ("notes", "foo2"),
+        ]
+        for attr, value in cases:
+            with self.subTest(attr=attr, value=value):
+                with change_attr(contest2, attr, value):
+                    self.assertNotEqual(contest1, contest2)
+        self.assertEqual(contest1, contest2)  # sanity check

@@ -77,6 +77,11 @@ class JsonMixin(object):
 
     meta_attrs = ()
 
+    def __repr__(self):
+        desc = self.repr_desc()
+        return "<%s: %s%s%s>" % (self.__class__.__name__, desc,
+                                 " " if desc else "", hex(id(self)))
+
     def __eq__(self, other):
         for attr in self.attrs:
             if getattr(self, attr) != getattr(other, attr):
@@ -96,6 +101,10 @@ class JsonMixin(object):
     # __ne__() is not implemented.
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def repr_desc(self):
+        """Return additional info for __repr__()."""
+        return ""
 
     def load_jsobj(self, jsobj):
         """
@@ -255,8 +264,9 @@ class TestBallot(JsonMixin):
         self.choices = choices
         self.weight = weight
 
-    def __repr__(self):
-        return "<TestBallot: jsobj=%r>" % self.to_jsobj()
+    def repr_desc(self):
+        """Return additional info for __repr__()."""
+        return "jsobj=%r" % self.to_jsobj()
 
     def load_jsobj(self, jsobj):
         """
@@ -299,6 +309,10 @@ class JsonContest(JsonMixin):
         self.candidate_count = candidate_count
         self.id = id_
         self.notes = notes
+
+    def repr_desc(self):
+        """Return additional info for __repr__()."""
+        return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
     def load_jsobj(self, jsobj):
         ballots = jsobj_to_seq(TestBallot, jsobj["ballots"])

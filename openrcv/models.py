@@ -77,6 +77,13 @@ class JsonObjError(Exception):
     pass
 
 
+class JsonAttr(object):
+
+    def __init__(self, name, cls=None):
+        self.name = name
+        self.cls = cls
+
+
 class JsonMixin(object):
 
     __no_attribute__ = object()  # used in __eq__()
@@ -104,8 +111,9 @@ class JsonMixin(object):
         if type(self) != type(other):
             return False
         for attr in self.attrs:
-            if (getattr(self, attr, self.__no_attribute__) !=
-                getattr(other, attr, other.__no_attribute__)):
+            name = attr.name
+            if (getattr(self, name, self.__no_attribute__) !=
+                getattr(other, name, other.__no_attribute__)):
                 return False
         return True
 
@@ -144,8 +152,9 @@ class JsonMixin(object):
 
         """
         for attr in attrs:
+            name = attr.name
             try:
-                value = jsdict[attr]
+                value = jsdict[name]
             except KeyError:
                 value = None
             else:
@@ -155,7 +164,7 @@ class JsonMixin(object):
                 else:
                     # TODO: deserialize with a type.
                     pass
-            setattr(self, attr, value)
+            setattr(self, name, value)
 
     def load_jsobj(self, jsobj):
         """
@@ -292,7 +301,8 @@ class JsonBallot(JsonMixin):
 
     """
 
-    data_attrs = ('choices', 'weight')
+    data_attrs = (JsonAttr('choices'),
+                  JsonAttr('weight'))
     attrs = data_attrs
 
     def __init__(self, choices=None, weight=1):
@@ -334,8 +344,10 @@ class JsonContest(JsonMixin):
 
     """
 
-    data_attrs = ('ballots', 'candidate_count')
-    meta_attrs = ('id', 'notes')
+    meta_attrs = (JsonAttr('id'),
+                  JsonAttr('notes'))
+    data_attrs = (JsonAttr('ballots'),
+                  JsonAttr('candidate_count'))
     attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self, candidate_count=None, ballots=None, id_=None, notes=None):

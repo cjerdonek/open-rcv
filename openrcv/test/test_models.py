@@ -2,8 +2,8 @@
 from contextlib import contextmanager
 from unittest import TestCase
 
-from openrcv.models import (ContestInfo, JsonContest, JsonObjError, JsonBallot,
-                            JsonMixin, JSNULL)
+from openrcv.models import (ContestInfo, JsonContest, JsonObjError, JsonAttr,
+                            JsonBallot, JsonMixin, JSNULL)
 
 
 @contextmanager
@@ -22,7 +22,9 @@ def change_attr(obj, name, value):
 
 class JsonSample(JsonMixin):
 
-    attrs = ('foo', 'bar')
+    attrs = (JsonAttr('foo'),
+             JsonAttr('bar'))
+
 
 class JsonMixinTest(TestCase):
 

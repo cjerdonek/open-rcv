@@ -12,7 +12,7 @@ class StringInfoTest(TestCase):
 
     def test_init__no_args(self):
         stream = StringInfo()
-        self.assertEqual(stream.value, "")
+        self.assertEqual(stream.value, None)
 
     def test_reading(self):
         stream = StringInfo("abc")
@@ -30,8 +30,8 @@ class StringInfoTest(TestCase):
         self.assertEqual(stream.value, "abc")
 
     def test_writing_to_non_empty(self):
-        """Test writing to a non-empty string."""
+        """Test writing to a StringInfo initialized to a string."""
         stream = StringInfo()
-        stream.value = "foo"
+        stream.value = ""  # Even an empty string triggers the ValueError.
         with self.assertRaises(ValueError):
             stream.open("w")

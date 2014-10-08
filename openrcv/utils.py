@@ -155,15 +155,16 @@ class StringInfo(StreamInfo):
     """A wrapped string that opens to become an in-memory text stream."""
 
     def __init__(self, value=None):
-        if value is None:
-            value = ""
         self.value = value
 
     # TODO: test this method on short text strings.
     def _open(self, mode):
+        value = self.value
+        # Display first 24 characters, otherwise first 24 plus "...".
+        display = (value if (not value or len(value) <= 24) else
+                   (value[:24] + "..."))
         # As a precaution, make sure the string is empty if not reading.
-        if (self.value and mode != "r"):
-            raise ValueError("Cannot write to string that already has a value")
-        log.info("opening memory stream for %r: %r" %
-                 (mode, (self.value[:20] + "...")))
+        if (value is not None and mode != "r"):
+            raise ValueError("Cannot write to string that already has a value: %r" % display)
+        log.info("opening memory stream for %r: %r" % (mode, display))
         return _EjectingStringIO(self.value, self)

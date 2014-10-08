@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from unittest import TestCase
 
 from openrcv.models import (from_jsobj, ContestInfo, JsonContest,
-                            JsonObjError, JsonAttr,
+                            JsonObjError, Attribute,
                             JsonBallot, JsonMixin, JS_NULL)
 
 
@@ -23,16 +23,28 @@ def change_attr(obj, name, value):
 
 class JsonSample(JsonMixin):
 
-    data_attrs = (JsonAttr('bar'),
-                  JsonAttr('foo'))
+    data_attrs = (Attribute('bar'),
+                  Attribute('foo'))
     attrs = data_attrs
 
     def __init__(self, bar=None, foo=None):
         self.bar = bar
         self.foo = foo
 
-    def __repr__(self):
+    def repr_desc(self):
         return "bar=%r foo=%r" % (self.bar, self.foo)
+
+
+class ComplexJsonSample(JsonMixin):
+
+    data_attrs = (Attribute('simple', JsonSample), )
+    attrs = data_attrs
+
+    def __init__(self, simple=None):
+        self.simple = simple
+
+    def repr_desc(self):
+        return "simple=%r" % self.simple
 
 
 class ModuleTest(TestCase):
@@ -43,6 +55,16 @@ class ModuleTest(TestCase):
     def test_from_jsobj__with_cls(self):
         expected_sample = JsonSample(foo="fooval")
         self.assertEqual(from_jsobj({'foo': 'fooval'}, cls=JsonSample), expected_sample)
+
+    def test_from_jsobj__with_complex_attr(self):
+        """
+        Test a serialized JSON object with an attribute that is also a
+        JSON object.
+
+        """
+        simple = JsonSample(foo="fooval")
+        expected_sample = ComplexJsonSample(simple=simple)
+        self.assertEqual(from_jsobj({'simple': {'foo': 'fooval'}}, cls=ComplexJsonSample), expected_sample)
 
 
 class JsonMixinTest(TestCase):
@@ -130,6 +152,8 @@ class JsonBallotTest(TestCase):
         ballot = JsonBallot()
         ballot.load_jsobj("2")
         self.assertEqual(ballot, JsonBallot(weight=2))
+
+    # TODO: add tests for pure from_jsobj() function.
 
     def test_from_jsobj(self):
         ballot = JsonBallot.from_jsobj("2 3 4")
@@ -226,11 +250,15 @@ class JsonContestTest(TestCase):
 
         contest.load_jsobj({"candidate_count": 5})
         self.assertEqual(contest.candidate_count, 5)
+
+    def test_load_jsobj__ballots(self):
+        """Check that ballots deserialize okay."""
+        contest = JsonContest()
         # Check that objects deserialize okay.
         expected_ballots = self.make_ballots()
         contest.load_jsobj({"ballots": ["3 2 1"]})
         # TODO
-        #self.assertEqual(contest.ballots, expected_ballots)
+        # self.assertEqual(contest.ballots, expected_ballots)
 
     def test_to_jsobj(self):
         # TODO

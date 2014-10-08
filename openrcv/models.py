@@ -105,7 +105,7 @@ class JsonObjError(Exception):
     pass
 
 
-class JsonAttr(object):
+class Attribute(object):
 
     def __init__(self, name, cls=None):
         self.name = name
@@ -183,15 +183,12 @@ class JsonMixin(object):
         for attr in attrs:
             name, cls = attr.name, attr.cls
             try:
-                value = jsdict[name]
+                jsobj = jsdict[name]
             except KeyError:
-                value = None
+                obj = None
             else:
-                # An explicit None should be JS_NULL.
-                if value is None:
-                    value = JS_NULL
-                from_jsobj(value, cls=cls)
-            setattr(self, name, value)
+                obj = from_jsobj(jsobj, cls=cls)
+            setattr(self, name, obj)
 
     def load_jsobj(self, jsobj):
         """
@@ -328,8 +325,8 @@ class JsonBallot(JsonMixin):
 
     """
 
-    data_attrs = (JsonAttr('choices'),
-                  JsonAttr('weight'))
+    data_attrs = (Attribute('choices'),
+                  Attribute('weight'))
     attrs = data_attrs
 
     def __init__(self, choices=None, weight=1):
@@ -371,10 +368,10 @@ class JsonContest(JsonMixin):
 
     """
 
-    meta_attrs = (JsonAttr('id'),
-                  JsonAttr('notes'))
-    data_attrs = (JsonAttr('ballots', cls=JsonBallot),
-                  JsonAttr('candidate_count'))
+    meta_attrs = (Attribute('id'),
+                  Attribute('notes'))
+    data_attrs = (Attribute('ballots', cls=JsonBallot),
+                  Attribute('candidate_count'))
     attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self, candidate_count=None, ballots=None, id_=None, notes=None):

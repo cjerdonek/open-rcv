@@ -1,4 +1,5 @@
 # .coveragerc to control coverage.py
 [run]
 omit =
+    # This is a scratch/test file for prototyping purposes.
     openrcv/scripts/rcvgen.py

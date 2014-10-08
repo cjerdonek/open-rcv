@@ -206,13 +206,20 @@ class JsonableMixin(object):
         Read data from the given JSON object and save it to attributes.
 
         """
+        keys = set()
         try:
             meta_dict = jsobj['_meta']
         except KeyError:
             # The metadata dict is optional.
             pass
         else:
+            keys |= set(meta_dict.keys())
             self._load_attrs(self.meta_attrs, meta_dict)
+        keys |= set(jsobj.keys())
+        keys -= set(('_meta', ))
+        extra_keys = set((attr.name for attr in self.attrs)) - keys
+        if extra_keys:
+            log.warning("JSON object has unserializable keys: %r" % (", ".join(extra_keys)))
         self._load_attrs(self.data_attrs, jsobj)
 
     # This is the reverse of _load_attrs().

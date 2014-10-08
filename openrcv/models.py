@@ -71,8 +71,6 @@ def from_jsobj(jsobj, cls=None):
       cls: a class that serves as a "type hint."
 
     """
-    log.debug("executing from_jsobj(jsobj, cls=%s)" % (None if cls is None else
-                                                       cls.__name__))
     if isinstance(jsobj, (list, tuple)):
         return tuple((from_jsobj(o, cls=cls) for o in jsobj))
 

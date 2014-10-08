@@ -65,7 +65,9 @@ def make_log_handler(level, stream=None):
 
     # If stream is None, StreamHandler uses sys.stderr.
     handler = logging.StreamHandler(stream)
-    handler.setLevel(level)
+    # TODO: can we delete this code comment?  Is there any reason
+    # to set this handler to a level different from the root logger?
+    #handler.setLevel(level)
 
     filter_ = get_filter(level)
     handler.addFilter(filter_)
@@ -94,9 +96,15 @@ def config_log(level=None, stream=None):
     if level is None:
         level = LOGGING_LEVEL_DEFAULT
     root = logging.getLogger()
+    # If logging was already configured (e.g. at the outset of a test run),
+    # then let's not change the root logging level.
+    already_configured = root.hasHandlers()
     handler = make_log_handler(level, stream=stream)
     root.addHandler(handler)
-    log.info("logging configured to: %s" % logging.getLevelName(level))
+    if not already_configured:
+        root.setLevel(level)
+        log.info("root logger level set to: %s" % logging.getLevelName(level))
+    log.info("a logging handler was added")
     yield
     root.removeHandler(handler)
 

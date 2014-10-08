@@ -1,7 +1,7 @@
 TODO
 ====
 
-* Allow logging to be displayed while running tests.
+* Log warning if JSON key does not deserialize.
 * Create a function to read a test input file, tabulate each contest,
   and write the results to a new file.
 * Add the expected output to the JSON tests.

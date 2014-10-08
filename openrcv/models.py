@@ -425,7 +425,6 @@ class TestInputFile(JsonableMixin):
     attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self, contests=None, version=None):
-
         """
         Arguments:
           contests: an iterable of JsonContest objects.

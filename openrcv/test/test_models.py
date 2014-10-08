@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from openrcv.models import (from_jsobj, ContestInfo, JsonContest,
                             JsonObjError, Attribute,
-                            JsonBallot, JsonMixin, JS_NULL)
+                            JsonBallot, JsonableMixin, JS_NULL)
 
 
 @contextmanager
@@ -21,7 +21,7 @@ def change_attr(obj, name, value):
     setattr(obj, name, initial_value)
 
 
-class JsonSample(JsonMixin):
+class JsonSample(JsonableMixin):
 
     data_attrs = (Attribute('bar'),
                   Attribute('foo'))
@@ -35,7 +35,7 @@ class JsonSample(JsonMixin):
         return "bar=%r foo=%r" % (self.bar, self.foo)
 
 
-class ComplexJsonSample(JsonMixin):
+class ComplexJsonSample(JsonableMixin):
 
     data_attrs = (Attribute('simple', JsonSample), )
     attrs = data_attrs
@@ -67,7 +67,7 @@ class ModuleTest(TestCase):
         self.assertEqual(from_jsobj({'simple': {'foo': 'fooval'}}, cls=ComplexJsonSample), expected_sample)
 
 
-class JsonMixinTest(TestCase):
+class JsonableMixinTest(TestCase):
 
     def test_eq(self):
         sample1 = JsonSample()

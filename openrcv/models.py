@@ -7,7 +7,7 @@ as "jsobj") means a Python object with a natural conversion to JSON.
 These are objects composed of built-in type instances like Python
 lists, dicts, strings, ints, etc.
 
-Instances of most models in this module (those inheriting from JsonMixin)
+Instances of most models in this module (those inheriting from JsonableMixin)
 can be converted to a JSON object by calling a to_jsobj() method on the
 instance.  Similarly, calling to_json() on the object returns JSON.  We
 call these objects "jsonable."
@@ -55,11 +55,6 @@ def write_json(jsobj, stream_info):
         return call_json(json.dump, jsobj, f)
 
 
-# TODO: remove this.
-def seq_to_jsobj(seq):
-    return tuple((jsonable.to_jsobj() for jsonable in seq))
-
-
 def to_jsobj(obj):
     if isinstance(obj, (list, tuple)):
         return tuple((to_jsobj(o) for o in obj))
@@ -70,7 +65,7 @@ def to_jsobj(obj):
 
 def from_jsobj(jsobj, cls=None):
     """
-    Convert a JSON object to a Python object.
+    Convert a JSON object to a Python object, and return it.
 
     Arguments:
       cls: a class that serves as a "type hint."
@@ -107,12 +102,28 @@ class JsonObjError(Exception):
 
 class Attribute(object):
 
+    """
+    Represents an attribute of a jsonable class that should be
+    serialized and deserialized to JSON.
+
+    """
+
     def __init__(self, name, cls=None):
+        """
+
+        Arguments:
+          name: the attribute name.
+          cls: the jsonable class that should be used for serializing and
+            deserializing the attribute value.  None means that no
+            class is applicable: the attribute value is an instance of a
+            Python built-in type.
+
+        """
         self.name = name
         self.cls = cls
 
 
-class JsonMixin(object):
+class JsonableMixin(object):
 
     __no_attribute__ = object()  # used in __eq__()
 
@@ -213,9 +224,18 @@ class JsonMixin(object):
 
         """
         for attr in attrs:
+            try:
+                name, cls = attr.name, attr.cls
+            except AttributeError:
+                # Make troubleshooting easier by providing the attr.
+                raise JsonObjError("error processing attribute: %r" % attr)
             # TODO: handle and test None/JS_NULL.
-            value = getattr(self, attr)
-            jsdict[attr] = value
+            try:
+                value = getattr(self, name)
+            except TypeError:
+                # Make troubleshooting easier by providing the name.
+                raise JsonObjError("error getting attribute: %r" % name)
+            jsdict[name] = value
 
     # TODO: convert this into a method similar to _load_attrs().
     def get_meta_dict(self):
@@ -271,7 +291,7 @@ class ContestInfo(object):
         return self.name
 
 
-class RawRoundResults(JsonMixin):
+class RawRoundResults(JsonableMixin):
 
     """
     Represents the results of a round for testing purposes.
@@ -292,7 +312,7 @@ class RawRoundResults(JsonMixin):
         }
 
 
-class RawContestResults(JsonMixin):
+class RawContestResults(JsonableMixin):
 
     """
     Represents contest results for testing purposes.
@@ -313,7 +333,7 @@ class RawContestResults(JsonMixin):
         }
 
 
-class JsonBallot(JsonMixin):
+class JsonBallot(JsonableMixin):
 
     """
     Represents a ballot for a JSON test case.
@@ -361,7 +381,7 @@ class JsonBallot(JsonMixin):
         return " ".join((str(v) for v in values))
 
 
-class JsonContest(JsonMixin):
+class JsonContest(JsonableMixin):
 
     """
     Represents a contest for a JSON test case.
@@ -388,29 +408,21 @@ class JsonContest(JsonMixin):
     def repr_desc(self):
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
-    def load_jsobj_old(self, jsobj):
-        # def _set_attrs(self, **kwargs):
-        #     for attr, value in kwargs.items():
-        #         setattr(self, attr, value)
-
-
-        ballots = jsobj_to_seq(JsonBallot, jsobj["ballots"])
-        candidate_count = jsobj["candidates"]
-        self.__init__(ballots=ballots, candidate_count=candidate_count)
-
     def __fill_jsobj__(self, jsobj):
         self.add_to_jsobj(jsobj, "ballots")
         self.add_to_jsobj(jsobj, "candidate_count")
 
 
-class TestInputFile(JsonMixin):
+class TestInputFile(JsonableMixin):
 
     """
     Represents an input file for open-rcv-tests.
 
     """
 
-    meta_attrs = ('version', )
+    meta_attrs = (Attribute('version'), )
+    data_attrs = (Attribute('contests', cls=JsonContest), )
+    attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self, contests=None, version=None):
 

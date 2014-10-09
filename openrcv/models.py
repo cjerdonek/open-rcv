@@ -108,12 +108,6 @@ def to_jsobj(obj):
     return obj.to_jsobj()
 
 
-# TODO: remove this.
-def jsobj_to_seq(cls, jsobjs):
-    log.info("%s: %r" % (cls.__name__, jsobjs))
-    return [cls.from_jsobj(jsobj) for jsobj in jsobjs]
-
-
 class ContestInfo(object):
 
     """
@@ -394,11 +388,6 @@ class JsonContest(JsonableMixin):
     def repr_desc(self):
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
-    # TODO: remove this.
-    def __fill_jsobj__(self, jsobj):
-        self.add_to_jsobj(jsobj, "ballots")
-        self.add_to_jsobj(jsobj, "candidate_count")
-
     def get_candidates(self):
         """Return an iterable of the candidate numbers."""
         return make_candidates(self.candidate_count)
@@ -434,15 +423,6 @@ class TestInputFile(JsonableMixin):
         """
         self.contests = contests
         self.version = version
-
-    def load_jsobj(self, jsobj):
-        jsobjs = jsobj['contests']
-        # TODO: use a general jsobj_to_obj instead.
-        self.contests = jsobj_to_seq(JsonContest, jsobjs)
-
-    def __fill_jsobj__(self, jsobj):
-        """Write the state of the current object to the given JSON object."""
-        self.add_to_jsobj(jsobj, "contests")
 
 
 class JsonRoundResults(JsonableMixin):

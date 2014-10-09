@@ -8,9 +8,10 @@ import json
 import logging
 import sys
 
+from openrcv.counting import count_irv_contest
 from openrcv.datagen import create_json_tests
 from openrcv import models
-from openrcv.models import TestInputFile
+from openrcv.models import to_json, TestInputFile
 from openrcv.scripts.main import main
 from openrcv import utils
 from openrcv.utils import FileInfo
@@ -35,6 +36,15 @@ def count_test_file(argv):
     log.info("printing TestInputFile JSON object")
     print(repr(jsobj))
     test_file = TestInputFile.from_jsobj(jsobj)
+    contest = test_file.contests[0]
+    log.info("contest: %r\n>>>%s" % (contest, contest.to_json()))
+    ballot_stream = contest.get_ballot_stream()
+    candidates = contest.get_candidates()
+    contest_results = count_irv_contest(ballot_stream, candidates)
+    print(repr(contest_results))
+
+    return
+
     log.info("printing TestInputFile Python object")
     for contest in test_file.contests:
         print(repr(contest))

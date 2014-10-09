@@ -26,14 +26,26 @@ is the usual default value).
 import json
 import logging
 
+from openrcv.utils import StringInfo
+
 
 log = logging.getLogger(__name__)
+
+LIST_TYPES = (list, tuple)
 
 # TODO: refactor this to be a JSON object?  This would give us things
 # like a nice repr() and the chance to reduce special-casing.
 class JsNull(object):
     pass
 JS_NULL = JsNull()
+
+
+def make_candidates(candidate_count):
+    """
+    Return an iterable of candidate numbers.
+
+    """
+    return range(1, candidate_count + 1)
 
 
 def call_json(json_func, *args, **kwargs):
@@ -55,14 +67,6 @@ def write_json(jsobj, stream_info):
         return call_json(json.dump, jsobj, f)
 
 
-def to_jsobj(obj):
-    if isinstance(obj, (list, tuple)):
-        return tuple((to_jsobj(o) for o in obj))
-    if obj.__class__.__module__ == "builtins":
-        return obj
-    return obj.to_jsobj()
-
-
 def from_jsobj(jsobj, cls=None):
     """
     Convert a JSON object to a Python object, and return it.
@@ -71,7 +75,7 @@ def from_jsobj(jsobj, cls=None):
       cls: a class that serves as a "type hint."
 
     """
-    if isinstance(jsobj, (list, tuple)):
+    if isinstance(jsobj, LIST_TYPES):
         return tuple((from_jsobj(o, cls=cls) for o in jsobj))
 
     if cls is not None:
@@ -89,9 +93,49 @@ def from_jsobj(jsobj, cls=None):
     return jsobj
 
 
+def to_jsobj(obj):
+    """
+    Convert a Python object to a JSON object, and return it.
+
+    Arguments:
+      cls: a class that serves as a "type hint."
+
+    """
+    if isinstance(obj, LIST_TYPES):
+        return [to_jsobj(o) for o in obj]
+    if obj.__class__.__module__ == "builtins":
+        return obj
+    return obj.to_jsobj()
+
+
+# TODO: remove this.
 def jsobj_to_seq(cls, jsobjs):
     log.info("%s: %r" % (cls.__name__, jsobjs))
     return [cls.from_jsobj(jsobj) for jsobj in jsobjs]
+
+
+class ContestInfo(object):
+
+    """
+    Attributes:
+      candidates: a list of the names of all candidates, in numeric order.
+      name: name of contest.
+      seat_count: integer number of winners.
+
+    """
+
+    ballot_count = 0
+
+    def __init__(self):
+        pass
+
+    def get_candidates(self):
+        """Return an iterable of the candidate numbers."""
+        return make_candidates(len(self.candidates))
+
+    # TODO: look up the proper return type.
+    def __repr__(self):
+        return self.name
 
 
 class JsonObjError(Exception):
@@ -141,9 +185,8 @@ class JsonableMixin(object):
         return obj
 
     def __repr__(self):
-        desc = self.repr_desc()
-        return "<%s: %s%s%s>" % (self.__class__.__name__, desc,
-                                 " " if desc else "", hex(id(self)))
+        desc = self.repr_desc() or "--"
+        return "<%s: [%s] %s>" % (self.__class__.__name__, desc, hex(id(self)))
 
     def __eq__(self, other):
         if type(self) != type(other):
@@ -173,13 +216,6 @@ class JsonableMixin(object):
         """Return additional info for __repr__()."""
         return ""
 
-    def __fill_jsobj__(self, jsobj):
-        """
-        Write the state of the current object to the given JSON object.
-
-        """
-        raise NotImplementedError()
-
     def _load_attrs(self, attrs, jsdict):
         """
         Read data from a JSON object and save it to attributes.
@@ -198,6 +234,38 @@ class JsonableMixin(object):
             else:
                 obj = from_jsobj(jsobj, cls=cls)
             setattr(self, name, obj)
+
+    # This is the reverse of _load_attrs().
+    # TODO: choose less ambiguous names for _load_attrs and _attrs_to_jsdict,
+    # so that the "direction" is clear.
+    def _attrs_to_jsdict(self, attrs, jsdict):
+        """
+        Read object attributes and write them to a JSON object.
+
+        """
+        for attr in attrs:
+            try:
+                name, cls = attr.name, attr.cls
+            except AttributeError:
+                # Make troubleshooting easier by providing the attr.
+                raise JsonObjError("error processing attribute: %r" % attr)
+            # TODO: handle and test None/JS_NULL.
+            try:
+                value = getattr(self, name)
+            except TypeError:
+                # Make troubleshooting easier by providing the name.
+                raise JsonObjError("error getting attribute: %r" % name)
+            jsobj = to_jsobj(value)
+            jsdict[name] = jsobj
+
+    # TODO: remove this.
+    def add_to_jsobj(self, jsobj, attr):
+        """Add the given attribute value to the given JSON object."""
+        value = getattr(self, attr)
+        # TODO: handle JS_NULL.
+        if value is None:
+            return
+        jsobj[attr] = to_jsobj(value)
 
     def load_jsobj(self, jsobj):
         """
@@ -220,122 +288,31 @@ class JsonableMixin(object):
             log.warning("JSON object has unserializable keys: %r" % (", ".join(extra_keys)))
         self._load_attrs(self.data_attrs, jsobj)
 
-    # This is the reverse of _load_attrs().
-    # TODO: choose less ambiguous names for _load_attrs and _write_attrs,
-    # so that the "direction" is clear.
-    def _write_attrs(self, attrs, jsdict):
-        """
-        Read object attributes and write them to a JSON object.
-
-        """
-        for attr in attrs:
-            try:
-                name, cls = attr.name, attr.cls
-            except AttributeError:
-                # Make troubleshooting easier by providing the attr.
-                raise JsonObjError("error processing attribute: %r" % attr)
-            # TODO: handle and test None/JS_NULL.
-            try:
-                value = getattr(self, name)
-            except TypeError:
-                # Make troubleshooting easier by providing the name.
-                raise JsonObjError("error getting attribute: %r" % name)
-            jsdict[name] = value
-
-    # TODO: convert this into a method similar to _load_attrs().
     def get_meta_dict(self):
         """Return a dict containing the object metadata."""
         meta = {}
-        self._write_attrs(self.meta_attrs, meta)
-        return meta if meta else None
-
-    def add_to_jsobj(self, jsobj, attr):
-        """Add the given attribute value to the given JSON object."""
-        value = getattr(self, attr)
-        # TODO: handle JS_NULL.
-        if value is None:
-            return
-        jsobj[attr] = to_jsobj(value)
+        self._attrs_to_jsdict(self.meta_attrs, meta)
+        return meta
 
     def to_jsobj(self):
+        """
+        Convert the current object to a JSON object.
+
+        """
         jsobj = {}
         meta = self.get_meta_dict()
         if meta:
             jsobj['_meta'] = meta
-        self.__fill_jsobj__(jsobj)
+        self._attrs_to_jsdict(self.data_attrs, jsobj)
         return jsobj
 
-    # This method should be thought of like __repr__() in that it is
-    # useful for debugging.
+    # This method should be thought of like __repr__() in that it is a
+    # convenience useful for debugging.  It deliberately does not provide
+    # any formatting and customization options since json.dumps() can
+    # easily be used directly if more control is needed.
     def to_json(self):
         """Convert the object to a human-readable JSON string."""
         return to_json(self.to_jsobj())
-
-
-class ContestInfo(object):
-
-    """
-    Attributes:
-      candidates: a list of the names of all candidates, in numeric order.
-      name: name of contest.
-      seat_count: integer number of winners.
-
-    """
-
-    ballot_count = 0
-
-    def __init__(self):
-        pass
-
-    def get_candidates(self):
-        """Return an iterable of the candidate numbers."""
-        return range(1, len(self.candidates) + 1)
-
-    # TODO: look up the proper return type.
-    def __repr__(self):
-        return self.name
-
-
-class RawRoundResults(JsonableMixin):
-
-    """
-    Represents the results of a round for testing purposes.
-
-    """
-
-    def __init__(self, totals):
-        """
-        Arguments:
-          totals: dict of candidate number to vote total.
-
-        """
-        self.totals = totals
-
-    def __jsdata__(self):
-        return {
-            "totals": self.totals,
-        }
-
-
-class RawContestResults(JsonableMixin):
-
-    """
-    Represents contest results for testing purposes.
-
-    """
-
-    def __init__(self, rounds):
-        """
-        Arguments:
-          rounds: an iterable of RawRoundResults objects.
-
-        """
-        self.rounds = rounds
-
-    def __jsdata__(self):
-        return {
-            "rounds": [r.__jsdata__() for r in self.rounds],
-        }
 
 
 class JsonBallot(JsonableMixin):
@@ -381,9 +358,13 @@ class JsonBallot(JsonableMixin):
         self.__init__(choices=numbers, weight=weight)
 
     def to_jsobj(self):
-        """Convert the ballot to a string."""
+        """Return the ballot as a JSON object."""
         values = [self.weight] + self.choices
         return " ".join((str(v) for v in values))
+
+    def to_internal_ballot(self):
+        """Return the ballot as an internal ballot string."""
+        return self.to_jsobj()
 
 
 class JsonContest(JsonableMixin):
@@ -413,11 +394,27 @@ class JsonContest(JsonableMixin):
     def repr_desc(self):
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
+    # TODO: remove this.
     def __fill_jsobj__(self, jsobj):
         self.add_to_jsobj(jsobj, "ballots")
         self.add_to_jsobj(jsobj, "candidate_count")
 
+    def get_candidates(self):
+        """Return an iterable of the candidate numbers."""
+        return make_candidates(self.candidate_count)
 
+    def get_ballot_stream(self):
+        """
+        Return an utils.StreamInfo object representing the ballots in
+          internal ballot file format.
+
+        """
+        lines = (b.to_internal_ballot() for b in self.ballots)
+        ballots_string = "\n".join(lines)
+        return StringInfo(ballots_string)
+
+
+# TODO: rename this to JsonInputFile.
 class TestInputFile(JsonableMixin):
 
     """
@@ -446,3 +443,44 @@ class TestInputFile(JsonableMixin):
     def __fill_jsobj__(self, jsobj):
         """Write the state of the current object to the given JSON object."""
         self.add_to_jsobj(jsobj, "contests")
+
+
+class JsonRoundResults(JsonableMixin):
+
+    """
+    Represents the results of a round for testing purposes.
+
+    """
+
+    data_attrs = (Attribute('totals'), )
+    attrs = data_attrs
+
+    def __init__(self, totals):
+        """
+        Arguments:
+          totals: dict of candidate number to vote total.
+
+        """
+        self.totals = totals
+
+
+class JsonContestResults(JsonableMixin):
+
+    """
+    Represents contest results for testing purposes.
+
+    """
+
+    data_attrs = (Attribute('rounds', cls=JsonContest), )
+    attrs = data_attrs
+
+    def __init__(self, rounds):
+        """
+        Arguments:
+          rounds: an iterable of JsonRoundResults objects.
+
+        """
+        self.rounds = rounds
+
+    def repr_desc(self):
+        return "rounds=%s" % (len(self.rounds), )

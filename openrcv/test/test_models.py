@@ -2,9 +2,9 @@
 from contextlib import contextmanager
 from unittest import TestCase
 
-from openrcv.models import (from_jsobj, ContestInfo, JsonContest,
-                            JsonObjError, Attribute,
-                            JsonBallot, JsonableMixin, JS_NULL)
+from openrcv.models import (from_jsobj, Attribute, ContestInfo,
+                            JsonableMixin, JsonBallot, JsonContest, JsonContestResults,
+                            JsonObjError, JsonRoundResults, JS_NULL)
 
 
 @contextmanager
@@ -119,7 +119,7 @@ class JsonBallotTest(TestCase):
     def test_repr(self):
         ballot = self.make_ballot()
         self.assertEqual(repr(ballot),
-                         "<JsonBallot: jsobj='3 1 2' %s>" % hex(id(ballot)))
+                         "<JsonBallot: [jsobj='3 1 2'] %s>" % hex(id(ballot)))
 
     def test_eq(self):
         ballot1 = self.make_ballot()
@@ -209,7 +209,7 @@ class JsonContestTest(TestCase):
 
     def test_repr(self):
         contest = self.make_contest()
-        self.assertEqual(repr(contest), "<JsonContest: id=3 candidate_count=2 %s>" %
+        self.assertEqual(repr(contest), "<JsonContest: [id=3 candidate_count=2] %s>" %
                          hex(id(contest)))
 
     def test_eq(self):
@@ -263,3 +263,22 @@ class JsonContestTest(TestCase):
     def test_to_jsobj(self):
         # TODO
         pass
+
+
+class JsonRoundResultsTest(TestCase):
+
+    def test_to_jsobj(self):
+        results = JsonRoundResults(totals={1: 2})
+        self.assertEqual(results.to_jsobj(), {'totals': {1: 2}})
+
+
+class JsonContestResultsTest(TestCase):
+
+    def test_to_jsobj(self):
+        rounds = [
+            JsonRoundResults(totals={1: 2}),
+            JsonRoundResults(totals={3: 4})
+        ]
+        results = JsonContestResults(rounds=rounds)
+        self.assertEqual(results.to_jsobj(),
+                         {'rounds': [{'totals': {1: 2}}, {'totals': {3: 4}}]})

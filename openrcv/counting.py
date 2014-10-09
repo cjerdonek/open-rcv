@@ -8,7 +8,7 @@ import logging
 import os
 import string
 
-from openrcv.models import RawContestResults, RawRoundResults
+from openrcv.models import JsonContestResults, JsonRoundResults
 from openrcv.parsing import BLTParser, InternalBallotsCounter
 from openrcv import utils
 from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
@@ -26,7 +26,7 @@ def any_value(dict_):
 
 def count_internal_ballots(ballot_stream, candidates):
     """
-    Count one round, and return a RawRoundResults object.
+    Count one round, and return a JsonRoundResults object.
 
     Arguments:
       ballot_stream: a StreamInfo object for an internal ballot file.
@@ -83,15 +83,16 @@ def get_lowest(totals):
 
 def count_irv_contest(ballot_stream, candidates):
     """
-    Tabulate a contest using IRV, and return a RawContestResults object.
+    Tabulate a contest using IRV, and return a JsonContestResults object.
 
     Arguments:
       ballot_stream: a StreamInfo object for an internal ballot file.
-      candidates: iterable of candidates eligible to receive votes.
+      candidates: an iterable of candidates eligible to receive votes.
 
     """
     # TODO: handle case of 0 total (no winner, probably)?  And add a test case.
     # TODO: add tests for degenerate cases (0 candidates, 1 candidate, 0 votes, etc).
+    candidates = set(candidates)
     rounds = []
     while True:
         round_results = count_internal_ballots(ballot_stream, candidates)
@@ -103,11 +104,13 @@ def count_irv_contest(ballot_stream, candidates):
         eliminated = get_lowest(totals)
         if len(eliminated) > 1:
             # Then there is a tie for last place.
-            raise NotImplementedError()
+            round_number = len(rounds)
+            raise NotImplementedError("tie for last place occurred in round %d: %r" %
+                                      (round_number, eliminated))
 
         candidates -= eliminated
 
-    results = RawContestResults(rounds)
+    results = JsonContestResults(rounds)
     return results
 
 

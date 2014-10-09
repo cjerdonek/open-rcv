@@ -2,7 +2,7 @@
 import logging
 import os
 
-from openrcv.models import ContestInfo, RawRoundResults
+from openrcv.models import ContestInfo, JsonRoundResults
 from openrcv import utils
 from openrcv.utils import FILE_ENCODING, time_it
 
@@ -182,7 +182,7 @@ class InternalBallotsCounter(Parser):
         self.candidates = candidates
 
     def get_parse_return_value(self):
-        totals = RawRoundResults(self.candidate_totals)
+        totals = JsonRoundResults(self.candidate_totals)
         return totals
 
     def parse_lines(self, lines):

@@ -1,6 +1,6 @@
 
 """
-Contains object models for this project.
+Contains models that suppot JSON serialization.
 
 For the purposes of this project, "JSON object" (abbreviated in code
 as "jsobj") means a Python object with a natural conversion to JSON.
@@ -20,44 +20,9 @@ is the usual default value).
 
 """
 
-# TODO: move non-serializable models to a different location?
-
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonObjError, JsonableMixin)
+from openrcv.models import make_candidates
 from openrcv.utils import StringInfo
-
-
-def make_candidates(candidate_count):
-    """
-    Return an iterable of candidate numbers.
-
-    """
-    return range(1, candidate_count + 1)
-
-
-class ContestInfo(object):
-
-    """
-    Attributes:
-      candidates: a list of the names of all candidates, in numeric order.
-      name: name of contest.
-      seat_count: integer number of winners.
-
-    """
-
-    ballot_count = 0
-
-    def __init__(self):
-        pass
-
-    def get_candidates(self):
-        """Return an iterable of the candidate numbers."""
-        return make_candidates(len(self.candidates))
-
-    # TODO: look up the proper return type.
-    def __repr__(self):
-        return self.name
-
-
 
 
 class JsonBallot(JsonableMixin):
@@ -112,6 +77,7 @@ class JsonBallot(JsonableMixin):
         return self.to_jsobj()
 
 
+# Inherit from ContestInfo?
 class JsonContest(JsonableMixin):
 
     """

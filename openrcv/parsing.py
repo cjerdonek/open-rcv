@@ -2,7 +2,8 @@
 import logging
 import os
 
-from openrcv.jsmodels import ContestInfo, JsonRoundResults
+from openrcv.models import ContestInfo
+from openrcv.jsmodels import JsonRoundResults
 from openrcv import utils
 from openrcv.utils import FILE_ENCODING, time_it
 

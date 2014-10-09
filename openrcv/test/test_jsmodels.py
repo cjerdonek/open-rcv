@@ -75,14 +75,16 @@ class JsonBallotTest(TestCase):
 
     # TODO: add tests for pure from_jsobj() function.
 
-    def test_from_jsobj(self):
-        ballot = JsonBallot.from_jsobj("2 3 4")
+    def test_load_jsobj(self):
+        ballot = JsonBallot()
+        ballot.load_jsobj("2 3 4")
         self.assertEqual(ballot, JsonBallot(choices=[3, 4], weight=2))
 
-    def test_from_jsobj__trailing_space(self):
+    def test_load_jsobj__trailing_space(self):
         """This checks that the format is strict (i.e. doesn't call strip())."""
+        ballot = JsonBallot()
         with self.assertRaises(JsonObjError):
-            ballot = JsonBallot.from_jsobj("2 ")
+            ballot.load_jsobj("2 ")
 
 
 class JsonContestTest(TestCase):

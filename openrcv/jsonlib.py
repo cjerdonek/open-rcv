@@ -112,19 +112,6 @@ class JsonableMixin(object):
 
     meta_attrs = ()
 
-    # TODO: remove this method (the function from_jsobj() replaces it).
-    @classmethod
-    def from_jsobj(cls, jsobj):
-        """Convert a JSON object to an object of the class."""
-        log.debug("called %s.from_jsobj()" % cls.__name__)
-        try:
-            obj = cls()
-        except TypeError:
-            # We don't get the class name otherwise.
-            raise Exception("error constructing class: %s" % cls.__name__)
-        obj.load_jsobj(jsobj)
-        return obj
-
     def __repr__(self):
         desc = self.repr_desc() or "--"
         return "<%s: [%s] %s>" % (self.__class__.__name__, desc, hex(id(self)))
@@ -198,15 +185,6 @@ class JsonableMixin(object):
                 # Don't write None values into the JSON object.
                 continue
             jsdict[name] = jsobj
-
-    # TODO: remove this.
-    def add_to_jsobj(self, jsobj, attr):
-        """Add the given attribute value to the given JSON object."""
-        value = getattr(self, attr)
-        # TODO: handle JS_NULL.
-        if value is None:
-            return
-        jsobj[attr] = to_jsobj(value)
 
     def load_jsobj(self, jsobj):
         """

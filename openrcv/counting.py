@@ -8,6 +8,7 @@ import logging
 import os
 import string
 
+# TODO: do not import from jsmodels in this module.
 from openrcv.jsmodels import JsonContestResults, JsonRoundResults
 from openrcv.parsing import BLTParser, InternalBallotsCounter
 from openrcv import utils

@@ -9,8 +9,8 @@ in the open-rcv-tests repo.
 
 import random
 
-from openrcv import models
-from openrcv.models import JsonBallot, JsonContest, TestInputFile
+import openrcv.jsmodels as models
+from openrcv.jsmodels import JsonBallot, JsonContest, TestInputFile
 from openrcv import utils
 from openrcv.utils import FileInfo
 

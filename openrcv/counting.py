@@ -8,7 +8,7 @@ import logging
 import os
 import string
 
-from openrcv.models import JsonContestResults, JsonRoundResults
+from openrcv.jsmodels import JsonContestResults, JsonRoundResults
 from openrcv.parsing import BLTParser, InternalBallotsCounter
 from openrcv import utils
 from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS

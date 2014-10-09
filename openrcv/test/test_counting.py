@@ -4,7 +4,7 @@ import unittest
 from unittest import TestCase
 
 from openrcv.counting import count_internal_ballots, get_lowest, get_majority, get_winner
-from openrcv.models import JsonRoundResults
+from openrcv.jsmodels import JsonRoundResults
 from openrcv.utils import StringInfo
 
 

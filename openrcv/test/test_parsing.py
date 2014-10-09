@@ -5,7 +5,7 @@ from textwrap import dedent
 import unittest
 from unittest import TestCase
 
-from openrcv.models import ContestInfo
+from openrcv.jsmodels import ContestInfo
 from openrcv.parsing import BLTParser, ParsingError
 from openrcv.utils import FileInfo, StringInfo
 

@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from unittest import TestCase
 
 from openrcv.jsonlib import JsonObjError, JS_NULL
-from openrcv.models import (from_jsobj, ContestInfo,
+from openrcv.jsmodels import (from_jsobj, ContestInfo,
                             JsonBallot, JsonContest, JsonContestResults,
                             JsonRoundResults)
 

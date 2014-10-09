@@ -10,9 +10,9 @@ import sys
 
 from openrcv.counting import count_irv_contest
 from openrcv.datagen import create_json_tests
+import openrcv.jsmodels as models
 from openrcv.jsonlib import to_json
-from openrcv import models
-from openrcv.models import TestInputFile
+from openrcv.jsmodels import TestInputFile
 from openrcv.scripts.main import main
 from openrcv import utils
 from openrcv.utils import FileInfo

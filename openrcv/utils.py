@@ -162,9 +162,9 @@ class StringInfo(StreamInfo):
         value = self.value
         # Display first 24 characters, otherwise first 24 plus "...".
         display = (value if (not value or len(value) <= 24) else
-                   (value[:24] + "..."))
+                   (repr(value[:24]) + "..."))
         # As a precaution, make sure the string is empty if not reading.
         if (value is not None and mode != "r"):
             raise ValueError("Cannot write to string that already has a value: %r" % display)
-        log.info("opening memory stream for %r: %r" % (mode, display))
+        log.info("opening in-memory text stream (mode=%r): %s" % (mode, display))
         return _EjectingStringIO(self.value, self)

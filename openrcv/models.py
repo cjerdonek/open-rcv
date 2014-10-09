@@ -216,9 +216,9 @@ class JsonableMixin(object):
         """Return additional info for __repr__()."""
         return ""
 
-    def _load_attrs(self, attrs, jsdict):
+    def _attrs_from_jsdict(self, attrs, jsdict):
         """
-        Read data from a JSON object and save it to attributes.
+        Read in attribute values from a JSON object dict.
 
         Arguments:
           attrs: iterable of attribute names.
@@ -235,12 +235,9 @@ class JsonableMixin(object):
                 obj = from_jsobj(jsobj, cls=cls)
             setattr(self, name, obj)
 
-    # This is the reverse of _load_attrs().
-    # TODO: choose less ambiguous names for _load_attrs and _attrs_to_jsdict,
-    # so that the "direction" is clear.
     def _attrs_to_jsdict(self, attrs, jsdict):
         """
-        Read object attributes and write them to a JSON object.
+        Write attribute values to a JSON object dict.
 
         """
         for attr in attrs:
@@ -256,6 +253,9 @@ class JsonableMixin(object):
                 # Make troubleshooting easier by providing the name.
                 raise JsonObjError("error getting attribute: %r" % name)
             jsobj = to_jsobj(value)
+            if jsobj is None:
+                # Don't write None values into the JSON object.
+                continue
             jsdict[name] = jsobj
 
     # TODO: remove this.
@@ -280,13 +280,13 @@ class JsonableMixin(object):
             pass
         else:
             keys |= set(meta_dict.keys())
-            self._load_attrs(self.meta_attrs, meta_dict)
+            self._attrs_from_jsdict(self.meta_attrs, meta_dict)
         keys |= set(jsobj.keys())
         keys -= set(('_meta', ))
         extra_keys = set((attr.name for attr in self.attrs)) - keys
         if extra_keys:
             log.warning("JSON object has unserializable keys: %r" % (", ".join(extra_keys)))
-        self._load_attrs(self.data_attrs, jsobj)
+        self._attrs_from_jsdict(self.data_attrs, jsobj)
 
     def get_meta_dict(self):
         """Return a dict containing the object metadata."""
@@ -471,15 +471,17 @@ class JsonContestResults(JsonableMixin):
 
     """
 
+    meta_attrs = (Attribute('id'), )
     data_attrs = (Attribute('rounds', cls=JsonContest), )
     attrs = data_attrs
 
-    def __init__(self, rounds):
+    def __init__(self, rounds=None, id_=None):
         """
         Arguments:
           rounds: an iterable of JsonRoundResults objects.
 
         """
+        self.id = id_
         self.rounds = rounds
 
     def repr_desc(self):

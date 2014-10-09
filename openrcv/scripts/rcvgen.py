@@ -36,12 +36,12 @@ def count_test_file(argv):
     log.info("printing TestInputFile JSON object")
     print(repr(jsobj))
     test_file = TestInputFile.from_jsobj(jsobj)
-    contest = test_file.contests[0]
-    log.info("contest: %r\n>>>%s" % (contest, contest.to_json()))
-    ballot_stream = contest.get_ballot_stream()
-    candidates = contest.get_candidates()
-    contest_results = count_irv_contest(ballot_stream, candidates)
-    print(repr(contest_results))
+    for contest in test_file.contests:
+        log.info("contest: %r\n>>>%s" % (contest, contest.to_json()))
+        ballot_stream = contest.get_ballot_stream()
+        candidates = contest.get_candidates()
+        contest_results = count_irv_contest(ballot_stream, candidates)
+        print(contest_results.to_json())
 
     return
 

@@ -11,11 +11,11 @@ import sys
 from openrcv.counting import count_irv_contest
 from openrcv.datagen import create_json_tests
 import openrcv.jsmodels as models
-from openrcv.jsonlib import to_json
+from openrcv.jsonlib import from_jsobj, to_json
 from openrcv.jsmodels import TestInputFile
 from openrcv.scripts.main import main
 from openrcv import utils
-from openrcv.utils import FileInfo
+from openrcv.utils import read_json_path, FileInfo
 
 
 log = logging.getLogger(__name__)
@@ -27,13 +27,16 @@ def run_main():
     main(do_rcvgen)
 
 def do_rcvgen(argv):
-    count_test_file(argv)
+    update_test_files(argv)
 
+def update_test_files(argv):
+    jsobj = read_json_path(TEST_INPUT_PATH)
+    test_file = TestInputFile.from_jsobj(jsobj)
+    for contest in test_file.contests:
+        print(contest.to_json())
 
 def count_test_file(argv):
-    stream_info = utils.JsonFileInfo(TEST_INPUT_PATH)
-    with stream_info.open() as f:
-        jsobj = json.load(f)
+    jsobj = read_json_path(TEST_INPUT_PATH)
     log.info("printing TestInputFile JSON object")
     print(repr(jsobj))
     test_file = TestInputFile.from_jsobj(jsobj)

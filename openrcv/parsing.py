@@ -150,6 +150,7 @@ class BLTParser(Parser):
                 raise ValueError("the BLT has non-empty lines at the end")
 
 
+# TODO: this class should take the "count" function as an argument.
 class InternalBallotsCounter(Parser):
 
     # TODO: document how to include undervotes.
@@ -186,6 +187,9 @@ class InternalBallotsCounter(Parser):
         totals = JsonRoundResults(self.candidate_totals)
         return totals
 
+    def count_ballot(self, weight, choices):
+        raise NotImplementedError()
+
     def parse_lines(self, lines):
         candidates = self.candidates
         totals = {}
@@ -196,6 +200,7 @@ class InternalBallotsCounter(Parser):
         for line in lines:
             ints = self.parse_int_line(line)
             weight = ints[0]
+            # TODO: replace with call to self.count_ballot().
             for i in ints[1:]:
                 if i in candidate_set:
                     totals[i] += weight

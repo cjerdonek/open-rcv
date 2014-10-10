@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 from datetime import datetime
 import io
+import json
 import logging
 import os
 import shutil
@@ -99,6 +100,17 @@ def time_it(description):
     yield
     elapsed = timeit.default_timer() - start_time
     log.info("done: %s: %.4f seconds" % (description, elapsed))
+
+
+def read_json_path(path):
+    """
+    Read a JSON file and return its contents as a JSON object.
+
+    """
+    stream_info = JsonFileInfo(path)
+    with stream_info.open() as f:
+        jsobj = json.load(f)
+    return jsobj
 
 
 class StreamInfo(object):

@@ -128,5 +128,7 @@ def main_status(do_func, argv, log_stream=None):
 # status rather than main()):
 # http://www.artima.com/weblogs/viewpost.jsp?thread=4829
 def main(do_func, argv=None):
+    if argv is None:
+        argv = sys.argv
     status = main_status(do_func, argv)
     sys.exit(status)

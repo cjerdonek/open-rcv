@@ -213,6 +213,11 @@ class JsonableMixin(object):
         self._attrs_to_jsdict(self.meta_attrs, meta)
         return meta
 
+    # This is just a convenience method.
+    @classmethod
+    def from_jsobj(cls, jsobj):
+        return from_jsobj(jsobj, cls=cls)
+
     def to_jsobj(self):
         """
         Convert the current object to a JSON object.

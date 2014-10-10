@@ -10,7 +10,7 @@ import string
 
 # TODO: do not import from jsmodels in this module.
 from openrcv.jsmodels import JsonContestResults, JsonRoundResults
-from openrcv.parsing import BLTParser, InternalBallotsCounter
+from openrcv.parsing import BLTParser, Parser
 from openrcv import utils
 from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
 
@@ -140,3 +140,61 @@ def count_irv(blt_path, temp_dir=None):
     print(results.to_json())
 
     return results
+
+
+class InternalBallotsCounter(Parser):
+
+    # TODO: document how to include undervotes.
+    """
+    Parses an internal ballots file.
+
+    The file format is as follows:
+
+    Each line is a space-delimited string of integers.  The first integer
+    is the weight of the ballot, which is 1 for a single voter.  The
+    remaining numbers are the candidates in the order in which they
+    were ranked.
+
+    A sample file:
+
+    2 2
+    1 2 4 3 1
+    2 1 3 4
+    3 1
+
+    """
+
+    name = "internal ballots"
+
+    def __init__(self, candidates):
+        """
+        Arguments:
+          candidates: iterable of candidate numbers.
+
+        """
+        self.candidates = candidates
+
+    def get_parse_return_value(self):
+        totals = JsonRoundResults(self.candidate_totals)
+        return totals
+
+    def count_ballot(self, weight, choices):
+        raise NotImplementedError()
+
+    def parse_lines(self, lines):
+        candidates = self.candidates
+        totals = {}
+        for candidate in candidates:
+            totals[candidate] = 0
+
+        candidate_set = set(candidates)
+        for line in lines:
+            ints = self.parse_int_line(line)
+            weight = ints[0]
+            # TODO: replace with call to self.count_ballot().
+            for i in ints[1:]:
+                if i in candidate_set:
+                    totals[i] += weight
+                    break
+
+        self.candidate_totals = totals

@@ -5,15 +5,10 @@ import os
 from openrcv.models import ContestInfo
 from openrcv.jsmodels import JsonRoundResults
 from openrcv import utils
-from openrcv.utils import FILE_ENCODING, time_it
+from openrcv.utils import parse_integer_line, time_it, FILE_ENCODING
 
 
 log = logging.getLogger(__name__)
-
-
-def parse_integer_line(line):
-    """Return an iterator object of integers."""
-    return (int(s) for s in line.split())
 
 
 def make_internal_ballot_line(weight, choices):

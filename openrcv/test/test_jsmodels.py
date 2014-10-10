@@ -36,6 +36,11 @@ class JsonBallotTest(TestCase):
         self.assertEqual(ballot.choices, [])
         self.assertEqual(ballot.weight, 1)
 
+    def test_repr_desc(self):
+        ballot = JsonBallot(choices=(1, 2), weight=3)
+        self.assertEqual(repr(ballot),
+                         "<JsonBallot: [jsobj='3 1 2'] %s>" % hex(id(ballot)))
+
     def test_repr(self):
         ballot = self.make_ballot()
         self.assertEqual(repr(ballot),
@@ -53,6 +58,12 @@ class JsonBallotTest(TestCase):
 
     def test_to_jsobj(self):
         ballot = JsonBallot(choices=[1, 2], weight=3)
+        jsobj = ballot.to_jsobj()
+        self.assertEqual(jsobj, "3 1 2")
+
+    def test_to_jsobj__choices_tuple(self):
+        """Check using a tuple for choices."""
+        ballot = JsonBallot(choices=(1, 2), weight=3)
         jsobj = ballot.to_jsobj()
         self.assertEqual(jsobj, "3 1 2")
 
@@ -78,7 +89,7 @@ class JsonBallotTest(TestCase):
     def test_load_jsobj(self):
         ballot = JsonBallot()
         ballot.load_jsobj("2 3 4")
-        self.assertEqual(ballot, JsonBallot(choices=[3, 4], weight=2))
+        self.assertEqual(ballot, JsonBallot(choices=(3, 4), weight=2))
 
     def test_load_jsobj__trailing_space(self):
         """This checks that the format is strict (i.e. doesn't call strip())."""

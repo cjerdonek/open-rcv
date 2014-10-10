@@ -4,28 +4,12 @@ import unittest
 from unittest import TestCase
 
 from openrcv.counting import (count_internal_ballots, get_lowest, get_majority,
-                              get_winner, normalized_ballots, parse_internal_ballot)
+                              get_winner, normalized_ballots)
 from openrcv.jsmodels import JsonRoundResults
 from openrcv.utils import StringInfo
 
 
 class ModuleTest(TestCase):
-
-    def test_parse_internal_ballot(self):
-        cases = [
-            ("1 2", (1, (2, ))),
-            ("1", (1, ())),
-            # Leading and trailing space are okay
-            (" 1 2", (1, (2, ))),
-            ("1 2 \n", (1, (2, ))),
-        ]
-        for line, expected in cases:
-            with self.subTest(line=line, expected=expected):
-                self.assertEqual(parse_internal_ballot(line), expected)
-
-    def test_parse_internal_ballot__non_integer(self):
-        with self.assertRaises(ValueError):
-            parse_internal_ballot("f 2 \n")
 
     def test_normalized_ballots(self):
         # This test case simultaneously checks both compressing and

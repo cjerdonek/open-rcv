@@ -22,7 +22,7 @@ is the usual default value).
 
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonObjError, JsonableMixin)
 from openrcv.models import make_candidates
-from openrcv.utils import StringInfo
+from openrcv.utils import parse_internal_ballot, StringInfo
 
 
 class JsonBallot(JsonableMixin):
@@ -49,6 +49,7 @@ class JsonBallot(JsonableMixin):
 
     def repr_desc(self):
         """Return additional info for __repr__()."""
+        # TODO: improve repr() and test in presence of exceptions.
         return "jsobj=%r" % self.to_jsobj()
 
     def load_jsobj(self, jsobj):
@@ -59,18 +60,19 @@ class JsonBallot(JsonableMixin):
 
         """
         try:
+            weight, choices = parse_internal_ballot(jsobj)
             # TODO: DRY up with other internal ballot stuff.
             numbers = [int(s) for s in jsobj.split(" ")]
-        except (AttributeError, ValueError):
-            # Can happen for example with: "2 ".
-            # ValueError: invalid literal for int() with base 10: ''
+        except ValueError:
+            # Can happen for example with: "1 2 abc".
+            # ValueError: invalid literal for int() with base 10: 'abc'
             raise JsonObjError("error parsing: %r" % jsobj)
-        weight = numbers.pop(0)
-        self.__init__(choices=numbers, weight=weight)
+        self.__init__(choices=choices, weight=weight)
 
     def to_jsobj(self):
         """Return the ballot as a JSON object."""
-        values = [self.weight] + self.choices
+        # TODO: share code with make_internal_ballot_line().
+        values = [self.weight] + list(self.choices)
         return " ".join((str(v) for v in values))
 
     def to_internal_ballot(self):

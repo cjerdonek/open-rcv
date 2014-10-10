@@ -10,10 +10,10 @@ import string
 
 # TODO: do not import from jsmodels in this module.
 from openrcv.jsmodels import JsonContestResults, JsonRoundResults
-from openrcv.parsing import (make_internal_ballot_line, parse_integer_line,
-                             BLTParser, Parser)
+from openrcv.parsing import (make_internal_ballot_line, BLTParser, Parser)
 from openrcv import utils
-from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
+from openrcv.utils import (parse_integer_line, parse_internal_ballot,
+                           FileInfo, ENCODING_INTERNAL_BALLOTS)
 
 
 log = logging.getLogger(__name__)
@@ -25,25 +25,6 @@ def any_value(dict_):
         return next(iter(dict_.values()))
     except StopIteration:
         raise ValueError("dict has no values")
-
-
-def parse_internal_ballot(line):
-    """
-    Parse an internal ballot line.
-
-    An internal ballot line is a space-delimited string of integers of the
-    form--
-
-    "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
-
-    This function allows leading and trailing spaces.  ValueError is
-    raised if one of the values does not parse to an integer.
-
-    """
-    ints = parse_integer_line(line)
-    weight = next(ints)
-    choices = tuple(ints)
-    return weight, choices
 
 
 def normalized_ballots(lines):
@@ -198,7 +179,6 @@ def count_irv(blt_path, temp_dir=None):
     return results
 
 
-# TODO: add a test for this.
 class InternalBallotsNormalizer(Parser):
 
     """
@@ -224,24 +204,11 @@ class InternalBallotsNormalizer(Parser):
     def get_parse_return_value(self):
         return self.output_stream
 
-    # TODO: make a function that takes an iterable of lines
-    # and returns an iterator that yields (weight, choices) pairs.
     def parse_lines(self, lines):
-        # A dict mapping tuples of choices to the cumulative weight.
-        choices_dict = {}
+        normalized = normalized_ballots(lines)
 
-        for line in lines:
-            weight, choices = self.parse_internal_ballot(line)
-            try:
-                choices_dict[choices] += weight
-            except KeyError:
-                # Then we are adding the choices for the first time.
-                choices_dict[choices] = weight
-
-        sorted_choices = sorted(choices_dict.keys())
         with self.output_stream.open("w") as f:
-            for choices in sorted_choices:
-                weight = choices_dict[choices]
+            for weight, choices in normalized:
                 line = make_internal_ballot_line(weight, choices)
                 f.write(line)
 

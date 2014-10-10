@@ -1,7 +1,26 @@
 
 from unittest import TestCase
 
-from openrcv.utils import ReprMixin, StringInfo
+from openrcv.utils import parse_internal_ballot, ReprMixin, StringInfo
+
+
+class ModuleTest(TestCase):
+
+    def test_parse_internal_ballot(self):
+        cases = [
+            ("1 2", (1, (2, ))),
+            ("1", (1, ())),
+            # Leading and trailing space are okay
+            (" 1 2", (1, (2, ))),
+            ("1 2 \n", (1, (2, ))),
+        ]
+        for line, expected in cases:
+            with self.subTest(line=line, expected=expected):
+                self.assertEqual(parse_internal_ballot(line), expected)
+
+    def test_parse_internal_ballot__non_integer(self):
+        with self.assertRaises(ValueError):
+            parse_internal_ballot("f 2 \n")
 
 
 class ReprMixinTest(TestCase):

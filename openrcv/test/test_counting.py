@@ -3,12 +3,44 @@ from textwrap import dedent
 import unittest
 from unittest import TestCase
 
-from openrcv.counting import count_internal_ballots, get_lowest, get_majority, get_winner
+from openrcv.counting import (count_internal_ballots, get_lowest, get_majority,
+                              get_winner, normalized_ballots, parse_internal_ballot)
 from openrcv.jsmodels import JsonRoundResults
 from openrcv.utils import StringInfo
 
 
-class TestCounting(TestCase):
+class ModuleTest(TestCase):
+
+    def test_parse_internal_ballot(self):
+        cases = [
+            ("1 2", (1, (2, ))),
+            ("1", (1, ())),
+            # Leading and trailing space are okay
+            (" 1 2", (1, (2, ))),
+            ("1 2 \n", (1, (2, ))),
+        ]
+        for line, expected in cases:
+            with self.subTest(line=line, expected=expected):
+                self.assertEqual(parse_internal_ballot(line), expected)
+
+    def test_parse_internal_ballot__non_integer(self):
+        with self.assertRaises(ValueError):
+            parse_internal_ballot("f 2 \n")
+
+    def test_normalized_ballots(self):
+        # This test case simultaneously checks both compressing and
+        # lexicographically ordering by choice (and not be weight).
+        lines = (
+            "1 2\n",
+            "1 3\n",
+            "4 1\n",
+            "1 2\n",
+        )
+        normalized = normalized_ballots(lines)
+        # Check that it returns a generator iterator and not a concrete
+        # list/tuple/etc.
+        self.assertEqual(type(normalized), type((x for x in ())))
+        self.assertEqual(list(normalized), [(4, (1,)), (2, (2,)), (1, (3,))])
 
     def test_count_internal_ballots(self):
         internal_ballots = dedent("""\

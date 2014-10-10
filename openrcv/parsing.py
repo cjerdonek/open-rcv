@@ -11,6 +11,11 @@ from openrcv.utils import FILE_ENCODING, time_it
 log = logging.getLogger(__name__)
 
 
+def parse_integer_line(line):
+    """Return an iterator object of integers."""
+    return (int(s) for s in line.split())
+
+
 def make_internal_ballot_line(weight, choices):
     """
     Arguments:
@@ -47,10 +52,6 @@ class Parser(object):
 
     def get_parse_return_value(self):
         return None
-
-    def parse_int_line(self, line):
-        """Return a tuple of integers."""
-        return tuple((int(s) for s in line.split()))
 
     def parse_lines(self, lines):
         raise NotImplementedError()
@@ -106,12 +107,12 @@ class BLTParser(Parser):
         return next(lines).strip()
 
     def parse_next_line_ints(self, lines):
-        return self.parse_int_line(next(lines))
+        return parse_integer_line(next(lines))
 
     def _parse_ballot_lines(self, lines, f=None):
         ballot_count = 0
         for line in lines:
-            ints = self.parse_int_line(line)
+            ints = tuple(parse_integer_line(line))
             weight = ints[0]
             if weight == 0:
                 break

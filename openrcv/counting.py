@@ -10,7 +10,8 @@ import string
 
 # TODO: do not import from jsmodels in this module.
 from openrcv.jsmodels import JsonContestResults, JsonRoundResults
-from openrcv.parsing import make_internal_ballot_line, BLTParser, Parser
+from openrcv.parsing import (make_internal_ballot_line, parse_integer_line,
+                             BLTParser, Parser)
 from openrcv import utils
 from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
 
@@ -24,6 +25,61 @@ def any_value(dict_):
         return next(iter(dict_.values()))
     except StopIteration:
         raise ValueError("dict has no values")
+
+
+def parse_internal_ballot(line):
+    """
+    Parse an internal ballot line.
+
+    An internal ballot line is a space-delimited string of integers of the
+    form--
+
+    "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
+
+    This function allows leading and trailing spaces.  ValueError is
+    raised if one of the values does not parse to an integer.
+
+    """
+    ints = parse_integer_line(line)
+    weight = next(ints)
+    choices = tuple(ints)
+    return weight, choices
+
+
+def normalized_ballots(lines):
+    """
+    Return an iterator object of normalized internal ballots.
+
+    Returns an iterator object that yields a sequence of internal ballots
+    that is equivalent to the original, but "compressed" (using the
+    weight component) and ordered lexicographically by the list of choices
+    on each ballot.  The iterator returns each internal ballot as a
+    2-tuple of (weight, choices).
+
+    Arguments:
+      lines: an iterable of lines in an internal ballot file.
+
+    """
+    # A dict mapping tuples of choices to the cumulative weight.
+    choices_dict = {}
+
+    for line in lines:
+        weight, choices = parse_internal_ballot(line)
+        try:
+            choices_dict[choices] += weight
+        except KeyError:
+            # Then we are adding the choices for the first time.
+            choices_dict[choices] = weight
+
+    sorted_choices = sorted(choices_dict.keys())
+
+    def iterator():
+        for choices in sorted_choices:
+            weight = choices_dict[choices]
+            yield weight, choices
+
+    return iterator()
+
 
 def count_internal_ballots(ballot_stream, candidates):
     """
@@ -168,12 +224,8 @@ class InternalBallotsNormalizer(Parser):
     def get_parse_return_value(self):
         return self.output_stream
 
-    def parse_internal_ballot(self, line):
-        ints = self.parse_int_line(line)
-        weight = ints[0]
-        choices = tuple(ints[1:])
-        return weight, choices
-
+    # TODO: make a function that takes an iterable of lines
+    # and returns an iterator that yields (weight, choices) pairs.
     def parse_lines(self, lines):
         # A dict mapping tuples of choices to the cumulative weight.
         choices_dict = {}
@@ -242,10 +294,11 @@ class InternalBallotsCounter(Parser):
 
         candidate_set = set(candidates)
         for line in lines:
-            ints = self.parse_int_line(line)
-            weight = ints[0]
+            ints = parse_integer_line(line)
+            weight = next(ints)
+            # TODO: use parse_internal_ballot()
             # TODO: replace with call to self.count_ballot().
-            for i in ints[1:]:
+            for i in ints:
                 if i in candidate_set:
                     totals[i] += weight
                     break

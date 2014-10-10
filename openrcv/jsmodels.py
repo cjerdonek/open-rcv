@@ -59,6 +59,7 @@ class JsonBallot(JsonableMixin):
 
         """
         try:
+            # TODO: DRY up with other internal ballot stuff.
             numbers = [int(s) for s in jsobj.split(" ")]
         except (AttributeError, ValueError):
             # Can happen for example with: "2 ".

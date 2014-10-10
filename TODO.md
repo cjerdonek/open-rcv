@@ -23,3 +23,7 @@ TODO
 * Add command to generate sample ballot file.
 * Add nice online documentation.
 * Add PEP8 checking.
+* Change format of unit test errors from--
+  `test_parse_internal_ballot__non_integer (openrcv.test.test_counting.ModuleTest`
+  to--
+  `openrcv.test.test_counting.ModuleTest.test_parse_internal_ballot__non_integer`

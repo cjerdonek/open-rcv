@@ -202,5 +202,5 @@ class StringInfo(StreamInfo):
         # As a precaution, make sure the string is empty if not reading.
         if (value is not None and mode != "r"):
             raise ValueError("Cannot write to string that already has a value: %r" % display)
-        log.info("opening in-memory text stream (mode=%r): %r" % (mode, display))
+        log.info("opening in-memory text stream (mode=%r): contents=%r" % (mode, display))
         return _EjectingStringIO(self.value, self)

@@ -11,6 +11,16 @@ from openrcv.utils import FILE_ENCODING, time_it
 log = logging.getLogger(__name__)
 
 
+def make_internal_ballot_line(weight, choices):
+    """
+    Arguments:
+      choices: an iterable of choices.
+
+    """
+    # Do not include the terminal 0 that BLT files include.
+    return "%d %s\n" % (weight, " ".join((str(c) for c in choices)))
+
+
 # TODO: add the line number, etc. as attributes.
 class ParsingError(Exception):
     pass
@@ -106,6 +116,7 @@ class BLTParser(Parser):
             if weight == 0:
                 break
             ballot_count += 1
+            # TODO: use make_internal_ballot_line() here.
             # Leave off the terminal 0.
             new_line = " ".join((str(n) for n in ints[:-1]))
             f.write(new_line + "\n")

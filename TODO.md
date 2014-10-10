@@ -3,6 +3,9 @@ TODO
 
 * Make a function that takes an internal ballot stream and returns
   a packed and ordered internal ballot stream.
+* Need code to convert a ballot stream into a list of JsonBallots.
+* Improve the random ballot generation by removing undervotes and
+  providing an option for not having duplicates.
 * Make an `update_test_files()` function that reindices and updates expecteds.
 * Make a JsonTestsFile class with input and output.
 * Eliminate JS from counting.py and parsing.py and document this.

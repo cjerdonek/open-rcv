@@ -10,7 +10,7 @@ import string
 
 # TODO: do not import from jsmodels in this module.
 from openrcv.jsmodels import JsonContestResults, JsonRoundResults
-from openrcv.parsing import BLTParser, Parser
+from openrcv.parsing import make_internal_ballot_line, BLTParser, Parser
 from openrcv import utils
 from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
 
@@ -142,6 +142,7 @@ def count_irv(blt_path, temp_dir=None):
     return results
 
 
+# TODO: add a test for this.
 class InternalBallotsNormalizer(Parser):
 
     """
@@ -149,8 +150,8 @@ class InternalBallotsNormalizer(Parser):
 
     This class takes a StreamInfo of internal ballots and returns a
     new StreamInfo that represents an equivalent set of internal ballots,
-    but "compressed" (using the weight component) and ordering the
-    ballots lexicographically for readability.
+    but both "compressed" (by using the weight component) and ordered
+    lexicographically for readability by the list of choices on the ballot.
 
     """
 
@@ -184,6 +185,13 @@ class InternalBallotsNormalizer(Parser):
             except KeyError:
                 # Then we are adding the choices for the first time.
                 choices_dict[choices] = weight
+
+        sorted_choices = sorted(choices_dict.keys())
+        with self.output_stream.open("w") as f:
+            for choices in sorted_choices:
+                weight = choices_dict[choices]
+                line = make_internal_ballot_line(weight, choices)
+                f.write(line)
 
 
 # TODO: this class should take the "count" function as an argument.

@@ -37,7 +37,7 @@ def update_test_files(argv):
     output_stream = StringInfo()
     parser = InternalBallotsNormalizer(output_stream)
     parser.parse(ballot_stream)
-    print(repr(ballot_stream))
+    print("output: %s" % output_stream.value)
 
 def count_test_file(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)

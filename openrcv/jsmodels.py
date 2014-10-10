@@ -111,7 +111,7 @@ class JsonContest(JsonableMixin):
 
     def get_ballot_stream(self):
         """
-        Return an utils.StreamInfo object representing the ballots in
+        Return a StreamInfo object representing the ballots in
           internal ballot file format.
 
         """

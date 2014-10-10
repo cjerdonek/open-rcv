@@ -142,6 +142,51 @@ def count_irv(blt_path, temp_dir=None):
     return results
 
 
+class InternalBallotsNormalizer(Parser):
+
+    """
+    Compresses and normalizes internal ballots.
+
+    This class takes a StreamInfo of internal ballots and returns a
+    new StreamInfo that represents an equivalent set of internal ballots,
+    but "compressed" (using the weight component) and ordering the
+    ballots lexicographically for readability.
+
+    """
+
+    name = "normalizing internal ballots"
+
+    def __init__(self, output_stream):
+        """
+        Arguments:
+          output_stream: a StreamInfo object for output.
+
+        """
+        self.output_stream = output_stream
+
+    def get_parse_return_value(self):
+        return self.output_stream
+
+    def parse_internal_ballot(self, line):
+        ints = self.parse_int_line(line)
+        weight = ints[0]
+        choices = tuple(ints[1:])
+        return weight, choices
+
+    def parse_lines(self, lines):
+        # A dict mapping tuples of choices to the cumulative weight.
+        choices_dict = {}
+
+        for line in lines:
+            weight, choices = self.parse_internal_ballot(line)
+            try:
+                choices_dict[choices] += weight
+            except KeyError:
+                # Then we are adding the choices for the first time.
+                choices_dict[choices] = weight
+
+
+# TODO: this class should take the "count" function as an argument.
 class InternalBallotsCounter(Parser):
 
     # TODO: document how to include undervotes.

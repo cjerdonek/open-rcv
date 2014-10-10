@@ -8,14 +8,14 @@ import json
 import logging
 import sys
 
-from openrcv.counting import count_irv_contest
+from openrcv.counting import count_irv_contest, InternalBallotsNormalizer
 from openrcv.datagen import create_json_tests
 import openrcv.jsmodels as models
 from openrcv.jsonlib import from_jsobj, to_json
 from openrcv.jsmodels import TestInputFile
 from openrcv.scripts.main import main
 from openrcv import utils
-from openrcv.utils import read_json_path, FileInfo
+from openrcv.utils import read_json_path, FileInfo, StringInfo
 
 
 log = logging.getLogger(__name__)
@@ -32,8 +32,12 @@ def do_rcvgen(argv):
 def update_test_files(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)
     test_file = TestInputFile.from_jsobj(jsobj)
-    for contest in test_file.contests:
-        print(contest.to_json())
+    contest = test_file.contests[0]
+    ballot_stream = contest.get_ballot_stream()
+    output_stream = StringInfo()
+    parser = InternalBallotsNormalizer(output_stream)
+    parser.parse(ballot_stream)
+    print(repr(ballot_stream))
 
 def count_test_file(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)

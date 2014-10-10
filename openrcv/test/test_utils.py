@@ -1,7 +1,25 @@
 
 from unittest import TestCase
 
-from openrcv.utils import StringInfo
+from openrcv.utils import ReprMixin, StringInfo
+
+
+class ReprMixinTest(TestCase):
+
+    class ReprSample(ReprMixin):
+
+        def repr_desc(self):
+            return "foo"
+
+    def test_repr(self):
+        obj = ReprMixin()
+        expected = "<ReprMixin object: [--] %s>" % hex(id(obj))
+        self.assertEqual(repr(obj), expected)
+
+    def test_repr__implemented(self):
+        obj = ReprMixinTest.ReprSample()
+        expected = "<ReprSample object: [foo] %s>" % hex(id(obj))
+        self.assertEqual(repr(obj), expected)
 
 
 class StringInfoTest(TestCase):

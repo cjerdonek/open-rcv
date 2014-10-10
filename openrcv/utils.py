@@ -95,7 +95,7 @@ def time_it(description):
       description: task description for logging purposes
 
     """
-    log.info("start: %s" % description)
+    log.info("start: %s..." % description)
     start_time = timeit.default_timer()
     yield
     elapsed = timeit.default_timer() - start_time
@@ -113,13 +113,26 @@ def read_json_path(path):
     return jsobj
 
 
-class StreamInfo(object):
+class ReprMixin(object):
+
+    def __repr__(self):
+        desc = self.repr_desc()
+        desc = "--" if desc is None else desc
+        return "<%s object: [%s] %s>" % (self.__class__.__name__, desc, hex(id(self)))
+
+    def repr_desc(self):
+        return None
+
+
+class StreamInfo(ReprMixin):
 
     def open(self, mode=None):
         if mode is None:
             mode = "r"
         return self._open(mode)
 
+
+# TODO: default to ASCII.
 class FileInfo(StreamInfo):
 
     """A wrapped file path that opens to become a file object."""
@@ -169,14 +182,25 @@ class StringInfo(StreamInfo):
     def __init__(self, value=None):
         self.value = value
 
+    def repr_desc(self):
+        return "contents=%s" % (self.get_value(10), )
+
+    def get_value(self, limit=None):
+        """
+        Return the first `limit` characters plus "...".
+
+        """
+        value = self.value
+        if limit is None or not value or len(value) <= limit:
+            return value
+        return repr(value[:limit]) + "..."
+
     # TODO: test this method on short text strings.
     def _open(self, mode):
         value = self.value
-        # Display first 24 characters, otherwise first 24 plus "...".
-        display = (value if (not value or len(value) <= 24) else
-                   (repr(value[:24]) + "..."))
+        display = self.get_value(limit=24)
         # As a precaution, make sure the string is empty if not reading.
         if (value is not None and mode != "r"):
             raise ValueError("Cannot write to string that already has a value: %r" % display)
-        log.info("opening in-memory text stream (mode=%r): %s" % (mode, display))
+        log.info("opening in-memory text stream (mode=%r): %r" % (mode, display))
         return _EjectingStringIO(self.value, self)

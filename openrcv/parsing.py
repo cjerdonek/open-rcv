@@ -10,18 +10,17 @@ from openrcv.utils import parse_integer_line, time_it, FILE_ENCODING
 log = logging.getLogger(__name__)
 
 
-# TODO: test this and check the case of empty choices.
-# TODO: DRY up with other implementations of this (look at the others
-# to see what is best).  But before I do this, see what the callers
-# are doing and check why the tests are insufficient.
 def make_internal_ballot_line(weight, choices):
     """
     Arguments:
       choices: an iterable of choices.
 
     """
+    ballot = str(weight)
+    if choices:
+        ballot = "%s %s" % (ballot, " ".join((str(c) for c in choices)))
     # Do not include the terminal 0 that BLT files include.
-    return "%d %s\n" % (weight, " ".join((str(c) for c in choices)))
+    return ballot
 
 
 def parse_internal_ballot(line):
@@ -134,9 +133,8 @@ class BLTParser(Parser):
             if weight == 0:
                 break
             ballot_count += 1
-            # TODO: use make_internal_ballot_line() here.
-            # Leave off the terminal 0.
-            new_line = " ".join((str(n) for n in ints[:-1]))
+            # Leave off the initial weight and terminal 0 for choices.
+            new_line = make_internal_ballot_line(weight, ints[1:-1])
             f.write(new_line + "\n")
         return ballot_count
 

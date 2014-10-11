@@ -1,8 +1,6 @@
 TODO
 ====
 
-* Address `make_internal_ballot_line()` code comments.
-* Clean up JsonBallot class's code.
 * Move parsing helper functions out of utils.
 * Need code to convert a ballot stream into a list of JsonBallots.
 * Improve the random ballot generation by removing undervotes and

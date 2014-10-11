@@ -22,7 +22,7 @@ is the usual default value).
 
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonObjError, JsonableMixin)
 from openrcv.models import make_candidates
-from openrcv.parsing import parse_internal_ballot
+from openrcv.parsing import make_internal_ballot_line, parse_internal_ballot
 from openrcv.utils import StringInfo
 
 
@@ -62,16 +62,14 @@ class JsonBallot(JsonableMixin):
         try:
             weight, choices = parse_internal_ballot(jsobj)
         except ValueError:
-            # Can happen for example with: "1 2 abc".
+            # Can happen with "1 2 abc", for example.
             # ValueError: invalid literal for int() with base 10: 'abc'
             raise JsonObjError("error parsing: %r" % jsobj)
         self.__init__(choices=choices, weight=weight)
 
     def to_jsobj(self):
         """Return the ballot as a JSON object."""
-        # TODO: share code with make_internal_ballot_line().
-        values = [self.weight] + list(self.choices)
-        return " ".join((str(v) for v in values))
+        return make_internal_ballot_line(self.weight, self.choices)
 
     def to_internal_ballot(self):
         """Return the ballot as an internal ballot string."""

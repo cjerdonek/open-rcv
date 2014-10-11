@@ -179,6 +179,7 @@ def count_irv(blt_path, temp_dir=None):
     return results
 
 
+# TODO: test this class.
 class InternalBallotsNormalizer(Parser):
 
     """

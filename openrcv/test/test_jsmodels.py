@@ -83,8 +83,8 @@ class JsonBallotTest(TestCase):
         """Test having None for choices."""
         ballot = JsonBallot(weight=3)
         ballot.choices = None
-        with self.assertRaises(TypeError):
-            jsobj = ballot.to_jsobj()
+        jsobj = ballot.to_jsobj()
+        self.assertEqual(jsobj, "3")
 
     def test_load_jsobj(self):
         ballot = JsonBallot()

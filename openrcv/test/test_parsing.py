@@ -6,25 +6,32 @@ import unittest
 from unittest import TestCase
 
 from openrcv.models import ContestInfo
-from openrcv.parsing import BLTParser, ParsingError
+from openrcv.parsing import make_internal_ballot_line, BLTParser, ParsingError
 from openrcv.utils import FileInfo, StringInfo
 
 
-BLT_STRING = """\
-4 2
--3
-2 2 0
-1 2 4 3 1 0
-0
-"Jen"
-"Alice"
-"Steve"
-"Bill"
-"My Election"
-"""
+class ModuleTest(TestCase):
+
+    def test_make_internal_ballot_line(self):
+        self.assertEqual(make_internal_ballot_line(1, (2, )), "1 2")
+        self.assertEqual(make_internal_ballot_line(1, (2, 3)), "1 2 3")
+        self.assertEqual(make_internal_ballot_line(1, ()), "1")
 
 
 class BLTParserTest(TestCase):
+
+    BLT_STRING = """\
+    4 2
+    -3
+    2 2 0
+    1 2 4 3 1 0
+    0
+    "Jen"
+    "Alice"
+    "Steve"
+    "Bill"
+    "My Election"
+    """
 
     def make_parser(self, blt_string, output_info=None):
         parser = BLTParser(output_info)
@@ -58,7 +65,7 @@ class BLTParserTest(TestCase):
     def test_parse(self):
         """Test passing an output StreamInfo object."""
         output_info = StringInfo()
-        info = self.parse_blt(BLT_STRING, output_info=output_info)
+        info = self.parse_blt(self.BLT_STRING, output_info=output_info)
         # TODO: test the other attributes.
         self.assertEqual(type(info), ContestInfo)
         self.assertEqual(info.name, '"My Election"')
@@ -67,7 +74,7 @@ class BLTParserTest(TestCase):
 
     def test_parse__terminal_empty_lines(self):
         """Test a BLT string with empty lines at the end."""
-        info = self.parse_blt(BLT_STRING + "\n\n")
+        info = self.parse_blt(self.BLT_STRING + "\n\n")
         self.assertEqual(type(info), ContestInfo)
         self.assertEqual(info.name, '"My Election"')
 
@@ -83,11 +90,11 @@ class BLTParserTest(TestCase):
             with self.subTest(suffix=suffix):
                 # TODO: check the line number.
                 with self.assertRaises(ParsingError):
-                    info = self.parse_blt(BLT_STRING + suffix)
+                    info = self.parse_blt(self.BLT_STRING + suffix)
 
     def test_parse__no_output_info(self):
         """Test passing no output StreamInfo object."""
-        info = self.parse_blt(BLT_STRING)
+        info = self.parse_blt(self.BLT_STRING)
         # TODO: test the other attributes.
         self.assertEqual(type(info), ContestInfo)
         self.assertEqual(info.ballot_count, 2)

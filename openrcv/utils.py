@@ -18,20 +18,6 @@ FILE_ENCODING = "utf-8"
 log = logging.getLogger(__name__)
 
 
-# TODO: move to parsing.py (next to make_internal_ballot_line()).
-def parse_integer_line(line):
-    """
-    Parse a string of integers (with or without a trailing newline).
-
-    Returns an iterator object of integers.
-
-    This function allows leading and trailing spaces.  ValueError is
-    raised if one of the values does not parse to an integer.
-
-    """
-    return (int(s) for s in line.split())
-
-
 def log_create_dir(path):
     log.info("creating dir: %s" % path)
 

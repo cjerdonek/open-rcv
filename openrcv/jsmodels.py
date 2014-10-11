@@ -1,6 +1,6 @@
 
 """
-Contains models that suppot JSON serialization.
+Contains models that support JSON serialization.
 
 For the purposes of this project, "JSON object" (abbreviated in code
 as "jsobj") means a Python object with a natural conversion to JSON.
@@ -69,11 +69,11 @@ class JsonBallot(JsonableMixin):
 
     def to_jsobj(self):
         """Return the ballot as a JSON object."""
-        return make_internal_ballot_line(self.weight, self.choices)
+        return self.to_internal_ballot()
 
     def to_internal_ballot(self):
         """Return the ballot as an internal ballot string."""
-        return self.to_jsobj()
+        return make_internal_ballot_line(self.weight, self.choices)
 
 
 # Inherit from ContestInfo?

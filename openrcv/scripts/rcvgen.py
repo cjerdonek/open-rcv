@@ -33,6 +33,7 @@ def update_test_files(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)
     test_file = TestInputFile.from_jsobj(jsobj)
     contest = test_file.contests[0]
+    print(contest.to_json())
     ballot_stream = contest.get_ballot_stream()
     output_stream = StringInfo()
     parser = InternalBallotsNormalizer(output_stream)

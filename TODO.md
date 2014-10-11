@@ -1,8 +1,9 @@
 TODO
 ====
 
-* Make a function that takes an internal ballot stream and returns
-  a packed and ordered internal ballot stream.
+* Address `make_internal_ballot_line()` code comments.
+* Clean up JsonBallot class's code.
+* Move parsing helper functions out of utils.
 * Need code to convert a ballot stream into a list of JsonBallots.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.

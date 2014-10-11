@@ -37,14 +37,21 @@ class JsonBallotTest(TestCase):
         self.assertEqual(ballot.weight, 1)
 
     def test_repr_desc(self):
-        ballot = JsonBallot(choices=(1, 2), weight=3)
-        self.assertEqual(repr(ballot),
-                         "<JsonBallot: [jsobj='3 1 2'] %s>" % hex(id(ballot)))
+        cases = [
+            (3, (1, 2), "weight=3 choices=(1, 2)"),
+            (None, None, "weight=None choices=None"),
+        ]
+        for weight, choices, expected in cases:
+            with self.subTest(weight=weight, choices=choices, expected=expected):
+                ballot = JsonBallot()
+                ballot.choices = choices
+                ballot.weight = weight
+                self.assertEqual(ballot.repr_desc(), expected)
 
     def test_repr(self):
         ballot = self.make_ballot()
-        self.assertEqual(repr(ballot),
-                         "<JsonBallot: [jsobj='3 1 2'] %s>" % hex(id(ballot)))
+        expected = "<JsonBallot: [weight=3 choices=[1, 2]] %s>" % hex(id(ballot))
+        self.assertEqual(repr(ballot), expected)
 
     def test_eq(self):
         ballot1 = self.make_ballot()
@@ -91,11 +98,11 @@ class JsonBallotTest(TestCase):
         ballot.load_jsobj("2 3 4")
         self.assertEqual(ballot, JsonBallot(choices=(3, 4), weight=2))
 
-    def test_load_jsobj__trailing_space(self):
-        """This checks that the format is strict (i.e. doesn't call strip())."""
+    def test_load_jsobj__bad_format(self):
+        """Check a string that does not parse."""
         ballot = JsonBallot()
         with self.assertRaises(JsonObjError):
-            ballot.load_jsobj("2 ")
+            ballot.load_jsobj("1 a 2")
 
 
 class JsonContestTest(TestCase):

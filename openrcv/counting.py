@@ -10,10 +10,10 @@ import string
 
 # TODO: do not import from jsmodels in this module.
 from openrcv.jsmodels import JsonContestResults, JsonRoundResults
-from openrcv.parsing import (make_internal_ballot_line, BLTParser, Parser)
+from openrcv.parsing import (make_internal_ballot_line, parse_internal_ballot,
+                             BLTParser, Parser)
 from openrcv import utils
-from openrcv.utils import (parse_integer_line, parse_internal_ballot,
-                           FileInfo, ENCODING_INTERNAL_BALLOTS)
+from openrcv.utils import (parse_integer_line, FileInfo, ENCODING_INTERNAL_BALLOTS)
 
 
 log = logging.getLogger(__name__)

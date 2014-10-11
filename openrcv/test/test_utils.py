@@ -1,8 +1,8 @@
 
 from unittest import TestCase
 
-from openrcv.utils import parse_internal_ballot, ReprMixin, StringInfo
-
+from openrcv.utils import ReprMixin, StringInfo
+from openrcv.parsing import parse_internal_ballot
 
 class ModuleTest(TestCase):
 

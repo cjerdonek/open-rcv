@@ -3,7 +3,6 @@ import logging
 import os
 
 from openrcv.models import ContestInfo
-from openrcv.jsmodels import JsonRoundResults
 from openrcv import utils
 from openrcv.utils import parse_integer_line, time_it, FILE_ENCODING
 
@@ -11,6 +10,10 @@ from openrcv.utils import parse_integer_line, time_it, FILE_ENCODING
 log = logging.getLogger(__name__)
 
 
+# TODO: test this and check the case of empty choices.
+# TODO: DRY up with other implementations of this (look at the others
+# to see what is best).  But before I do this, see what the callers
+# are doing and check why the tests are insufficient.
 def make_internal_ballot_line(weight, choices):
     """
     Arguments:
@@ -19,6 +22,25 @@ def make_internal_ballot_line(weight, choices):
     """
     # Do not include the terminal 0 that BLT files include.
     return "%d %s\n" % (weight, " ".join((str(c) for c in choices)))
+
+
+def parse_internal_ballot(line):
+    """
+    Parse an internal ballot line (with or without a trailing newline).
+
+    This function allows leading and trailing spaces.  ValueError is
+    raised if one of the values does not parse to an integer.
+
+    An internal ballot line is a space-delimited string of integers of the
+    form--
+
+    "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
+
+    """
+    ints = parse_integer_line(line)
+    weight = next(ints)
+    choices = tuple(ints)
+    return weight, choices
 
 
 # TODO: add the line number, etc. as attributes.

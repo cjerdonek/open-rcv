@@ -18,30 +18,18 @@ FILE_ENCODING = "utf-8"
 log = logging.getLogger(__name__)
 
 
-# TODO: moving to parsing.py (next to make_internal_ballot_line()).
+# TODO: move to parsing.py (next to make_internal_ballot_line()).
 def parse_integer_line(line):
-    """Return an iterator object of integers."""
-    return (int(s) for s in line.split())
-
-
-# TODO: moving to parsing.py (next to make_internal_ballot_line()).
-def parse_internal_ballot(line):
     """
-    Parse an internal ballot line.
+    Parse a string of integers (with or without a trailing newline).
 
-    An internal ballot line is a space-delimited string of integers of the
-    form--
-
-    "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
+    Returns an iterator object of integers.
 
     This function allows leading and trailing spaces.  ValueError is
     raised if one of the values does not parse to an integer.
 
     """
-    ints = parse_integer_line(line)
-    weight = next(ints)
-    choices = tuple(ints)
-    return weight, choices
+    return (int(s) for s in line.split())
 
 
 def log_create_dir(path):

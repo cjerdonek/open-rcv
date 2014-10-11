@@ -22,7 +22,8 @@ is the usual default value).
 
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonObjError, JsonableMixin)
 from openrcv.models import make_candidates
-from openrcv.utils import parse_internal_ballot, StringInfo
+from openrcv.parsing import parse_internal_ballot
+from openrcv.utils import StringInfo
 
 
 class JsonBallot(JsonableMixin):
@@ -49,8 +50,7 @@ class JsonBallot(JsonableMixin):
 
     def repr_desc(self):
         """Return additional info for __repr__()."""
-        # TODO: improve repr() and test in presence of exceptions.
-        return "jsobj=%r" % self.to_jsobj()
+        return "weight=%r choices=%r" % (self.weight, self.choices)
 
     def load_jsobj(self, jsobj):
         """
@@ -61,8 +61,6 @@ class JsonBallot(JsonableMixin):
         """
         try:
             weight, choices = parse_internal_ballot(jsobj)
-            # TODO: DRY up with other internal ballot stuff.
-            numbers = [int(s) for s in jsobj.split(" ")]
         except ValueError:
             # Can happen for example with: "1 2 abc".
             # ValueError: invalid literal for int() with base 10: 'abc'

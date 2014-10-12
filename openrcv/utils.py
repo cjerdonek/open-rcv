@@ -177,7 +177,14 @@ class _EjectingStringIO(io.StringIO):
 
 class StringInfo(StreamInfo):
 
-    """A wrapped string that opens to become an in-memory text stream."""
+    """
+    A wrapped string that opens to become an in-memory text stream.
+
+    This class allows functions that accept a FileInfo object to be called
+    using strings.  In particular, writing to disk and creating temporary
+    files isn't necessary.  This is especially convenient for testing.
+
+    """
 
     def __init__(self, value=None):
         self.value = value

@@ -1,8 +1,8 @@
 TODO
 ====
 
-* Move parsing helper functions out of utils.
 * Need code to convert a ballot stream into a list of JsonBallots.
+* Review calls to make_internal_ballot_line() for final char.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
 * Make an `update_test_files()` function that reindices and updates expecteds.

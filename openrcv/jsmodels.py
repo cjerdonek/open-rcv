@@ -38,6 +38,18 @@ class JsonBallot(JsonableMixin):
 
     """
 
+    @staticmethod
+    def to_ballot_stream(ballots):
+        """
+        Convert an iterable of ballots into a StreamInfo object.
+
+        The StreamInfo represents the ballots in internal ballot file format.
+
+        """
+        lines = (b.to_internal_ballot() for b in ballots)
+        ballots_string = "\n".join(lines)
+        return StringInfo(ballots_string)
+
     data_attrs = (Attribute('choices'),
                   Attribute('weight'))
     attrs = data_attrs
@@ -107,16 +119,6 @@ class JsonContest(JsonableMixin):
     def get_candidates(self):
         """Return an iterable of the candidate numbers."""
         return make_candidates(self.candidate_count)
-
-    def get_ballot_stream(self):
-        """
-        Return a StreamInfo object representing the ballots in
-          internal ballot file format.
-
-        """
-        lines = (b.to_internal_ballot() for b in self.ballots)
-        ballots_string = "\n".join(lines)
-        return StringInfo(ballots_string)
 
 
 # TODO: rename this to JsonInputFile.

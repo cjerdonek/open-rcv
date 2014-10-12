@@ -23,15 +23,18 @@ def parse_integer_line(line):
     return (int(s) for s in line.split())
 
 
-def make_internal_ballot_line(weight, choices):
+def make_internal_ballot_line(weight, choices, final=''):
     """
+    Return the internal ballot representation of the ballot.
+
     Arguments:
       choices: an iterable of choices.
 
     """
     ballot = str(weight)
     if choices:
-        ballot = "%s %s" % (ballot, " ".join((str(c) for c in choices)))
+        ballot = "%s %s%s" % (ballot, " ".join((str(c) for c in choices)),
+                              final)
     # Do not include the terminal 0 that BLT files include.
     return ballot
 

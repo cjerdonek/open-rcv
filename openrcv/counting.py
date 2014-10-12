@@ -32,10 +32,9 @@ def normalized_ballots(lines):
     Return an iterator object of normalized internal ballots.
 
     Returns an iterator object that yields a sequence of internal ballots
-    that is equivalent to the original, but "compressed" (using the
-    weight component) and ordered lexicographically by the list of choices
-    on each ballot.  The iterator returns each internal ballot as a
-    2-tuple of (weight, choices).
+    equivalent to the original, but "compressed" (using the weight component)
+    and ordered lexicographically by the list of choices on each ballot.
+    The iterator returns each internal ballot as a (weight, choices) 2-tuple.
 
     Arguments:
       lines: an iterable of lines in an internal ballot file.
@@ -210,7 +209,7 @@ class InternalBallotsNormalizer(Parser):
 
         with self.output_stream.open("w") as f:
             for weight, choices in normalized:
-                line = make_internal_ballot_line(weight, choices)
+                line = make_internal_ballot_line(weight, choices, "\n")
                 f.write(line)
 
 

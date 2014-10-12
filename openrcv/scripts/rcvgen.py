@@ -11,6 +11,7 @@ import sys
 from openrcv.counting import count_irv_contest, InternalBallotsNormalizer
 from openrcv.datagen import create_json_tests
 import openrcv.jsmodels as models
+from openrcv.jsmodels import JsonBallot
 from openrcv.jsonlib import from_jsobj, to_json
 from openrcv.jsmodels import TestInputFile
 from openrcv.scripts.main import main
@@ -34,7 +35,7 @@ def update_test_files(argv):
     test_file = TestInputFile.from_jsobj(jsobj)
     contest = test_file.contests[0]
     print(contest.to_json())
-    ballot_stream = contest.get_ballot_stream()
+    ballot_stream = JsonBallot.to_ballot_stream(contest.ballots)
     output_stream = StringInfo()
     parser = InternalBallotsNormalizer(output_stream)
     parser.parse(ballot_stream)

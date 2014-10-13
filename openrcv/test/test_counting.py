@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from openrcv.counting import (count_internal_ballots, get_lowest, get_majority,
                               get_winner, normalized_ballots, InternalBallotsNormalizer)
-from openrcv.jsmodels import JsonRoundResults
+from openrcv.models import RoundResults
 from openrcv.utils import StringInfo
 
 
@@ -37,7 +37,7 @@ class ModuleTest(TestCase):
         """)
         openable = StringInfo(internal_ballots)
         result = count_internal_ballots(openable, (1, 2, 4))
-        self.assertEqual(type(result), JsonRoundResults)
+        self.assertEqual(type(result), RoundResults)
         self.assertEqual(result.totals, {1: 3, 2: 2, 4: 0})
 
     def test_get_majority(self):

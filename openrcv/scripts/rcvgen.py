@@ -35,11 +35,9 @@ def update_test_files(argv):
     test_file = JsonContestFile.from_jsobj(jsobj)
     contest = test_file.contests[0]
     print(contest.to_json())
-    ballot_stream = JsonBallot.to_ballot_stream(contest.ballots)
-    output_stream = StringInfo()
-    parser = InternalBallotsNormalizer(output_stream)
-    parser.parse(ballot_stream)
-    print("output: %r" % output_stream.value)
+    contest.normalize()
+    print(contest.to_json())
+    #print("output: %r" % new_ballots)
 
 def count_test_file(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)

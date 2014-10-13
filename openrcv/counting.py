@@ -8,8 +8,14 @@ import logging
 import os
 import string
 
-# TODO: do not import from jsmodels in this module.
-from openrcv.jsmodels import JsonContestResults, JsonRoundResults
+# This module should not import the module containing the JSON objects.
+# In particular, it should not use any of the JSON object classes.  There
+# are two reasons for this: (1) it avoids circular dependencies, and
+# (2) for simplicity, the counting algorithms should be decoupled from
+# and not depend on serialization, etc.  Serialization is supplemental
+# to any counting and not a prerequisite.
+
+from openrcv.models import ContestResults, RoundResults
 from openrcv.parsing import (make_internal_ballot_line, parse_integer_line,
                              parse_internal_ballot, BLTParser, Parser)
 from openrcv import utils
@@ -63,7 +69,7 @@ def normalized_ballots(lines):
 
 def count_internal_ballots(ballot_stream, candidates):
     """
-    Count one round, and return a JsonRoundResults object.
+    Count one round, and return a RoundResults object.
 
     Arguments:
       ballot_stream: a StreamInfo object for an internal ballot file.
@@ -120,7 +126,7 @@ def get_lowest(totals):
 
 def count_irv_contest(ballot_stream, candidates):
     """
-    Tabulate a contest using IRV, and return a JsonContestResults object.
+    Tabulate a contest using IRV, and return a ContestResults object.
 
     Arguments:
       ballot_stream: a StreamInfo object for an internal ballot file.
@@ -147,7 +153,7 @@ def count_irv_contest(ballot_stream, candidates):
 
         candidates -= eliminated
 
-    results = JsonContestResults(rounds)
+    results = ContestResults(rounds)
     return results
 
 
@@ -178,7 +184,6 @@ def count_irv(blt_path, temp_dir=None):
     return results
 
 
-# TODO: test this class.
 class InternalBallotsNormalizer(Parser):
 
     """
@@ -247,7 +252,7 @@ class InternalBallotsCounter(Parser):
         self.candidates = candidates
 
     def get_parse_return_value(self):
-        totals = JsonRoundResults(self.candidate_totals)
+        totals = RoundResults(self.candidate_totals)
         return totals
 
     def count_ballot(self, weight, choices):

@@ -34,3 +34,33 @@ class ContestInfo(object):
     # TODO: look up the proper return type.
     def __repr__(self):
         return self.name
+
+
+class RoundResults(object):
+
+    """
+    Represents contest results.
+
+    """
+
+    def __init__(self, totals):
+        """
+        Arguments:
+          totals: dict of candidate number to vote total.
+
+        """
+        self.totals = totals
+
+
+class ContestResults(object):
+
+    """
+    Represents contest results.
+
+    """
+
+    def __init__(self, rounds=None):
+        self.rounds = rounds
+
+    def repr_desc(self):
+        return "rounds=%s" % (len(self.rounds), )

@@ -20,8 +20,9 @@ is the usual default value).
 
 """
 
+from openrcv.counting import InternalBallotsNormalizer
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonObjError, JsonableMixin)
-from openrcv.models import make_candidates
+from openrcv.models import make_candidates, ContestResults, RoundResults
 from openrcv.parsing import make_internal_ballot_line, parse_internal_ballot
 from openrcv.utils import StringInfo
 
@@ -140,6 +141,18 @@ class JsonContest(JsonableMixin):
         """Return an iterable of the candidate numbers."""
         return make_candidates(self.candidate_count)
 
+    def normalize(self):
+        """
+        Modifies the current contest in place.
+
+        """
+        ballot_stream = JsonBallot.to_ballot_stream(self.ballots)
+        output_stream = StringInfo()
+        parser = InternalBallotsNormalizer(output_stream)
+        parser.parse(ballot_stream)
+        new_ballots = JsonBallot.from_ballot_stream(output_stream)
+        self.ballots = new_ballots
+
 
 class JsonContestFile(JsonableMixin):
 
@@ -162,7 +175,7 @@ class JsonContestFile(JsonableMixin):
         self.version = version
 
 
-class JsonRoundResults(JsonableMixin):
+class JsonRoundResults(RoundResults, JsonableMixin):
 
     """
     Represents the results of a round for testing purposes.
@@ -172,16 +185,8 @@ class JsonRoundResults(JsonableMixin):
     data_attrs = (Attribute('totals'), )
     attrs = data_attrs
 
-    def __init__(self, totals):
-        """
-        Arguments:
-          totals: dict of candidate number to vote total.
 
-        """
-        self.totals = totals
-
-
-class JsonContestResults(JsonableMixin):
+class JsonContestResults(ContestResults, JsonableMixin):
 
     """
     Represents contest results for testing purposes.
@@ -200,6 +205,3 @@ class JsonContestResults(JsonableMixin):
         """
         self.id = id_
         self.rounds = rounds
-
-    def repr_desc(self):
-        return "rounds=%s" % (len(self.rounds), )

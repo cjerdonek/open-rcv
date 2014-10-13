@@ -188,7 +188,11 @@ class JsonRoundResults(RoundResults, JsonableMixin):
     data_attrs = (Attribute('totals'), )
     attrs = data_attrs
 
+    def __init__(self, totals=None):
+        self.totals = totals
 
+
+# TODO: remove this.
 class JsonContestResults(ContestResults, JsonableMixin):
 
     """
@@ -197,7 +201,7 @@ class JsonContestResults(ContestResults, JsonableMixin):
     """
 
     meta_attrs = (Attribute('id'), )
-    data_attrs = (Attribute('rounds', cls=JsonContest), )
+    data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
     attrs = data_attrs
 
     def __init__(self, rounds=None, id_=None):
@@ -210,6 +214,46 @@ class JsonContestResults(ContestResults, JsonableMixin):
         self.rounds = rounds
 
 
+class JsonTestCaseOutput(JsonableMixin):
+
+    meta_attrs = ()
+    data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
+    attrs = tuple(list(data_attrs) + list(meta_attrs))
+
+    def __init__(self):
+        self.rounds = []
+
+
+class JsonTestCaseInput(JsonableMixin):
+
+    meta_attrs = ()
+    data_attrs = (Attribute('contest', cls=JsonContest), )
+    attrs = tuple(list(data_attrs) + list(meta_attrs))
+
+    def __init__(self):
+        self.contest = None
+
+
+class JsonTestCase(JsonableMixin):
+
+    """
+    An RCV test case (input and expected output).
+
+    """
+
+    meta_attrs = (Attribute('id'),
+                  Attribute('contest_id'), )
+    data_attrs = (Attribute('input', cls=JsonTestCaseInput),
+                  Attribute('output', cls=JsonTestCaseOutput), )
+    attrs = tuple(list(data_attrs) + list(meta_attrs))
+
+    def __init__(self):
+        self.id = None
+        self.contest_id = None
+        self.input = JsonTestCaseInput()
+        self.output = JsonTestCaseOutput()
+
+
 class JsonTestCaseFile(JsonableMixin):
 
     """
@@ -219,5 +263,10 @@ class JsonTestCaseFile(JsonableMixin):
 
     meta_attrs = (Attribute('version'),
                   Attribute('rule_set'), )
-    data_attrs = (Attribute('test_cases', cls=JsonContestResults), )
-    attrs = data_attrs
+    data_attrs = (Attribute('test_cases', cls=JsonTestCase), )
+    attrs = tuple(list(data_attrs) + list(meta_attrs))
+
+    def __init__(self):
+        self.rule_set = None
+        self.version = None
+        self.test_cases = []

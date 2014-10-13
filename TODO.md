@@ -5,7 +5,6 @@ TODO
   providing an option for not having duplicates.
 * Make an `update_test_files()` function that reindices and updates expecteds.
 * Make a JsonTestsFile class with input and output.
-* Eliminate JS from counting.py and parsing.py and document this.
 * Add tie-break and add convention to docs or code comment.
 * Create a function to read a test input file, tabulate each contest,
   and write the results to a new file.

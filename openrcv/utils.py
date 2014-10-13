@@ -102,17 +102,6 @@ def time_it(description):
     log.info("done: %s: %.4f seconds" % (description, elapsed))
 
 
-def read_json_path(path):
-    """
-    Read a JSON file and return its contents as a JSON object.
-
-    """
-    stream_info = JsonFileInfo(path)
-    with stream_info.open() as f:
-        jsobj = json.load(f)
-    return jsobj
-
-
 class ReprMixin(object):
 
     def __repr__(self):
@@ -156,12 +145,6 @@ class FileInfo(StreamInfo):
 
     def _open(self, mode):
         return logged_open(self.path, mode, *self.args, **self.kwargs)
-
-
-class JsonFileInfo(FileInfo):
-
-    def __init__(self, path):
-        super().__init__(path, encoding=ENCODING_JSON)
 
 
 class _EjectingStringIO(io.StringIO):

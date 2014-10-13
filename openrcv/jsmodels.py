@@ -174,6 +174,9 @@ class JsonContestFile(JsonableMixin):
         self.contests = contests
         self.version = version
 
+    def repr_desc(self):
+        return "version=%s contests=%d" % (self.version, len(self.contests))
+
 
 class JsonRoundResults(RoundResults, JsonableMixin):
 
@@ -205,3 +208,16 @@ class JsonContestResults(ContestResults, JsonableMixin):
         """
         self.id = id_
         self.rounds = rounds
+
+
+class JsonTestCaseFile(JsonableMixin):
+
+    """
+    A file of test cases (input and expected output).
+
+    """
+
+    meta_attrs = (Attribute('version'),
+                  Attribute('rule_set'), )
+    data_attrs = (Attribute('test_cases', cls=JsonContestResults), )
+    attrs = data_attrs

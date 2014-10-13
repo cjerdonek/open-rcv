@@ -7,6 +7,8 @@ Supporting code for JSON serialization.
 import json
 import logging
 
+from openrcv.utils import FileInfo, ENCODING_JSON
+
 
 log = logging.getLogger(__name__)
 
@@ -28,12 +30,30 @@ def to_json(jsobj):
     return call_json(json.dumps, jsobj)
 
 
-def write_json(jsobj, stream_info):
+def read_json_path(path):
+    """
+    Read a JSON file and return its contents as a JSON object.
+
+    """
+    stream_info = JsonFileInfo(path)
+    with stream_info.open() as f:
+        jsobj = json.load(f)
+    return jsobj
+
+
+def write_json(obj, stream_info=None, path=None):
     """
     Arguments:
       stream_info: a StreamInfo object.
 
     """
+    try:
+        jsobj = obj.to_jsobj()
+    except AttributeError:
+        jsobj = obj
+    if path is not None:
+        assert stream_info is None
+        stream_info = JsonFileInfo(path)
     with stream_info.open("w") as f:
         return call_json(json.dump, jsobj, f)
 
@@ -77,6 +97,12 @@ def to_jsobj(obj):
     if obj.__class__.__module__ == "builtins":
         return obj
     return obj.to_jsobj()
+
+
+class JsonFileInfo(FileInfo):
+
+    def __init__(self, path):
+        super().__init__(path, encoding=ENCODING_JSON)
 
 
 class JsonObjError(Exception):

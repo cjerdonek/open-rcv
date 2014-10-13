@@ -12,11 +12,11 @@ from openrcv.counting import count_irv_contest, InternalBallotsNormalizer
 from openrcv.datagen import create_json_tests
 import openrcv.jsmodels as models
 from openrcv.jsmodels import JsonBallot
-from openrcv.jsonlib import from_jsobj, to_json
-from openrcv.jsmodels import JsonContestFile
+from openrcv.jsonlib import from_jsobj, read_json_path, to_json, write_json
+from openrcv.jsmodels import JsonContestFile, JsonTestCaseFile
 from openrcv.scripts.main import main
 from openrcv import utils
-from openrcv.utils import read_json_path, FileInfo, StringInfo
+from openrcv.utils import FileInfo, StringInfo
 
 
 log = logging.getLogger(__name__)
@@ -28,16 +28,18 @@ def run_main():
     main(do_rcvgen)
 
 def do_rcvgen(argv):
-    update_test_files(argv)
+    normalize_contest_file(argv)
 
-def update_test_files(argv):
+
+def normalize_contest_file(argv):
+    """Normalize a contest file."""
     jsobj = read_json_path(TEST_INPUT_PATH)
     test_file = JsonContestFile.from_jsobj(jsobj)
-    contest = test_file.contests[0]
-    print(contest.to_json())
-    contest.normalize()
-    print(contest.to_json())
-    #print("output: %r" % new_ballots)
+    for id_, contest in enumerate(test_file.contests, start=1):
+        contest.id = id_
+        contest.normalize()
+    write_json(test_file, path=TEST_INPUT_PATH)
+
 
 def count_test_file(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)

@@ -46,9 +46,29 @@ class JsonBallot(JsonableMixin):
         The StreamInfo represents the ballots in internal ballot file format.
 
         """
-        lines = (b.to_internal_ballot() for b in ballots)
-        ballots_string = "\n".join(lines)
+        lines = (b.to_internal_ballot(final="\n") for b in ballots)
+        ballots_string = "".join(lines)
         return StringInfo(ballots_string)
+
+    @classmethod
+    def from_ballot_stream(cls, ballot_stream):
+        """
+        Return an iterable of JsonBallot objects.
+
+        Arguments:
+          ballot_stream: a StreamInfo object of internal ballots.
+
+        """
+        # TODO: would it help to create a general method to iterate through
+        # internal ballots in a ballot stream?  Also, if we do this, we
+        # could use a Parser, which would provide more error info.
+        ballots = []
+        with ballot_stream.open() as f:
+            for line in f:
+                weight, choices = parse_internal_ballot(line)
+                ballot = cls(choices=choices, weight=weight)
+                ballots.append(ballot)
+        return ballots
 
     data_attrs = (Attribute('choices'),
                   Attribute('weight'))
@@ -56,8 +76,8 @@ class JsonBallot(JsonableMixin):
 
     def __init__(self, choices=None, weight=1):
         if choices is None:
-            choices = []
-        self.choices = choices
+            choices = ()
+        self.choices = tuple(choices)
         self.weight = weight
 
     def repr_desc(self):
@@ -83,9 +103,9 @@ class JsonBallot(JsonableMixin):
         """Return the ballot as a JSON object."""
         return self.to_internal_ballot()
 
-    def to_internal_ballot(self):
+    def to_internal_ballot(self, final=''):
         """Return the ballot as an internal ballot string."""
-        return make_internal_ballot_line(self.weight, self.choices)
+        return make_internal_ballot_line(self.weight, self.choices, final=final)
 
 
 # Inherit from ContestInfo?

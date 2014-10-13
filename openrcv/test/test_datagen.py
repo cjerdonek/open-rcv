@@ -39,7 +39,8 @@ class ModuleTest(TestCase):
     def test_gen_random_ballot_list(self):
         cases = (
             # args=(choices, ballot_count, max_length=None),
-            (([1, 2], 2), [0, 2, 1, 2], ([1], [2])),
+            #   randint_vals, expected_choices
+            (([1, 2], 2), [0, 2, 1, 2], ((1, ), (2, ))),
         )
         for args, randint_vals, expected in cases:
             with self.subTest(args=args, expected=expected, randint_vals=randint_vals):

@@ -198,9 +198,9 @@ class StringInfo(StreamInfo):
         self.value = value
 
     def repr_desc(self):
-        return "contents=%s" % (self.get_value(10), )
+        return "contents=%s" % (self.get_display_value(10), )
 
-    def get_value(self, limit=None):
+    def get_display_value(self, limit=None):
         """
         Return the first `limit` characters plus "...".
 
@@ -213,7 +213,7 @@ class StringInfo(StreamInfo):
     # TODO: test this method on short text strings.
     def _open(self, mode):
         value = self.value
-        display = self.get_value(limit=24)
+        display = self.get_display_value(limit=24)
         # As a precaution, make sure the string is empty if not reading.
         if (value is not None and mode != "r"):
             raise ValueError("Cannot write to string that already has a value: %r" % display)

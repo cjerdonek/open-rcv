@@ -1,10 +1,12 @@
 
 from contextlib import contextmanager
+from textwrap import dedent
 from unittest import TestCase
 
 from openrcv.jsonlib import JsonObjError, JS_NULL
 from openrcv.jsmodels import (from_jsobj, JsonBallot, JsonContest,
                               JsonContestResults, JsonRoundResults)
+from openrcv.utils import StreamInfo, StringInfo
 
 
 @contextmanager
@@ -28,13 +30,20 @@ class JsonBallotTest(TestCase):
 
     def test_init(self):
         ballot = self.make_ballot()
-        self.assertEqual(ballot.choices, [1, 2])
+        self.assertEqual(ballot.choices, (1, 2))
         self.assertEqual(ballot.weight, 3)
 
     def test_init__defaults(self):
         ballot = JsonBallot()
-        self.assertEqual(ballot.choices, [])
+        self.assertEqual(ballot.choices, ())
         self.assertEqual(ballot.weight, 1)
+
+    def test_init__tuple(self):
+        """Check that JsonBallot converts lists to tuples."""
+        ballot = JsonBallot(choices=[])
+        self.assertEqual(ballot.choices, ())
+        ballot = JsonBallot(choices=[1, 2])
+        self.assertEqual(ballot.choices, (1, 2))
 
     def test_repr_desc(self):
         cases = [
@@ -50,7 +59,7 @@ class JsonBallotTest(TestCase):
 
     def test_repr(self):
         ballot = self.make_ballot()
-        expected = "<JsonBallot: [weight=3 choices=[1, 2]] %s>" % hex(id(ballot))
+        expected = "<JsonBallot: [weight=3 choices=(1, 2)] %s>" % hex(id(ballot))
         self.assertEqual(repr(ballot), expected)
 
     def test_eq(self):
@@ -103,6 +112,23 @@ class JsonBallotTest(TestCase):
         ballot = JsonBallot()
         with self.assertRaises(JsonObjError):
             ballot.load_jsobj("1 a 2")
+
+    def test_to_ballot_stream(self):
+        ballots = [JsonBallot(weight=3),
+                   JsonBallot(choices=[1, 2])]
+        stream = JsonBallot.to_ballot_stream(ballots)
+        self.assertTrue(isinstance(stream, StreamInfo))
+        self.assertEqual(stream.value, "3\n1 1 2\n")
+
+    def test_from_ballot_stream(self):
+        ballot_stream = StringInfo(dedent("""\
+        2
+        3 1 2
+        """))
+        ballots = JsonBallot.from_ballot_stream(ballot_stream)
+        expected = [JsonBallot(weight=2),
+                    JsonBallot(weight=3, choices=(1, 2))]
+        self.assertEqual(ballots, expected)
 
 
 class JsonContestTest(TestCase):

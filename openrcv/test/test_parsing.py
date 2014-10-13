@@ -18,6 +18,8 @@ class ModuleTest(TestCase):
         self.assertEqual(make_internal_ballot_line(1, ()), "1")
         # Check the final-character argument.
         self.assertEqual(make_internal_ballot_line(1, (2, ), "\n"), "1 2\n")
+        # Check the final-character argument with empty choices.
+        self.assertEqual(make_internal_ballot_line(1, (), "\n"), "1\n")
 
 
 class BLTParserTest(TestCase):

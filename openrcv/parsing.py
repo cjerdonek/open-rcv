@@ -31,11 +31,10 @@ def make_internal_ballot_line(weight, choices, final=''):
       choices: an iterable of choices.
 
     """
-    ballot = str(weight)
-    if choices:
-        ballot = "%s %s%s" % (ballot, " ".join((str(c) for c in choices)),
-                              final)
-    # Do not include the terminal 0 that BLT files include.
+    choices = "" if not choices else " ".join((str(c) for c in choices))
+    # Only include the space separator if choices are present.
+    # Also, note that there is no terminal 0 like in the BLT format.
+    ballot = "%s%s%s%s" % (weight, " " if choices else "", choices, final)
     return ballot
 
 
@@ -69,6 +68,9 @@ class Parser(object):
     line_no = 0
     line = None
 
+    # TODO: consider moving this into StreamInfo by creating a method
+    # to return an iterator object over lines -- perhaps by implementing
+    # the iterator protocol.
     def iter_lines(self, f):
         """
         Return an iterator over the lines of an input file.

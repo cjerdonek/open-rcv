@@ -127,6 +127,14 @@ class ReprMixin(object):
 class StreamInfo(ReprMixin):
 
     def open(self, mode=None):
+        """
+        Open the stream, and return a file object.
+
+        Specifically, this method returns an io.IOBase object.  IOBase
+        objects are iterable.  Iterating over them yields the lines in
+        the stream.
+
+        """
         if mode is None:
             mode = "r"
         return self._open(mode)

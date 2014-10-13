@@ -12,19 +12,22 @@ from openrcv.utils import StringInfo
 class ModuleTest(TestCase):
 
     def test_normalized_ballots(self):
-        # This test case simultaneously checks both compressing and
-        # lexicographically ordering by choice (and not be weight).
-        lines = (
-            "1 2\n",
-            "1 3\n",
-            "4 1\n",
-            "1 2\n",
-        )
+        # This test case simultaneously checks all of (1) "compressing" (by
+        # weight), (2) lexicographically ordering by choice (and not
+        # by weight), and (3) ballots with no choices (aka undervotes).
+        lines = dedent("""\
+            1 2
+            1
+            1 3
+            2
+            4 1
+            1 2
+            """).splitlines(keepends=True)
         normalized = normalized_ballots(lines)
         # Check that it returns a generator iterator and not a concrete
         # list/tuple/etc.
         self.assertEqual(type(normalized), type((x for x in ())))
-        self.assertEqual(list(normalized), [(4, (1,)), (2, (2,)), (1, (3,))])
+        self.assertEqual(list(normalized), [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))])
 
     def test_count_internal_ballots(self):
         internal_ballots = dedent("""\
@@ -87,9 +90,11 @@ class InternalBallotsNormalizerTest(TestCase):
         1 2
         1 3
         4 1
+        3
         1 2
         """)
         expected = dedent("""\
+        3
         4 1
         2 2
         1 3

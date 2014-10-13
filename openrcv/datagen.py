@@ -10,7 +10,7 @@ in the open-rcv-tests repo.
 import random
 
 import openrcv.jsmodels as models
-from openrcv.jsmodels import JsonBallot, JsonContest, TestInputFile
+from openrcv.jsmodels import JsonBallot, JsonContest, JsonContestFile
 from openrcv import utils
 from openrcv.utils import FileInfo
 
@@ -71,5 +71,5 @@ def create_json_tests():
                          format(candidate_count))
         contests.append(contest)
 
-    test_file = TestInputFile(contests, version="0.2.0-alpha")
+    test_file = JsonContestFile(contests, version="0.2.0-alpha")
     return test_file

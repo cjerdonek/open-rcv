@@ -13,7 +13,7 @@ from openrcv.datagen import create_json_tests
 import openrcv.jsmodels as models
 from openrcv.jsmodels import JsonBallot
 from openrcv.jsonlib import from_jsobj, to_json
-from openrcv.jsmodels import TestInputFile
+from openrcv.jsmodels import JsonContestFile
 from openrcv.scripts.main import main
 from openrcv import utils
 from openrcv.utils import read_json_path, FileInfo, StringInfo
@@ -32,7 +32,7 @@ def do_rcvgen(argv):
 
 def update_test_files(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)
-    test_file = TestInputFile.from_jsobj(jsobj)
+    test_file = JsonContestFile.from_jsobj(jsobj)
     contest = test_file.contests[0]
     print(contest.to_json())
     ballot_stream = JsonBallot.to_ballot_stream(contest.ballots)
@@ -43,9 +43,9 @@ def update_test_files(argv):
 
 def count_test_file(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)
-    log.info("printing TestInputFile JSON object")
+    log.info("printing JsonContestFile JSON object")
     print(repr(jsobj))
-    test_file = TestInputFile.from_jsobj(jsobj)
+    test_file = JsonContestFile.from_jsobj(jsobj)
     for contest in test_file.contests:
         log.info("contest: %r\n>>>%s" % (contest, contest.to_json()))
         ballot_stream = contest.get_ballot_stream()
@@ -55,10 +55,10 @@ def count_test_file(argv):
 
     return
 
-    log.info("printing TestInputFile Python object")
+    log.info("printing JsonContestFile Python object")
     for contest in test_file.contests:
         print(repr(contest))
-    log.info("printing TestInputFile JSON")
+    log.info("printing JsonContestFile JSON")
     print(test_file.to_json())
 
 

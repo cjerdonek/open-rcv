@@ -108,7 +108,7 @@ class JsonBallot(JsonableMixin):
         return make_internal_ballot_line(self.weight, self.choices, final=final)
 
 
-# Inherit from ContestInfo?
+# TODO: inherit from ContestInfo?
 class JsonContest(JsonableMixin):
 
     """
@@ -141,8 +141,7 @@ class JsonContest(JsonableMixin):
         return make_candidates(self.candidate_count)
 
 
-# TODO: rename this to JsonInputFile.
-class TestInputFile(JsonableMixin):
+class JsonContestFile(JsonableMixin):
 
     """
     Represents an input file for open-rcv-tests.

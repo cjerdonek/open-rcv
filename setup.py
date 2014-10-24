@@ -97,7 +97,7 @@ setup(
     # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
     # data_files=[('my_data', ['data/data_file'])],
 
-    # These commands can be run with--
+    # The cmdclass commands below can be run using the form--
     #
     #   $ python setup.py KEY
     #
@@ -105,6 +105,7 @@ setup(
         'build_html': utils.BuildHtmlCommand,
         'update_long_desc': utils.LongDescriptionCommand,
     },
+
     entry_points={
         # "distutils.commands": [
         #     "foo = mypackage.some_module:foo",

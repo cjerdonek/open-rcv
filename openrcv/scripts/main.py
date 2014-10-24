@@ -98,13 +98,14 @@ def config_log(level=None, stream=None):
     root = logging.getLogger()
     # If logging was already configured (e.g. at the outset of a test run),
     # then let's not change the root logging level.
+    # TODO: simplify this logic (e.g. we should not need "if" logic).
     already_configured = root.hasHandlers()
     handler = make_log_handler(level, stream=stream)
     root.addHandler(handler)
     if not already_configured:
         root.setLevel(level)
         log.info("root logger level set to: %s" % logging.getLevelName(level))
-    log.info("a logging handler was added")
+    log.debug("a logging handler was added")
     yield
     root.removeHandler(handler)
 

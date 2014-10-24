@@ -6,6 +6,7 @@ The rcv command for counting ballots.
 
 import json
 import logging
+import os
 import sys
 
 from openrcv.counting import count_irv_contest, InternalBallotsNormalizer

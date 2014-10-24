@@ -26,8 +26,8 @@ def logged_open(*args, **kwargs):
     log.info("opening file: (%r, %r): %s" % (args[1:], kwargs, args[0]))
     try:
         return open(*args, **kwargs)
-    except TypeError:
-        raise TypeError("arguments: open(*%r, **%r)" % (args, kwargs))
+    except (OSError, TypeError):
+        raise Exception("arguments: open(*%r, **%r)" % (args, kwargs))
 
 
 def make_dirs(path):

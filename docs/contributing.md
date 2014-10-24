@@ -76,7 +76,7 @@ To install pandoc, follow the instructions on [pandoc's home page][pandoc].
 If you use TextMate, you can include the following at the beginning of
 your `*.tmproj` file's `regexFolderFilter:
 
-    <string>!dist|.*.egg-info|...
+    <string>!dist|.*.egg-info|.*/(__pycache__|...
 
 
 Running Tests

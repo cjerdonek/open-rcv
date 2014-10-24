@@ -1,19 +1,16 @@
 TODO
 ====
 
+* Start using argparse.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
+  - Make sure we have a function to create a random contest (given
+    number of candidates, ballots, etc).
 * Make an `update_test_files()` function that reindices and updates expecteds.
-* Make a JsonTestsFile class with input and output.
 * Add tie-break and add convention to docs or code comment.
-* Create a function to read a test input file, tabulate each contest,
-  and write the results to a new file.
-* Add the expected output to the JSON tests.
-  - Figure out where to document the rules (e.g. tie-break) for given output.
 * Create a "top-level" function to tabulate an election from a path to
   an internal ballot file and a ContestInfo object.
 * Add remaining PyPI instructions to releasing.
-* Stub out argparse.
 * Add auto-generation comment to top of `setup_long_description.rst`.
 * Only include newest changes in README.
 * Add command to generate sample ballot file.

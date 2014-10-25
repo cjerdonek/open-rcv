@@ -20,11 +20,15 @@ log = logging.getLogger(PROG_NAME)
 
 
 class UsageError(Exception):
+
     """
     Exception class for command-line syntax errors.
 
     """
-    pass
+
+    def __init__(self, *args, parser=None):
+        super().__init__(*args)
+        self.parser = parser
 
 
 # We subclass ArgumentParser to prevent it from raising SystemExit when
@@ -39,7 +43,7 @@ class ArgParser(argparse.ArgumentParser):
         Handle an error occurring while parsing command arguments.
 
         """
-        raise UsageError(message)
+        raise UsageError(message, parser=self)
 
 
 class DisplayNameFilter(object):
@@ -103,6 +107,7 @@ def make_log_handler(level, stream=None):
     return handler
 
 
+# TODO: rename stream to file.
 @contextmanager
 def config_log(level=None, stream=None):
     """
@@ -135,12 +140,27 @@ def config_log(level=None, stream=None):
     root.removeHandler(handler)
 
 
+# TODO: rename log_stream to log_file.
+# TODO: test the UsageError code path.
 def main_status(do_func, argv, log_stream=None):
     with config_log(stream=log_stream):
         log.debug("argv: %r" % argv)
         try:
             do_func(argv)
             status = EXIT_STATUS_SUCCESS
+        except UsageError as err:
+            # As of Python 3.4, argparse.ArgumentParser's error() implementation
+            # looked like this--
+            #   self.print_usage(_sys.stderr)
+            #   args = {'prog': self.prog, 'message': message}
+            #   self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+            parser = err.parser
+            # TODO: display user-friendly instruction for running --help.
+            parser.print_usage(log_stream)
+            args = err.args
+            assert len(args) == 1
+            log.error(args[0])
+            status = EXIT_STATUS_USAGE_ERROR
         except Exception as err:
             # Log the full exception info for "unexpected" exceptions.
             log.error(format_exc())

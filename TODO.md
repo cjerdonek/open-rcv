@@ -1,6 +1,8 @@
 TODO
 ====
 
+* Finish fleshing out design doc.
+* Link to design doc from contributing doc.
 * Incorporate "dev" scripts into command-line API.
 * Nicer message on argparse error.
 * Get logging level from argparse.

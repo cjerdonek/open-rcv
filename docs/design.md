@@ -8,7 +8,7 @@ the `openrcv` package or interact with it in some other way.
 Some of the pieces are as follows:
 
 1. **Ballot data files.**  These are the input files that contain ballot
-   data.  These can be in any number of formats (e.g. [BLT][blt]).
+   data.  These can be in any number of formats (e.g. [BLT][blt-desc]).
 2. **Contests files.**  This is an OpenRCV
 3. **Parsers.**  A parser is a Python object responsible for converting
    ballot data files into Contest objects.

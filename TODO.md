@@ -1,6 +1,7 @@
 TODO
 ====
 
+* Stub out parsing a YAML file.
 * Incorporate "dev" scripts into command-line API.
 * Fix up remaining PyPI release instructions and commit.
 * Improve the random ballot generation by removing undervotes and
@@ -16,6 +17,7 @@ TODO
 * Add command to generate sample ballot file.
 * Add nice online documentation.
 * Add PEP8 checking.
+* Add option for specifying file format to bypass detection based on file extension.
 * Change format of unit test errors from--
   `test_parse_internal_ballot__non_integer (openrcv.test.test_counting.ModuleTest`
   to--

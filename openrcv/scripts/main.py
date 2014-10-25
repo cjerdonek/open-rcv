@@ -19,7 +19,7 @@ PROG_NAME = os.path.basename(sys.argv[0])
 log = logging.getLogger(PROG_NAME)
 
 
-class UsageError(Exception):
+class UsageException(Exception):
 
     """
     Exception class for command-line syntax errors.
@@ -29,6 +29,26 @@ class UsageError(Exception):
     def __init__(self, *args, parser=None):
         super().__init__(*args)
         self.parser = parser
+
+
+class HelpRequested(UsageException):
+    pass
+
+
+# We create a custom help action to simplify unit testing and make all
+# system exits occur through our global main() function.
+#
+# This class is modeled after Python 3.4's argparse._HelpAction.
+class HelpAction(argparse.Action):
+
+    def __init__(self, *args, nargs=0, **kwargs):
+        super().__init__(*args, nargs=0, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        # Python 3.4's argparse implementation looks like this--
+        #   parser.print_help()
+        #   parser.exit()
+        raise HelpRequested(parser=parser)
 
 
 # We subclass ArgumentParser to prevent it from raising SystemExit when
@@ -43,7 +63,7 @@ class ArgParser(argparse.ArgumentParser):
         Handle an error occurring while parsing command arguments.
 
         """
-        raise UsageError(message, parser=self)
+        raise UsageException(message, parser=self)
 
 
 class DisplayNameFilter(object):
@@ -141,23 +161,27 @@ def config_log(level=None, stream=None):
 
 
 # TODO: rename log_stream to log_file.
-# TODO: test the UsageError code path.
+# TODO: test the UsageException code path.
 def main_status(do_func, argv, log_stream=None):
     with config_log(stream=log_stream):
         log.debug("argv: %r" % argv)
         try:
             do_func(argv)
             status = EXIT_STATUS_SUCCESS
-        except UsageError as err:
+        except HelpRequested as exc:
+            parser = exc.parser
+            parser.print_help(file=sys.stdout)
+            status = EXIT_STATUS_SUCCESS
+        except UsageException as exc:
             # As of Python 3.4, argparse.ArgumentParser's error() implementation
             # looked like this--
             #   self.print_usage(_sys.stderr)
             #   args = {'prog': self.prog, 'message': message}
             #   self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
-            parser = err.parser
+            parser = exc.parser
             # TODO: display user-friendly instruction for running --help.
             parser.print_usage(log_stream)
-            args = err.args
+            args = exc.args
             assert len(args) == 1
             log.error(args[0])
             status = EXIT_STATUS_USAGE_ERROR

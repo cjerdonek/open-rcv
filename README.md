@@ -44,6 +44,15 @@ Installing
 
     $ pip install openrcv
 
+If you see an error like the following in the logs, you can safely ignore it:
+
+    build/temp.macosx-10.9-x86_64-3.4/check_libyaml.c:2:10: fatal error: 'yaml.h' file not found
+        #include <yaml.h>
+                 ^
+        1 error generated.
+
+        libyaml is not found or a compiler error: forcing --without-libyaml
+
 
 Running It
 ----------

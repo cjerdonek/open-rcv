@@ -77,7 +77,8 @@ setup(
         'dev':  [
             'check-manifest',
             'pandocfilters >=1.2,<1.3',
-            'twine >=1.3,<1.4'
+            'PyYAML >=3,<4',
+            'twine >=1.3,<1.4',
         ],
         'test':  [
             'coverage',

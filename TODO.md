@@ -2,7 +2,21 @@ TODO
 ====
 
 * Stub out parsing a YAML file.
+
+contests.yaml
+-------------
+    election:
+      name:
+      contests: [
+        name:
+        file: contest.blt
+        file_format: BLT
+        style: san_francisco_rcv
+
 * Incorporate "dev" scripts into command-line API.
+* Nicer message on argparse error.
+* Get logging level from argparse.
+* Add extra command options from molt.
 * Fix up remaining PyPI release instructions and commit.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.

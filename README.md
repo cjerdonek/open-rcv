@@ -68,8 +68,6 @@ For help from the command-line:
 
     $ rcv --help
 
-Here is a description of the [BLT file][blt-description] format.
-
 
 Testing It
 ----------
@@ -97,7 +95,6 @@ Author
 Chris Jerdonek (<chris.jerdonek@gmail.com>)
 
 
-[blt-description]: https://code.google.com/p/droop/wiki/BltFileFormat
 [openrcv-contribute]: docs/contributing.md
 [openrcv-github]: https://github.com/cjerdonek/open-rcv
 [openrcv-pypi]: https://pypi.python.org/pypi/OpenRCV

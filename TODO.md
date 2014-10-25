@@ -1,25 +1,6 @@
 TODO
 ====
 
-* Stub out parsing a YAML file.
-
-contests.yaml
--------------
-    election:
-      name:
-      contests: [
-        name:
-        file: contest.blt
-        file_format: BLT
-        style: san_francisco_rcv
-
-* Stub out architecture doc describing architecture of library:
-  1) input files
-  2) parser -> structured internal ballot format (with metadata)
-     - explain that this is a simple text file with Python metadata.
-  3) tallier -> structured results
-  4) results renderers
-
 * Incorporate "dev" scripts into command-line API.
 * Nicer message on argparse error.
 * Get logging level from argparse.
@@ -36,7 +17,8 @@ contests.yaml
 * Add auto-generation comment to top of `setup_long_description.rst`.
 * Only include newest changes in README.
 * Add command to generate sample ballot file.
-* Add nice online documentation.
+* Add "sample election" command so people can play with using it.
+* Add nice online documentation (convert to reST).
 * Add PEP8 checking.
 * Add option for specifying file format to bypass detection based on file extension.
 * Change format of unit test errors from--

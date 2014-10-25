@@ -1,4 +1,5 @@
 
+import argparse
 from contextlib import contextmanager
 import logging
 import os
@@ -7,6 +8,7 @@ from traceback import format_exc
 
 import colorlog
 
+# TODO: give this module a better name (e.g. "common").
 
 EXIT_STATUS_SUCCESS = 0
 EXIT_STATUS_FAIL = 1
@@ -15,6 +17,29 @@ LOGGING_LEVEL_DEFAULT = logging.DEBUG
 
 PROG_NAME = os.path.basename(sys.argv[0])
 log = logging.getLogger(PROG_NAME)
+
+
+class UsageError(Exception):
+    """
+    Exception class for command-line syntax errors.
+
+    """
+    pass
+
+
+# We subclass ArgumentParser to prevent it from raising SystemExit when
+# an argument-parsing error occurs.  We want all error handling to happen
+# centrally through our catch-all.
+class ArgParser(argparse.ArgumentParser):
+
+    # The base class implementation prints the usage string and exits
+    # with status code 2.
+    def error(self, message):
+        """
+        Handle an error occurring while parsing command arguments.
+
+        """
+        raise UsageError(message)
 
 
 class DisplayNameFilter(object):

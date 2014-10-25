@@ -4,12 +4,11 @@ The rcv command for counting ballots.
 
 """
 
-import argparse
 import logging
 import sys
 
 from openrcv import counting
-from openrcv.scripts.main import main
+from openrcv.scripts.main import main, ArgParser
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ def create_argparser():
     Return an ArgumentParser object.
 
     """
-    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser = ArgParser(description=DESCRIPTION)
     parser.add_argument('input_path', metavar='INPUT_PATH',
                         help="path to a contests configuration file. "
                              "Supported file formats are JSON (*.json) and "
@@ -36,6 +35,7 @@ def run_main():
     main(run_rcv)
 
 
+# TODO: unit-test --help.
 def run_rcv(argv):
     if argv is None:
         argv = sys.argv

@@ -48,9 +48,18 @@ Installing
 Running It
 ----------
 
-To count the ballots for a contest, pass a path to a [BLT file][blt-description]:
+To count the ballots for one or more contests, pass the path to an OpenRCV
+contests file:
 
-    $ rcv CONTEST.blt
+    $ rcv data/sample.yaml
+
+TODO: explain the format and that it can be JSON or YAML.
+
+For help from the command-line:
+
+    $ rcv --help
+
+Here is a description of the [BLT file][blt-description] format.
 
 
 Testing It

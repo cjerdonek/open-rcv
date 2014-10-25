@@ -23,7 +23,16 @@ def log_create_dir(path):
 
 
 def logged_open(*args, **kwargs):
-    log.info("opening file: (%r, %r): %s" % (args[1:], kwargs, args[0]))
+    try:
+        mode = args[1]
+    except IndexError:
+        mode = 'r'
+
+    if mode == 'r':
+        _log = log.debug
+    else:
+        _log = log.info
+    _log('opening file (options=%r, %r): %s' % (args[1:], kwargs, args[0]))
     try:
         return open(*args, **kwargs)
     except (OSError, TypeError):

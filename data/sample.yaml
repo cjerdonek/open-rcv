@@ -1,0 +1,7 @@
+openrcv:
+  name: Sample Election
+  contests:
+    -
+      file: sample.blt
+      file_format: BLT
+      style: san_francisco_rcv

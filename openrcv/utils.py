@@ -28,11 +28,9 @@ def logged_open(*args, **kwargs):
     except IndexError:
         mode = 'r'
 
-    if mode == 'r':
-        _log = log.debug
-    else:
-        _log = log.info
+    _log = log.debug if (mode == 'r') else log.info
     _log('opening file (options=%r, %r): %s' % (args[1:], kwargs, args[0]))
+
     try:
         return open(*args, **kwargs)
     except (OSError, TypeError):
@@ -114,9 +112,8 @@ def time_it(description):
 class ReprMixin(object):
 
     def __repr__(self):
-        desc = self.repr_desc()
-        desc = "--" if desc is None else desc
-        return "<%s object: [%s] %s>" % (self.__class__.__name__, desc, hex(id(self)))
+        desc = self.repr_desc() or "--"
+        return "<%s: [%s] %s>" % (self.__class__.__name__, desc, hex(id(self)))
 
     def repr_desc(self):
         return None

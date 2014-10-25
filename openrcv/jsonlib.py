@@ -7,7 +7,7 @@ Supporting code for JSON serialization.
 import json
 import logging
 
-from openrcv.utils import FileInfo, ENCODING_JSON
+from openrcv.utils import FileInfo, ReprMixin, ENCODING_JSON
 
 
 log = logging.getLogger(__name__)
@@ -132,15 +132,11 @@ class Attribute(object):
         self.cls = cls
 
 
-class JsonableMixin(object):
+class JsonableMixin(ReprMixin):
 
     __no_attribute__ = object()  # used in __eq__()
 
     meta_attrs = ()
-
-    def __repr__(self):
-        desc = self.repr_desc() or "--"
-        return "<%s: [%s] %s>" % (self.__class__.__name__, desc, hex(id(self)))
 
     def __eq__(self, other):
         if type(self) != type(other):

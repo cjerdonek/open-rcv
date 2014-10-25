@@ -162,7 +162,9 @@ def config_log(level=None, stream=None):
 
 # TODO: rename log_stream to log_file.
 # TODO: test the UsageException code path.
-def main_status(do_func, argv, log_stream=None):
+def main_status(do_func, argv, stdout=None, log_stream=None):
+    if stdout is None:
+        stdout = sys.stdout
     with config_log(stream=log_stream):
         log.debug("argv: %r" % argv)
         try:
@@ -170,7 +172,7 @@ def main_status(do_func, argv, log_stream=None):
             status = EXIT_STATUS_SUCCESS
         except HelpRequested as exc:
             parser = exc.parser
-            parser.print_help(file=sys.stdout)
+            parser.print_help(file=stdout)
             status = EXIT_STATUS_SUCCESS
         except UsageException as exc:
             # As of Python 3.4, argparse.ArgumentParser's error() implementation

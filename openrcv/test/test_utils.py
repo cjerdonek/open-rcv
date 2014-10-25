@@ -32,12 +32,12 @@ class ReprMixinTest(TestCase):
 
     def test_repr(self):
         obj = ReprMixin()
-        expected = "<ReprMixin object: [--] %s>" % hex(id(obj))
+        expected = "<ReprMixin: [--] %s>" % hex(id(obj))
         self.assertEqual(repr(obj), expected)
 
     def test_repr__implemented(self):
         obj = ReprMixinTest.ReprSample()
-        expected = "<ReprSample object: [foo] %s>" % hex(id(obj))
+        expected = "<ReprSample: [foo] %s>" % hex(id(obj))
         self.assertEqual(repr(obj), expected)
 
 

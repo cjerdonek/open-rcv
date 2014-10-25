@@ -13,6 +13,13 @@ contests.yaml
         file_format: BLT
         style: san_francisco_rcv
 
+* Stub out architecture doc describing architecture of library:
+  1) input files
+  2) parser -> structured internal ballot format (with metadata)
+     - explain that this is a simple text file with Python metadata.
+  3) tallier -> structured results
+  4) results renderers
+
 * Incorporate "dev" scripts into command-line API.
 * Nicer message on argparse error.
 * Get logging level from argparse.

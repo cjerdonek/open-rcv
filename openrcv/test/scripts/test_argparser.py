@@ -10,6 +10,7 @@ from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 # TODO: add a test for good args.
 class ModuleTestCase(UnitCase):
 
+    @skipIfTravis()
     def test_parse_log_level(self):
         self.assertEqual(parse_log_level('INFO'), 20)
         self.assertEqual(parse_log_level('DEBUG'), 10)
@@ -18,21 +19,18 @@ class ModuleTestCase(UnitCase):
         with self.assertRaises(ArgumentTypeError):
             parse_log_level('FOO')
 
+    @skipIfTravis()
     def test_get_log_level(self):
         parser = create_argparser()
         self.assertEqual(get_log_level(parser, ['input_path', '--log-level', 'DEBUG']), 10)
-
         # Check what would otherwise be a UsageException.
         with self.assertRaises(UsageException):
             parser.parse_args([])
         self.assertEqual(get_log_level(parser, []), 20)
-
         # Check an unrecognized string.
         self.assertEqual(get_log_level(parser, ['input_path', '--log-level', 'FOO']), 20)
-
         # Check not passing the --log-level option.
         self.assertEqual(get_log_level(parser, ['input_path']), 20)
-
         # Test what happens if the parser doesn't have a --log-level option.
         parser = ArgumentParser()
         with self.assertRaises(AttributeError):
@@ -68,6 +66,7 @@ class CreateArgparserTestCase(UnitCase):
         ns = self.parse_args(args)
         return ns.log_level
 
+    @skipIfTravis()
     def test_log_level(self):
         # Test the default.
         self.assertEqual(self.parse_log_level([]), 20)

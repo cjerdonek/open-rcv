@@ -75,11 +75,11 @@ Testing It
     $ python -m unittest discover openrcv
 
 
-Contributing
-------------
+Developing
+----------
 
-To contribute to the project, see the [Contributing][openrcv-contribute]
-page.
+For information on contributing to the project or developing applications
+that interact with OpenRCV, see the [Development][doc-develop] page.
 
 
 License
@@ -95,7 +95,7 @@ Author
 Chris Jerdonek (<chris.jerdonek@gmail.com>)
 
 
-[openrcv-contribute]: docs/contributing.md
+[doc-develop]: docs/contributing.md
 [openrcv-github]: https://github.com/cjerdonek/open-rcv
 [openrcv-pypi]: https://pypi.python.org/pypi/OpenRCV
 [open-rcv-tests]: https://github.com/cjerdonek/open-rcv-tests

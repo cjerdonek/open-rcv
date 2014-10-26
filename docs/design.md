@@ -1,5 +1,5 @@
-Design
-======
+OpenRCV Design
+==============
 
 This document describes the overall design of OpenRCV.  This is to assist
 contributors and those who want to build applications that import from

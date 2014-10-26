@@ -1,15 +1,13 @@
-Contributing to OpenRCV
-=======================
+OpenRCV Development
+===================
 
-This is a guide for contributors to OpenRCV.  In particular, it shows you
-how to interact with the project from a source checkout.
+This is a guide for those who wish to contribute to OpenRCV or develop
+applications that interact with OpenRCV
 
 For instructions on installing or using the application, consult the
 [`README`][doc-readme] or [project page][open-rcv] instead.
-
 For instructions on releasing new versions of OpenRCV to PyPI, consult
 the [Releasing][doc-releasing] page.
-
 For information on the overall design and software architecture of
 OpenRCV, see the [Design][doc-design] page.
 

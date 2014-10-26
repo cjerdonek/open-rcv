@@ -45,5 +45,5 @@ class CaseMixin(object):
 
 
 # This is for convenience to reduce typing.
-class UnitTestCase(CaseMixin, unittest.TestCase):
+class UnitCase(CaseMixin, unittest.TestCase):
     pass

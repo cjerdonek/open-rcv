@@ -1,13 +1,12 @@
 
 from argparse import ArgumentParser
 import os
-from unittest import TestCase
 
 from openrcv.scripts.argparser import create_argparser
 from openrcv.scripts.run import main_status
-from openrcv.utiltest.helpers import UnitTestCase
+from openrcv.utiltest.helpers import UnitCase
 
-class MainTestCase(UnitTestCase):
+class MainTestCase(UnitCase):
 
     # TODO: add a test for good args.
     def test_main_status__exception(self):

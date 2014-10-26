@@ -12,6 +12,7 @@ import sys
 import yaml
 
 from openrcv import counting
+from openrcv.jsmodels import JsonTestCaseOutput
 from openrcv.scripts.argparse import ArgParser, HelpAction
 from openrcv.scripts.argparser import create_argparser
 from openrcv.scripts.run import main
@@ -37,4 +38,6 @@ def run_rcv(ns):
     contests = config['contests']
     contest = contests[0]
     blt_path = os.path.join(base_dir, contest['file'])
-    counting.count_irv(blt_path)
+    results = counting.count_irv(blt_path)
+    json_results = JsonTestCaseOutput.from_contest_results(results)
+    print(json_results.to_json())

@@ -3,14 +3,14 @@ from io import StringIO
 import os
 from textwrap import dedent
 import unittest
-from unittest import TestCase
 
 from openrcv.models import ContestInfo
 from openrcv.parsing import make_internal_ballot_line, BLTParser, ParsingError
 from openrcv.utils import FileInfo, StringInfo
+from openrcv.utiltest.helpers import UnitCase
 
 
-class ModuleTest(TestCase):
+class ModuleTest(UnitCase):
 
     def test_make_internal_ballot_line(self):
         self.assertEqual(make_internal_ballot_line(1, (2, )), "1 2")
@@ -22,7 +22,7 @@ class ModuleTest(TestCase):
         self.assertEqual(make_internal_ballot_line(1, (), "\n"), "1\n")
 
 
-class BLTParserTest(TestCase):
+class BLTParserTest(UnitCase):
 
     BLT_STRING = """\
     4 2

@@ -1,11 +1,11 @@
 
-from unittest import TestCase
 from unittest.mock import patch
 
 from openrcv.datagen import gen_random_list, gen_random_ballot_list
+from openrcv.utiltest.helpers import UnitCase
 
 
-class ModuleTest(TestCase):
+class ModuleTest(UnitCase):
 
     def make_randint(self, values):
         values = iter(values)

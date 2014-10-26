@@ -1,12 +1,12 @@
 
 from contextlib import contextmanager
 from textwrap import dedent
-from unittest import TestCase
 
 from openrcv.jsonlib import JsonObjError, JS_NULL
 from openrcv.jsmodels import (from_jsobj, JsonBallot, JsonContest,
                               JsonRoundResults, JsonTestCaseOutput)
 from openrcv.utils import StreamInfo, StringInfo
+from openrcv.utiltest.helpers import UnitCase
 
 
 @contextmanager
@@ -23,7 +23,7 @@ def change_attr(obj, name, value):
     setattr(obj, name, initial_value)
 
 
-class JsonBallotTest(TestCase):
+class JsonBallotTest(UnitCase):
 
     def make_ballot(self):
         return JsonBallot(choices=[1, 2], weight=3)
@@ -131,7 +131,7 @@ class JsonBallotTest(TestCase):
         self.assertEqual(ballots, expected)
 
 
-class JsonContestTest(TestCase):
+class JsonContestTest(UnitCase):
 
     def make_ballots(self):
         ballots = [JsonBallot(choices=[1, 2]),
@@ -231,14 +231,14 @@ class JsonContestTest(TestCase):
         pass
 
 
-class JsonRoundResultsTest(TestCase):
+class JsonRoundResultsTest(UnitCase):
 
     def test_to_jsobj(self):
         results = JsonRoundResults(totals={1: 2})
         self.assertEqual(results.to_jsobj(), {'totals': {1: 2}})
 
 
-class JsonTestCaseOutputTest(TestCase):
+class JsonTestCaseOutputTest(UnitCase):
 
     def test_to_jsobj(self):
         rounds = [

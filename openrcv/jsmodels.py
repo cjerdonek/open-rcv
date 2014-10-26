@@ -22,7 +22,7 @@ is the usual default value).
 
 from openrcv.counting import InternalBallotsNormalizer
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonObjError, JsonableMixin)
-from openrcv.models import make_candidates, ContestResults, RoundResults
+from openrcv.models import make_candidates, RoundResults
 from openrcv.parsing import make_internal_ballot_line, parse_internal_ballot
 from openrcv.utils import StringInfo
 
@@ -192,18 +192,6 @@ class JsonRoundResults(RoundResults, JsonableMixin):
         self.totals = totals
 
 
-class JsonTestCaseOutput(JsonableMixin):
-
-    meta_attrs = ()
-    data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
-    attrs = tuple(list(data_attrs) + list(meta_attrs))
-
-    def __init__(self, rounds=None):
-        if rounds is None:
-            rounds = []
-        self.rounds = rounds
-
-
 class JsonTestCaseInput(JsonableMixin):
 
     meta_attrs = ()
@@ -212,6 +200,32 @@ class JsonTestCaseInput(JsonableMixin):
 
     def __init__(self):
         self.contest = None
+
+
+class JsonTestCaseOutput(JsonableMixin):
+
+    meta_attrs = ()
+    data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
+    attrs = tuple(list(data_attrs) + list(meta_attrs))
+
+    @classmethod
+    def from_contest_results(cls, results):
+        """
+        Arguments:
+          results: a ContestResults object.
+
+        """
+        json_rounds = []
+        for round_results in results.rounds:
+            json_round = JsonRoundResults()
+            json_round.totals = round_results.totals
+            json_rounds.append(json_round)
+        return JsonTestCaseOutput(rounds=json_rounds)
+
+    def __init__(self, rounds=None):
+        if rounds is None:
+            rounds = []
+        self.rounds = rounds
 
 
 class JsonTestCase(JsonableMixin):

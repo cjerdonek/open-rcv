@@ -1,15 +1,15 @@
 
 from textwrap import dedent
 import unittest
-from unittest import TestCase
 
 from openrcv.counting import (count_internal_ballots, get_lowest, get_majority,
                               get_winner, normalized_ballots, InternalBallotsNormalizer)
 from openrcv.models import RoundResults
 from openrcv.utils import StringInfo
+from openrcv.utiltest.helpers import UnitCase
 
 
-class ModuleTest(TestCase):
+class ModuleTest(UnitCase):
 
     def test_normalized_ballots(self):
         # This test case simultaneously checks all of (1) "compressing" (by
@@ -83,7 +83,7 @@ class ModuleTest(TestCase):
                 self.assertEqual(get_lowest(totals), lowest)
 
 
-class InternalBallotsNormalizerTest(TestCase):
+class InternalBallotsNormalizerTest(UnitCase):
 
     def test_parse(self):
         internal_ballots = dedent("""\

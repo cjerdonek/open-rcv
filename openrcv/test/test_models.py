@@ -1,10 +1,9 @@
 
-from unittest import TestCase
-
 from openrcv.models import ContestInfo
+from openrcv.utiltest.helpers import UnitCase
 
 
-class ContestInfoTest(TestCase):
+class ContestInfoTest(UnitCase):
 
     def test_get_candidates(self):
         contest = ContestInfo()

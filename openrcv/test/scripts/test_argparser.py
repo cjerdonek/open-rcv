@@ -1,14 +1,14 @@
 
 import argparse
 import os
-from unittest import TestCase
 
 from openrcv.scripts.argparse import ArgParser, HelpRequested, UsageException
 from openrcv.scripts.argparser import create_argparser, get_log_level, parse_log_level
+from openrcv.utiltest.helpers import UnitCase
 
 
 # TODO: add a test for good args.
-class ModuleTestCase(TestCase):
+class ModuleTestCase(UnitCase):
 
     def test_parse_log_level(self):
         self.assertEqual(parse_log_level('INFO'), 20)

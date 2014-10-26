@@ -173,13 +173,12 @@ def _count_irv(sub_dir, blt_path):
 
 # This is currently just a test function rather than part of the API.
 def count_irv(blt_path, temp_dir=None):
+    """Return a ContestResults object."""
     if temp_dir is None:
         temp_dir = "temp"
     utils.ensure_dir(temp_dir)
     with utils.temp_dir_inside(temp_dir) as sub_dir:
         results = _count_irv(sub_dir, blt_path)
-
-    print(results.to_json())
 
     return results
 

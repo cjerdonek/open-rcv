@@ -4,9 +4,8 @@ Tests of jsonlib.
 
 """
 
-from unittest import TestCase
-
 from openrcv.jsonlib import from_jsobj, Attribute, JsonableMixin, JS_NULL
+from openrcv.utiltest.helpers import UnitCase
 
 
 class JsonSample(JsonableMixin):
@@ -35,7 +34,7 @@ class ComplexJsonSample(JsonableMixin):
         return "simple=%r" % self.simple
 
 
-class ModuleTest(TestCase):
+class ModuleTest(UnitCase):
 
     def test_from_jsobj(self):
         self.assertEqual(from_jsobj(None), JS_NULL)
@@ -55,7 +54,7 @@ class ModuleTest(TestCase):
         self.assertEqual(from_jsobj({'simple': {'foo': 'fooval'}}, cls=ComplexJsonSample), expected_sample)
 
 
-class JsonableMixinTest(TestCase):
+class JsonableMixinTest(UnitCase):
 
     def test_eq(self):
         sample1 = JsonSample()

@@ -1,10 +1,10 @@
 
-from unittest import TestCase
-
 from openrcv.utils import ReprMixin, StringInfo
 from openrcv.parsing import parse_internal_ballot
+from openrcv.utiltest.helpers import UnitCase
 
-class ModuleTest(TestCase):
+
+class ModuleTest(UnitCase):
 
     def test_parse_internal_ballot(self):
         cases = [
@@ -23,7 +23,7 @@ class ModuleTest(TestCase):
             parse_internal_ballot("f 2 \n")
 
 
-class ReprMixinTest(TestCase):
+class ReprMixinTest(UnitCase):
 
     class ReprSample(ReprMixin):
 
@@ -41,7 +41,7 @@ class ReprMixinTest(TestCase):
         self.assertEqual(repr(obj), expected)
 
 
-class StringInfoTest(TestCase):
+class StringInfoTest(UnitCase):
 
     def test_init(self):
         stream = StringInfo("abc")

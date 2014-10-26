@@ -4,9 +4,13 @@ from contextlib import contextmanager
 import logging
 import os
 import sys
+from textwrap import dedent
 from traceback import format_exc
 
 import colorlog
+
+from openrcv.scripts.argparser import OPTION_HELP
+
 
 # TODO: give this module a better name (e.g. "common").
 
@@ -16,6 +20,7 @@ EXIT_STATUS_USAGE_ERROR = 2
 LOGGING_LEVEL_DEFAULT = logging.DEBUG
 
 PROG_NAME = os.path.basename(sys.argv[0])
+
 log = logging.getLogger(PROG_NAME)
 
 
@@ -160,6 +165,18 @@ def config_log(level=None, stream=None):
     root.removeHandler(handler)
 
 
+def print_usage_error(parser, msg, file_=None):
+    if file_ is None:
+        file_ = sys.stderr
+    parser.print_usage(file_)
+    text = dedent("""\
+    Command-line usage error: %s
+
+    Pass %s for help documentation and available options.""" %
+        (msg, OPTION_HELP.display(' or ')))
+    log.error(text)
+
+
 # TODO: rename log_stream to log_file.
 # TODO: test the UsageException code path.
 def main_status(do_func, argv, stdout=None, log_stream=None):
@@ -180,12 +197,9 @@ def main_status(do_func, argv, stdout=None, log_stream=None):
             #   self.print_usage(_sys.stderr)
             #   args = {'prog': self.prog, 'message': message}
             #   self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
-            parser = exc.parser
-            # TODO: display user-friendly instruction for running --help.
-            parser.print_usage(log_stream)
-            args = exc.args
-            assert len(args) == 1
-            log.error(args[0])
+            err_args, parser = exc.args, exc.parser
+            assert len(err_args) == 1
+            print_usage_error(parser, err_args[0], file_=log_stream)
             status = EXIT_STATUS_USAGE_ERROR
         except Exception as err:
             # Log the full exception info for "unexpected" exceptions.

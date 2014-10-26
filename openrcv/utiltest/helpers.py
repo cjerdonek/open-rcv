@@ -4,8 +4,14 @@ Helpers for unit testing.
 
 """
 
+import os
+import sys
 import unittest
 
+import openrcv
+
+# The directory containing the openrcv package.
+parent_dir = os.path.dirname(os.path.dirname(openrcv.__file__))
 
 class CaseMixin(object):
 
@@ -36,12 +42,15 @@ class CaseMixin(object):
         to the command-line as is.
 
         """
-        return ("%s.%s\n >> %s.%s.%s" %
-                (self.__class__.__name__,
-                 self._testMethodName,
-                 self.__class__.__module__,
-                 self.__class__.__name__,
-                 self._testMethodName))
+        cls = self.__class__
+        mod_name = cls.__module__
+        path = os.path.relpath(sys.modules[mod_name].__file__, parent_dir)
+        return ("%s.%s\n"
+                "  in %s\n"
+                " >> %s.%s.%s" %
+                (cls.__name__, self._testMethodName,
+                 path,
+                 mod_name, cls.__name__, self._testMethodName))
 
 
 # This is for convenience to reduce typing.

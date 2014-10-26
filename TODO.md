@@ -1,13 +1,13 @@
 TODO
 ====
 
-* Rename main to common.
-* Flesh out design doc more.
-* Link to design doc from contributing doc.
-* Incorporate at least one "dev" script into command-line API.
+* Use UnitTestCase everywhere.
+* Incorporate at least one "dev" script into command-line API (e.g.
+  make one random contest).
 * Get logging level from argparse.
 * Add extra command options from molt.
 * Fix up remaining PyPI release instructions and commit.
+* Add definition of "contest metadata" to design doc.
 * Stub out batch IRV in open-rcv-tests
   - Stub out option & style docs, and update README.
   - Stub out section to describe format of test files.
@@ -27,7 +27,3 @@ TODO
 * Add nice online documentation (convert to reST).
 * Add PEP8 checking.
 * Add option for specifying file format to bypass detection based on file extension.
-* Change format of unit test errors from--
-  `test_parse_internal_ballot__non_integer (openrcv.test.test_counting.ModuleTest`
-  to--
-  `openrcv.test.test_counting.ModuleTest.test_parse_internal_ballot__non_integer`

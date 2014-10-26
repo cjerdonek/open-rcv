@@ -5,10 +5,13 @@ This is a guide for contributors to OpenRCV.  In particular, it shows you
 how to interact with the project from a source checkout.
 
 For instructions on installing or using the application, consult the
-[`README`](../README.md) or [project page][open-rcv] instead.
+[`README`][doc-readme] or [project page][open-rcv] instead.
 
 For instructions on releasing new versions of OpenRCV to PyPI, consult
-the file [`docs/releasing.md`][openrcv-releasing].
+the [Releasing][doc-releasing] page.
+
+For information on the overall design and software architecture of
+OpenRCV, see the [Design][doc-design] page.
 
 
 Setting Up
@@ -101,10 +104,12 @@ Viewing Docs
     $ python setup.py build_html
 
 
-[workon-gist]: https://gist.github.com/cjerdonek/7583644
+[doc-design]: design.md
+[doc-readme]: ../README.md
+[doc-releasing]: releasing.md
 [open-rcv]: https://github.com/cjerdonek/open-rcv
 [open-rcv-tests]: https://github.com/cjerdonek/open-rcv-tests
-[openrcv-releasing]: releasing.md
 [pandoc]: http://johnmacfarlane.net/pandoc/
 [pug]: https://packaging.python.org/en/latest/tutorial.html
 [venv]: https://docs.python.org/3/library/venv.html
+[workon-gist]: https://gist.github.com/cjerdonek/7583644

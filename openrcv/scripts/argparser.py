@@ -32,7 +32,6 @@ def parse_log_level(name_or_number):
     return level
 
 
-# TODO: turn some of this code into a custom argparse action or type.
 def get_log_level(parser, args):
     """
     Returns the log level that should be used based on user args.
@@ -43,13 +42,9 @@ def get_log_level(parser, args):
     try:
         ns = parser.parse_args(args=args)  # Namespace object
     except UsageException:
-        level_name = LOG_LEVEL_DEFAULT
-    else:
-        level_name = ns.log_level
-    try:
-        level = parse_log_level(level_name)
-    except ValueError:
         level = parse_log_level(LOG_LEVEL_DEFAULT)
+    else:
+        level = ns.log_level
     return level
 
 

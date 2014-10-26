@@ -69,8 +69,11 @@ class CreateArgparserTestCase(UnitCase):
         return ns.log_level
 
     def test_log_level(self):
+        # Test the default.
         self.assertEqual(self.parse_log_level([]), 20)
+        # Test a number.
         self.assertEqual(self.parse_log_level(['--log-level', '15']), 15)
+        # Test a string.
         self.assertEqual(self.parse_log_level(['--log-level', 'DEBUG']), 10)
         # Test missing value.
         with self.assertRaises(UsageException):

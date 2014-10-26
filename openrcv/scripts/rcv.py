@@ -22,15 +22,12 @@ log = logging.getLogger(__name__)
 
 
 def run_main():
-    main(run_rcv)
+    parser = create_argparser()
+    main(parser, do_func=run_rcv)
 
 
 # TODO: unit-test this.
-def run_rcv(argv):
-    if argv is None:
-        argv = sys.argv
-    parser = create_argparser()
-    ns = parser.parse_args(args=argv[1:])  # Namespace object
+def run_rcv(ns):
     input_path = ns.input_path
     with logged_open(input_path) as f:
         config = yaml.load(f)

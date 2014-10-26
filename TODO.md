@@ -2,6 +2,7 @@ TODO
 ====
 
 * Use UnitTestCase everywhere.
+* Bad --log-level should raise UsageException.
 * Incorporate at least one "dev" script into command-line API (e.g.
   make one random contest).
 * Get logging level from argparse.

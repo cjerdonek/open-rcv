@@ -10,13 +10,12 @@ from traceback import format_exc
 import colorlog
 
 from openrcv.scripts.argparse import HelpRequested, UsageException
-from openrcv.scripts.argparser import OPTION_HELP
+from openrcv.scripts.argparser import get_log_level, LOG_LEVEL_DEFAULT, OPTION_HELP
 
 
 EXIT_STATUS_SUCCESS = 0
 EXIT_STATUS_FAIL = 1
 EXIT_STATUS_USAGE_ERROR = 2
-LOGGING_LEVEL_DEFAULT = logging.INFO
 
 PROG_NAME = os.path.basename(sys.argv[0])
 
@@ -85,7 +84,7 @@ def make_log_handler(level, file_=None):
 
 
 @contextmanager
-def log_config(level=None, file_=None):
+def log_config(level, file_=None):
     """
     A context manager to configure logging and then undo the configuration.
 
@@ -100,7 +99,7 @@ def log_config(level=None, file_=None):
 
     """
     if level is None:
-        level = LOGGING_LEVEL_DEFAULT
+        level = LOG_LEVEL_DEFAULT
     root = logging.getLogger()
     # If logging was already configured (e.g. at the outset of a test run),
     # then let's not change the root logging level.
@@ -110,7 +109,7 @@ def log_config(level=None, file_=None):
     root.addHandler(handler)
     if not already_configured:
         root.setLevel(level)
-        log.debug("root logger level set to: %s" % logging.getLevelName(level))
+        log.debug("root logger level set to: %r" % logging.getLevelName(level))
     log.debug("a logging handler was added")
     yield
     root.removeHandler(handler)
@@ -129,13 +128,23 @@ def print_usage_error(parser, msg, file_=None):
 
 
 # TODO: test the UsageException code path.
-def main_status(do_func, argv, stdout=None, log_file=None):
+def main_status(parser, do_func, argv, stdout=None, log_file=None):
+    """
+    Arguments:
+      parser: an argparse.ArgumentParser object.
+
+    """
+    args = argv[1:]
+    log_level = get_log_level(parser, args)
+
     if stdout is None:
         stdout = sys.stdout
-    with log_config(file_=log_file):
+    with log_config(level=log_level, file_=log_file):
         log.debug("argv: %r" % argv)
         try:
-            do_func(argv)
+            ns = parser.parse_args(args=args)  # Namespace object
+            log.debug("ns: %r" % ns)
+            do_func(ns)
             status = EXIT_STATUS_SUCCESS
         except HelpRequested as exc:
             parser = exc.parser
@@ -163,8 +172,8 @@ def main_status(do_func, argv, stdout=None, log_file=None):
 # functions (though we choose _main() as the function that returns an exit
 # status rather than main()):
 # http://www.artima.com/weblogs/viewpost.jsp?thread=4829
-def main(do_func, argv=None):
+def main(parser, do_func, argv=None):
     if argv is None:
         argv = sys.argv
-    status = main_status(do_func, argv)
+    status = main_status(parser, do_func, argv)
     sys.exit(status)

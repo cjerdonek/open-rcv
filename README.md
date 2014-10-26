@@ -62,9 +62,7 @@ contests file:
 
     $ rcv data/sample.yaml
 
-TODO: explain the format and that it can be JSON or YAML.
-
-For help from the command-line:
+For help and detailed information about command-line usage:
 
     $ rcv --help
 
@@ -78,8 +76,9 @@ Testing It
 Developing
 ----------
 
-For information on contributing to the project or developing applications
-that interact with OpenRCV, see the [Development][doc-develop] page.
+For information on contributing technically to the project or developing
+applications that interact with OpenRCV, see the [Development][doc-develop]
+page.
 
 
 License

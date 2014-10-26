@@ -95,7 +95,7 @@ Author
 Chris Jerdonek (<chris.jerdonek@gmail.com>)
 
 
-[doc-develop]: docs/contributing.md
+[doc-develop]: docs/develop.md
 [openrcv-github]: https://github.com/cjerdonek/open-rcv
 [openrcv-pypi]: https://pypi.python.org/pypi/OpenRCV
 [open-rcv-tests]: https://github.com/cjerdonek/open-rcv-tests

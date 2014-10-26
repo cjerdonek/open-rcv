@@ -13,6 +13,13 @@ import openrcv
 # The directory containing the openrcv package.
 parent_dir = os.path.dirname(os.path.dirname(openrcv.__file__))
 
+
+def skipIfTravis():
+    msg = ("since Travis uses Python 3.4.1 instead of 3.4.2. "
+           "See: http://bugs.python.org/issue22386")
+    return unittest.skipIf(os.getenv('TRAVIS', False), msg)
+
+
 class CaseMixin(object):
 
     """

@@ -5,7 +5,15 @@ import logging
 from openrcv.scripts.argparse import ArgParser, HelpAction, Option, UsageException
 
 
-LOG_LEVEL_DEFAULT = 'INFO'
+# For better compatibility with Python 3.4.1, we rely more on the number
+# than the string representation.  This is because in Python 3.4 (but
+# fixedin 3.4.2), you could not use logging.getLevelName() to get the
+# level number for a level name.  Travis CI was also uing 3.4.1 as of
+# Oct. 26, 2014.
+#  For more info, see:
+#    http://bugs.python.org/issue22386"
+LOG_LEVEL_DEFAULT = 20  # corresponds to INFO.
+LOG_LEVEL_DEFAULT_NAME = logging.getLevelName(LOG_LEVEL_DEFAULT)
 
 DESCRIPTION = """\
 Tally the contests specified by the contests file at INPUT_PATH.
@@ -62,7 +70,7 @@ def create_argparser(prog="rcv"):
         default=LOG_LEVEL_DEFAULT, type=parse_log_level,
         help=("logging level name or number (e.g. CRITICAL, ERROR, WARNING, "
               "INFO, DEBUG, 10, 20, etc). "
-              "Defaults to %s." % LOG_LEVEL_DEFAULT))
+              "Defaults to %s." % LOG_LEVEL_DEFAULT_NAME))
     # The add_argument() call for help is modeled after how argparse does it.
     parser.add_argument('-h', '--help', action=HelpAction,
         help='show this help message and exit.')

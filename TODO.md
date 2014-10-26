@@ -3,6 +3,7 @@ TODO
 
 * Incorporate at least one "dev" script into command-line API (e.g.
   make one random contest).
+* Allow test logging messages to show (e.g. skips).
 * Add extra command options from molt.
 * Fix up remaining PyPI release instructions and commit.
 * Add definition of "contest metadata" to design doc.

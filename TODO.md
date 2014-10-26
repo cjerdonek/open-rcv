@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Bad --log-level should raise UsageException.
 * Incorporate at least one "dev" script into command-line API (e.g.
   make one random contest).
 * Add extra command options from molt.
@@ -21,7 +20,6 @@ TODO
   an internal ballot file and a ContestInfo object.
 * Add auto-generation comment to top of `setup_long_description.rst`.
 * Only include newest changes in README.
-* Add command to generate sample ballot file.
 * Add "sample election" command so people can play with using it.
 * Add nice online documentation (convert to reST).
 * Add PEP8 checking.

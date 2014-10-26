@@ -1,4 +1,5 @@
 
+import argparse
 import logging
 
 from openrcv.scripts.argparse import ArgParser, HelpAction, Option, UsageException
@@ -7,7 +8,7 @@ from openrcv.scripts.argparse import ArgParser, HelpAction, Option, UsageExcepti
 LOG_LEVEL_DEFAULT = 'INFO'
 
 DESCRIPTION = """\
-Tally the contests specified by the file at INPUT_PATH.
+Tally the contests specified by the contests file at INPUT_PATH.
 
 """
 
@@ -15,7 +16,10 @@ OPTION_HELP = Option(('-h', '--help'))
 
 
 def parse_log_level(name_or_number):
-    """Return the log level number associated to a name or number."""
+    """
+    Return the log level number associated to a string name or number.
+
+    """
     try:
         return int(name_or_number)
     except ValueError:
@@ -24,7 +28,7 @@ def parse_log_level(name_or_number):
     # also from string name to integer.
     level = logging.getLevelName(name_or_number)
     if isinstance(level, str):
-        raise ValueError("invalid level name: %r" % name_or_number)
+        raise argparse.ArgumentTypeError("invalid log level name: %r" % name_or_number)
     return level
 
 
@@ -59,7 +63,8 @@ def create_argparser(prog="rcv"):
     parser.add_argument('input_path', metavar='INPUT_PATH',
         help=("path to a contests configuration file. Supported file "
               "formats are JSON (*.json) and YAML (*.yaml or *.yml)."))
-    parser.add_argument('--log-level', metavar='LEVEL', default=LOG_LEVEL_DEFAULT,
+    parser.add_argument('--log-level', metavar='LEVEL',
+        default=LOG_LEVEL_DEFAULT, type=parse_log_level,
         help=("logging level name or number (e.g. CRITICAL, ERROR, WARNING, "
               "INFO, DEBUG, 10, 20, etc). "
               "Defaults to %s." % LOG_LEVEL_DEFAULT))

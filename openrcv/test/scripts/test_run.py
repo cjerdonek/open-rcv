@@ -13,4 +13,4 @@ class MainTestCase(TestCase):
         def do_func(args):
             raise Exception("foo")
         with open(os.devnull, "w") as f:
-            self.assertEqual(main_status(do_func, None, log_stream=f), 1)
+            self.assertEqual(main_status(do_func, None, log_file=f), 1)

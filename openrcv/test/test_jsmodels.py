@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from openrcv.jsonlib import JsonObjError, JS_NULL
 from openrcv.jsmodels import (from_jsobj, JsonBallot, JsonContest,
-                              JsonContestResults, JsonRoundResults)
+                              JsonRoundResults, JsonTestCaseOutput)
 from openrcv.utils import StreamInfo, StringInfo
 
 
@@ -238,13 +238,13 @@ class JsonRoundResultsTest(TestCase):
         self.assertEqual(results.to_jsobj(), {'totals': {1: 2}})
 
 
-class JsonContestResultsTest(TestCase):
+class JsonTestCaseOutputTest(TestCase):
 
     def test_to_jsobj(self):
         rounds = [
             JsonRoundResults(totals={1: 2}),
             JsonRoundResults(totals={3: 4})
         ]
-        results = JsonContestResults(rounds=rounds)
+        results = JsonTestCaseOutput(rounds=rounds)
         self.assertEqual(results.to_jsobj(),
                          {'rounds': [{'totals': {1: 2}}, {'totals': {3: 4}}]})

@@ -4,6 +4,9 @@ Internal models that do not require JSON serialization.
 
 """
 
+from openrcv.utils import ReprMixin
+
+
 def make_candidates(candidate_count):
     """
     Return an iterable of candidate numbers.
@@ -52,7 +55,7 @@ class RoundResults(object):
         self.totals = totals
 
 
-class ContestResults(object):
+class ContestResults(ReprMixin):
 
     """
     Represents contest results.

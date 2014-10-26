@@ -192,36 +192,16 @@ class JsonRoundResults(RoundResults, JsonableMixin):
         self.totals = totals
 
 
-# TODO: remove this.
-class JsonContestResults(ContestResults, JsonableMixin):
-
-    """
-    Represents contest results for testing purposes.
-
-    """
-
-    meta_attrs = (Attribute('id'), )
-    data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
-    attrs = data_attrs
-
-    def __init__(self, rounds=None, id_=None):
-        """
-        Arguments:
-          rounds: an iterable of JsonRoundResults objects.
-
-        """
-        self.id = id_
-        self.rounds = rounds
-
-
 class JsonTestCaseOutput(JsonableMixin):
 
     meta_attrs = ()
     data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
     attrs = tuple(list(data_attrs) + list(meta_attrs))
 
-    def __init__(self):
-        self.rounds = []
+    def __init__(self, rounds=None):
+        if rounds is None:
+            rounds = []
+        self.rounds = rounds
 
 
 class JsonTestCaseInput(JsonableMixin):

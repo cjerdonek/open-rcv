@@ -1,13 +1,17 @@
 TODO
 ====
 
-* Finish fleshing out design doc.
+* Rename main to common.
+* Flesh out design doc more.
 * Link to design doc from contributing doc.
-* Incorporate "dev" scripts into command-line API.
-* Nicer message on argparse error.
+* Incorporate at least one "dev" script into command-line API.
 * Get logging level from argparse.
 * Add extra command options from molt.
 * Fix up remaining PyPI release instructions and commit.
+* Stub out batch IRV in open-rcv-tests
+  - Stub out option & style docs, and update README.
+  - Stub out section to describe format of test files.
+    ~ mention lexicographic ordering, and grouping/weighting.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
   - Make sure we have a function to create a random contest (given

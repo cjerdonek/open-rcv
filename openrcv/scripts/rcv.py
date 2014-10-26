@@ -14,7 +14,7 @@ import yaml
 from openrcv import counting
 from openrcv.scripts.argparse import ArgParser, HelpAction
 from openrcv.scripts.argparser import create_argparser
-from openrcv.scripts.main import main
+from openrcv.scripts.run import main
 from openrcv.utils import logged_open
 
 

@@ -16,7 +16,7 @@ from openrcv.jsmodels import JsonBallot
 from openrcv.jsonlib import from_jsobj, read_json_path, to_json, write_json
 from openrcv.jsmodels import (JsonContestFile, JsonRoundResults, JsonTestCase,
                               JsonTestCaseOutput, JsonTestCaseFile)
-from openrcv.scripts.main import main
+from openrcv.scripts.run import main
 from openrcv import utils
 from openrcv.utils import FileInfo, StringInfo
 

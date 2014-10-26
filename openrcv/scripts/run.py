@@ -13,8 +13,6 @@ from openrcv.scripts.argparse import HelpRequested, UsageException
 from openrcv.scripts.argparser import OPTION_HELP
 
 
-# TODO: give this module a better name (e.g. "common").
-
 EXIT_STATUS_SUCCESS = 0
 EXIT_STATUS_FAIL = 1
 EXIT_STATUS_USAGE_ERROR = 2

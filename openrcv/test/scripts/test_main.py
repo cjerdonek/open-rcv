@@ -2,7 +2,7 @@
 import os
 from unittest import TestCase
 
-from openrcv.scripts.main import main_status
+from openrcv.scripts.run import main_status
 
 
 class MainTestCase(TestCase):

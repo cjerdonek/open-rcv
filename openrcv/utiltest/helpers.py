@@ -44,5 +44,6 @@ class CaseMixin(object):
                  self._testMethodName))
 
 
+# This is for convenience to reduce typing.
 class UnitTestCase(CaseMixin, unittest.TestCase):
     pass

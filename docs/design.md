@@ -5,6 +5,10 @@ This document describes the overall design of OpenRCV.  This is to assist
 contributors and those who want to build applications that import from
 the `openrcv` package or interact with it in some other way.
 
+
+Components and Terminology
+--------------------------
+
 Some of the pieces are as follows:
 
 1. **Input file.**  An "input file" is a file that contains ballot data and
@@ -34,6 +38,10 @@ Some of the pieces are as follows:
 6. **Results object.**
 7. **Renderer.**
 8. **Output file.**
+
+
+Data Flow
+---------
 
 When running OpenRCV from the command-line, the data flow is as follows:
 

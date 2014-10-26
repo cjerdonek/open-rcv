@@ -16,7 +16,7 @@ from openrcv.scripts.argparser import OPTION_HELP
 EXIT_STATUS_SUCCESS = 0
 EXIT_STATUS_FAIL = 1
 EXIT_STATUS_USAGE_ERROR = 2
-LOGGING_LEVEL_DEFAULT = logging.DEBUG
+LOGGING_LEVEL_DEFAULT = logging.INFO
 
 PROG_NAME = os.path.basename(sys.argv[0])
 
@@ -65,12 +65,12 @@ def make_formatter():
     formatter = colorlog.ColoredFormatter(format_string, log_colors=colors)
     return formatter
 
-def make_log_handler(level, stream=None):
-    if stream is None:
-        stream = sys.stderr
+def make_log_handler(level, file_=None):
+    if file_ is None:
+        file_ = sys.stderr
 
-    # If stream is None, StreamHandler uses sys.stderr.
-    handler = logging.StreamHandler(stream)
+    # If file_ is None, StreamHandler uses sys.stderr.
+    handler = logging.StreamHandler(file_)
     # TODO: can we delete this code comment?  Is there any reason
     # to set this handler to a level different from the root logger?
     #handler.setLevel(level)
@@ -84,9 +84,8 @@ def make_log_handler(level, stream=None):
     return handler
 
 
-# TODO: rename stream to file.
 @contextmanager
-def config_log(level=None, stream=None):
+def log_config(level=None, file_=None):
     """
     A context manager to configure logging and then undo the configuration.
 
@@ -97,7 +96,7 @@ def config_log(level=None, stream=None):
     Arguments:
 
       level: lowest logging level to log.
-      stream: the stream to use for logging (e.g. sys.stderr).
+      file_: the file object to use for logging (e.g. sys.stderr).
 
     """
     if level is None:
@@ -107,11 +106,11 @@ def config_log(level=None, stream=None):
     # then let's not change the root logging level.
     # TODO: simplify this logic (e.g. we should not need "if" logic).
     already_configured = root.hasHandlers()
-    handler = make_log_handler(level, stream=stream)
+    handler = make_log_handler(level, file_=file_)
     root.addHandler(handler)
     if not already_configured:
         root.setLevel(level)
-        log.info("root logger level set to: %s" % logging.getLevelName(level))
+        log.debug("root logger level set to: %s" % logging.getLevelName(level))
     log.debug("a logging handler was added")
     yield
     root.removeHandler(handler)
@@ -129,12 +128,11 @@ def print_usage_error(parser, msg, file_=None):
     log.error(text)
 
 
-# TODO: rename log_stream to log_file.
 # TODO: test the UsageException code path.
-def main_status(do_func, argv, stdout=None, log_stream=None):
+def main_status(do_func, argv, stdout=None, log_file=None):
     if stdout is None:
         stdout = sys.stdout
-    with config_log(stream=log_stream):
+    with log_config(file_=log_file):
         log.debug("argv: %r" % argv)
         try:
             do_func(argv)
@@ -151,7 +149,7 @@ def main_status(do_func, argv, stdout=None, log_stream=None):
             #   self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
             err_args, parser = exc.args, exc.parser
             assert len(err_args) == 1
-            print_usage_error(parser, err_args[0], file_=log_stream)
+            print_usage_error(parser, err_args[0], file_=log_file)
             status = EXIT_STATUS_USAGE_ERROR
         except Exception as err:
             # Log the full exception info for "unexpected" exceptions.

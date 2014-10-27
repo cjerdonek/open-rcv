@@ -2,10 +2,31 @@
 """
 Extensions to the argparse module.
 
+This module contains generic functionality not specific to OpenRCV.
+
 """
 
 import argparse
 import logging
+
+
+# The log level that should be used if the parser raises a UsageException.
+USAGE_ERROR_LOG_LEVEL = 20  # corresponds to INFO.
+
+
+# Unfortunately, we need to include this class before defining the
+# OPTION_HELP global variable.
+# TODO: address the comment above.
+class Option(tuple):
+    """
+    Encapsulates a command option (e.g. "-h" and "--help", or "--run-tests").
+
+    """
+    def display(self, glue):
+        return glue.join(self)
+
+
+OPTION_HELP = Option(('-h', '--help'))
 
 
 def parse_log_level(name_or_number):
@@ -23,15 +44,6 @@ def parse_log_level(name_or_number):
     if isinstance(level, str):
         raise argparse.ArgumentTypeError("invalid log level name: %r" % name_or_number)
     return level
-
-
-class Option(tuple):
-    """
-    Encapsulates a command option (e.g. "-h" and "--help", or "--run-tests").
-
-    """
-    def display(self, glue):
-        return glue.join(self)
 
 
 class UsageException(Exception):
@@ -70,6 +82,26 @@ class HelpAction(argparse.Action):
 # an argument-parsing error occurs.  We want all error handling to happen
 # centrally through our catch-all.
 class ArgParser(argparse.ArgumentParser):
+
+    def safe_get_log_level(self, args, error_level=None):
+        """
+        Get the user-requested log level without raising an exception.
+
+        Returns the log level as an integer.
+
+        Arguments:
+          error_level: the log level that should be used if a UsageException occurs.
+
+        """
+        if error_level is None:
+            error_level = USAGE_ERROR_LOG_LEVEL
+        try:
+            ns = self.parse_args(args=args)  # Namespace object
+        except UsageException:
+            level = parse_log_level(error_level)
+        else:
+            level = ns.log_level
+        return level
 
     # The base class implementation prints the usage string and exits
     # with status code 2.

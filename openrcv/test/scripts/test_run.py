@@ -2,7 +2,7 @@
 from argparse import ArgumentParser
 import os
 
-from openrcv.scripts.argparser import create_argparser
+from openrcv.scripts.rcv import create_argparser
 from openrcv.scripts.run import main_status
 from openrcv.utiltest.helpers import UnitCase
 

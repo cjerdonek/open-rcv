@@ -1,6 +1,7 @@
 TODO
 ====
 
+* Create a base argparser outside of argparse.py (along with OPTION_HELP).
 * Incorporate at least one "dev" script into command-line API (e.g.
   make one random contest).
 * Add "sample election" command so people can play with using it.

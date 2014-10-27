@@ -9,9 +9,8 @@ from traceback import format_exc
 
 import colorlog
 
-from openrcv.scripts.argparse import parse_log_level, HelpRequested, UsageException
-# TODO: remove these imports (e.g. by making them properties of the parser).
-from openrcv.scripts.argparser import get_log_level, LOG_LEVEL_DEFAULT, OPTION_HELP
+from openrcv.scripts.argparse import (parse_log_level, HelpRequested,
+                                      UsageException, OPTION_HELP)
 
 
 EXIT_STATUS_SUCCESS = 0
@@ -137,7 +136,7 @@ def main_status(parser, argv, stdout=None, log_file=None):
 
     """
     args = argv[1:]
-    log_level = get_log_level(parser, args)
+    log_level = parser.safe_get_log_level(args)
 
     if stdout is None:
         stdout = sys.stdout

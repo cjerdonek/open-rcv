@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import os
 
 from openrcv.scripts.argparse import ArgParser, HelpRequested, UsageException
-from openrcv.scripts.argparser import create_argparser, get_log_level
+from openrcv.scripts.rcv import create_argparser
 from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 
 
@@ -11,9 +11,9 @@ from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 VALID_COMMAND = ['count', 'path.py']
 
 
-class ModuleTestCase(UnitCase):
+class SafeGetLogLevelTestCase(UnitCase):
 
-    """Test the module-level functions."""
+    """Test the ArgumentParser's safe_get_log_level() method."""
 
     def _get_valid_args(self, level):
         args = ['--log-level', level]
@@ -22,54 +22,54 @@ class ModuleTestCase(UnitCase):
         args.extend(VALID_COMMAND)
         return args
 
-    def call_get_log_level(self, level):
+    def call_safe_get_log_level(self, level):
         parser = create_argparser()
         args = self._get_valid_args(level)
-        return get_log_level(parser, args, error_level=42)
+        return parser.safe_get_log_level(args, error_level=42)
 
-    def call_get_log_level_default_error_level(self, level):
+    def call_safe_get_log_level_default_error_level(self, level):
         parser = create_argparser()
         args = self._get_valid_args(level)
-        return get_log_level(parser, args)
+        return parser.safe_get_log_level(args)
 
-    def test_get_log_level__valid_string(self):
-        actual = self.call_get_log_level('DEBUG')
+    def test_safe_get_log_level__valid_string(self):
+        actual = self.call_safe_get_log_level('DEBUG')
         self.assertEqual(actual, 10)
 
-    def test_get_log_level__int(self):
-        actual = self.call_get_log_level('17')
+    def test_safe_get_log_level__int(self):
+        actual = self.call_safe_get_log_level('17')
         self.assertEqual(actual, 17)
 
-    def test_get_log_level__invalid_value(self):
+    def test_safe_get_log_level__invalid_value(self):
         """Check an invalid log level string."""
-        actual = self.call_get_log_level('FOO')
+        actual = self.call_safe_get_log_level('FOO')
         self.assertEqual(actual, 42)
 
-    def test_get_log_level__default_error_level(self):
+    def test_safe_get_log_level__default_error_level(self):
         """Check the default error level."""
         # We pass an invalid log-level value to trigger the error.
-        actual = self.call_get_log_level_default_error_level('FOO')
+        actual = self.call_safe_get_log_level_default_error_level('FOO')
         self.assertEqual(actual, 20)  # 20 means INFO
 
-    def test_get_log_level__no_level(self):
+    def test_safe_get_log_level__no_level(self):
         """Check not passing the --log-level option."""
         parser = create_argparser()
-        actual = get_log_level(parser, VALID_COMMAND, error_level=42)
+        actual = parser.safe_get_log_level(VALID_COMMAND, error_level=42)
         self.assertEqual(actual, 20)
 
-    def test_get_log_level__invalid_command(self):
+    def test_safe_get_log_level__invalid_command(self):
         """Check that passing invalid command syntax returns the error level."""
         parser = create_argparser()
         with self.assertRaises(UsageException):
             parser.parse_args([])
-        actual = get_log_level(parser, [], error_level=42)
+        actual = parser.safe_get_log_level([], error_level=42)
         self.assertEqual(actual, 42)
 
-    def test_get_log_level__unsupported_parser(self):
+    def test_safe_get_log_level__unsupported_parser(self):
         """Check using an ArgumentParser that doesn't support --log-level."""
         parser = ArgumentParser()
         with self.assertRaises(AttributeError):
-            actual = get_log_level(parser, [], error_level=42)
+            actual = parser.safe_get_log_level([], error_level=42)
 
 
 class ArgumentParserTestCase(UnitCase):
@@ -101,7 +101,6 @@ class ArgumentParserTestCase(UnitCase):
         ns = self.parse_args(args)
         return ns.log_level
 
-    @skipIfTravis()
     def test_log_level(self):
         # Test the default.
         self.assertEqual(self.parse_log_level([]), 20)

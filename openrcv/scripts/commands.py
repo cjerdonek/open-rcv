@@ -31,3 +31,6 @@ def count(ns):
     results = counting.count_irv(blt_path)
     json_results = JsonTestCaseOutput.from_contest_results(results)
     print(json_results.to_json())
+
+def rand_contest(ns):
+    print(repr(ns))

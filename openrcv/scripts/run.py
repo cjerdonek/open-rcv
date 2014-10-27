@@ -145,8 +145,7 @@ def main_status(parser, argv, stdout=None, log_file=None):
         try:
             ns = parser.parse_args(args=args)  # Namespace object
             log.debug("ns: %r" % ns)
-            print(repr(ns))
-            ns.func(ns)
+            ns.run_command(ns)
             status = EXIT_STATUS_SUCCESS
         except HelpRequested as exc:
             parser = exc.parser

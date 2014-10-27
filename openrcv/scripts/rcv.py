@@ -38,18 +38,25 @@ def main():
     _main(parser)
 
 
+def add_command(subparsers, add_func):
+    parser, command_func = add_func(subparsers)
+    parser.set_defaults(run_command=command_func)
+
+
 def add_command_count(subparsers):
     parser = subparsers.add_parser('count', help='Tally one or more contests.',
         description='Tally the contests specified by the contests file at INPUT_PATH.')
     parser.add_argument('input_path', metavar='INPUT_PATH',
         help=("path to a contests configuration file. Supported file "
               "formats are JSON (*.json) and YAML (*.yaml or *.yml)."))
-    parser.set_defaults(func=commands.count)
+    return parser, commands.count
 
 
-def add_command_samplecontest(subparsers):
-    parser = subparsers.add_parser('samplecontest', help='Create a sample contest.',
-        description='Tally the contests specified by the contests file at INPUT_PATH.')
+def add_command_randcontest(subparsers):
+    help = 'Create a random sample contest.'
+    parser = subparsers.add_parser('randcontest', help=help,
+        description=help)
+    return parser, commands.rand_contest
 
 
 # TODO: unit-test print_help().
@@ -79,8 +86,13 @@ def create_argparser(prog="rcv"):
     # TODO: unit test this behavior.
     subparsers.required = True
 
-    add_command_count(subparsers)
-    add_command_samplecontest(subparsers)
+    add_funcs = (
+        add_command_count,
+        add_command_randcontest,
+    )
+
+    for add_func in add_funcs:
+        add_command(subparsers, add_func)
 
     return parser
 

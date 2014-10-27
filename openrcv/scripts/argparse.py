@@ -5,6 +5,24 @@ Extensions to the argparse module.
 """
 
 import argparse
+import logging
+
+
+def parse_log_level(name_or_number):
+    """
+    Return the log level number associated to a string name or number.
+
+    """
+    try:
+        return int(name_or_number)
+    except ValueError:
+        pass
+    # It is a known quirk of getLevelName() that it can be used to convert
+    # also from string name to integer.
+    level = logging.getLevelName(name_or_number)
+    if isinstance(level, str):
+        raise argparse.ArgumentTypeError("invalid log level name: %r" % name_or_number)
+    return level
 
 
 class Option(tuple):

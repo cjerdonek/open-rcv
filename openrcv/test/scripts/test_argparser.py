@@ -1,40 +1,34 @@
 
-from argparse import ArgumentParser, ArgumentTypeError
+from argparse import ArgumentParser
 import os
 
 from openrcv.scripts.argparse import ArgParser, HelpRequested, UsageException
-from openrcv.scripts.argparser import create_argparser, get_log_level, parse_log_level
+from openrcv.scripts.argparser import create_argparser, get_log_level
 from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 
 
 # TODO: add a test for good args.
 class ModuleTestCase(UnitCase):
 
-    @skipIfTravis()
-    def test_parse_log_level(self):
-        self.assertEqual(parse_log_level('INFO'), 20)
-        self.assertEqual(parse_log_level('DEBUG'), 10)
-        self.assertEqual(parse_log_level('35'), 35)
-        self.assertEqual(parse_log_level(35), 35)
-        with self.assertRaises(ArgumentTypeError):
-            parse_log_level('FOO')
+    def call_get_log_level(self, parser, args):
+        return get_log_level(parser, args, default=35)
 
     @skipIfTravis()
     def test_get_log_level(self):
         parser = create_argparser()
-        self.assertEqual(get_log_level(parser, ['input_path', '--log-level', 'DEBUG']), 10)
+        self.assertEqual(self.call_get_log_level(parser, ['input_path', '--log-level', 'DEBUG']), 10)
         # Check what would otherwise be a UsageException.
         with self.assertRaises(UsageException):
             parser.parse_args([])
-        self.assertEqual(get_log_level(parser, []), 20)
+        self.assertEqual(self.call_get_log_level(parser, []), 35)
         # Check an unrecognized string.
-        self.assertEqual(get_log_level(parser, ['input_path', '--log-level', 'FOO']), 20)
+        self.assertEqual(self.call_get_log_level(parser, ['input_path', '--log-level', 'FOO']), 35)
         # Check not passing the --log-level option.
-        self.assertEqual(get_log_level(parser, ['input_path']), 20)
+        self.assertEqual(self.call_get_log_level(parser, ['input_path']), 20)
         # Test what happens if the parser doesn't have a --log-level option.
         parser = ArgumentParser()
         with self.assertRaises(AttributeError):
-            self.assertEqual(get_log_level(parser, []), 40)
+            self.assertEqual(self.call_get_log_level(parser, []), 40)
 
 
 class CreateArgparserTestCase(UnitCase):

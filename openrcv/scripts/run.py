@@ -9,7 +9,7 @@ from traceback import format_exc
 
 import colorlog
 
-from openrcv.scripts.argparse import HelpRequested, UsageException
+from openrcv.scripts.argparse import parse_log_level, HelpRequested, UsageException
 from openrcv.scripts.argparser import get_log_level, LOG_LEVEL_DEFAULT, OPTION_HELP
 
 
@@ -135,7 +135,7 @@ def main_status(parser, do_func, argv, stdout=None, log_file=None):
 
     """
     args = argv[1:]
-    log_level = get_log_level(parser, args)
+    log_level = get_log_level(parser, args, default=LOG_LEVEL_DEFAULT)
 
     if stdout is None:
         stdout = sys.stdout

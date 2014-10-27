@@ -1,14 +1,13 @@
 TODO
 ====
 
-* Create a base argparser outside of argparse.py (along with OPTION_HELP).
-* Incorporate at least one "dev" script into command-line API (e.g.
-  make one random contest).
-* Add "sample election" command so people can play with using it.
+* Add random_contest() function with flexible args.
+* Add "samplecontest" command so people can play with using it.
   - Also add "random election" command.
   - The samples should have names:
     ~ Ann, Bob, Carol, Dave, Ellen, Fred, Gwen, Hank, Irene, Joe, Katy, Leo,
       Candidate 13, etc.
+* Get rid of rcvgen.
 * Allow test logging messages to show (e.g. skips).
 * Add extra command options from molt.
 * Fix up remaining PyPI release instructions and commit.

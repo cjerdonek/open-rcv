@@ -10,6 +10,7 @@ import os
 import yaml
 
 from openrcv import counting
+from openrcv.datagen import random_contest
 from openrcv.jsmodels import JsonTestCaseOutput
 from openrcv.utils import logged_open
 
@@ -34,3 +35,5 @@ def count(ns):
 
 def rand_contest(ns):
     print(repr(ns))
+    contest = random_contest(ns.candidates)
+    print(contest)

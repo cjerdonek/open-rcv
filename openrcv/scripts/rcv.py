@@ -56,6 +56,10 @@ def add_command_randcontest(subparsers):
     help = 'Create a random sample contest.'
     parser = subparsers.add_parser('randcontest', help=help,
         description=help)
+    parser.add_argument('-c', '--candidates', metavar='N', type=int, default=6,
+                        help='number of candidates.')
+    parser.add_argument('-b', '--ballots', metavar='N', type=int,
+                       help='number of ballots.')
     return parser, commands.rand_contest
 
 
@@ -72,7 +76,7 @@ def create_argparser(prog="rcv"):
               "INFO, DEBUG, 10, 20, etc). "
               "Defaults to %s." % LOG_LEVEL_DEFAULT_NAME))
     # The add_argument() call for help is modeled after how argparse does it.
-    parser.add_argument('-h', '--help', action=HelpAction,
+    parser.add_argument(*OPTION_HELP, action=HelpAction,
         help='show this help message and exit.')
 
     desc = ("Available commands are below. For help with a particular "

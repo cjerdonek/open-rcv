@@ -62,7 +62,7 @@ contests file:
 
     $ rcv count data/sample.yaml
 
-For help and detailed information about command-line usage:
+For detailed command-line help:
 
     $ rcv --help
 

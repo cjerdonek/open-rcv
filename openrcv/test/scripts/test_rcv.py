@@ -2,8 +2,8 @@
 from argparse import ArgumentParser
 import os
 
-from openrcv.scripts.argparse import ArgParser, HelpRequested, UsageException
-from openrcv.scripts.rcv import create_argparser
+from openrcv.scripts.argparse import HelpRequested, UsageException
+from openrcv.scripts.rcv import create_argparser, RcvArgumentParser
 from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 
 
@@ -83,7 +83,7 @@ class ArgumentParserTestCase(UnitCase):
         err = cm.exception
         self.assertEqual(err.args, ('the following arguments are required: COMMAND', ))
         parser = err.parser
-        self.assertEqual(type(parser), ArgParser)
+        self.assertEqual(type(parser), RcvArgumentParser)
         self.assertEqual(parser.prog, "rcv")
 
     def test_create_argparser__help(self):

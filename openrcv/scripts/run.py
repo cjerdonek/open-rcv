@@ -10,7 +10,7 @@ from traceback import format_exc
 import colorlog
 
 from openrcv.scripts.argparse import (parse_log_level, HelpRequested,
-                                      UsageException, OPTION_HELP)
+                                      UsageException)
 
 
 EXIT_STATUS_SUCCESS = 0
@@ -123,7 +123,7 @@ def print_usage_error(parser, msg, file_=None):
     Command-line usage error: %s
 
     Pass %s for help documentation and available options.""" %
-        (msg, OPTION_HELP.display(' or ')))
+        (msg, parser.option_help.display(' or ')))
     log.error(text)
 
 

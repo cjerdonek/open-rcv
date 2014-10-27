@@ -8,7 +8,7 @@ import argparse
 import logging
 
 from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
-                                      Option, UsageException, OPTION_HELP)
+                                      Option, UsageException)
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
 
@@ -22,6 +22,10 @@ from openrcv.scripts.run import main as _main
 #    http://bugs.python.org/issue22386"
 LOG_LEVEL_DEFAULT = 20  # corresponds to INFO.
 LOG_LEVEL_DEFAULT_NAME = logging.getLevelName(LOG_LEVEL_DEFAULT)
+# The log level that should be used if the ArgumentParser raises a UsageException.
+LOG_LEVEL_USAGE_ERROR = 20  # corresponds to INFO.
+
+OPTION_HELP = Option(('-h', '--help'))
 
 DESCRIPTION = """\
 OpenRCV command-line tool.
@@ -54,7 +58,7 @@ def create_argparser(prog="rcv"):
     Return an ArgumentParser object.
 
     """
-    parser = ArgParser(prog=prog, description=DESCRIPTION, add_help=False)
+    parser = RcvArgumentParser(prog=prog, description=DESCRIPTION, add_help=False)
     parser.add_argument('--log-level', metavar='LEVEL',
         default=LOG_LEVEL_DEFAULT, type=parse_log_level,
         help=("logging level name or number (e.g. CRITICAL, ERROR, WARNING, "
@@ -79,3 +83,28 @@ def create_argparser(prog="rcv"):
     add_command_samplecontest(subparsers)
 
     return parser
+
+
+class RcvArgumentParser(ArgParser):
+
+    option_help = OPTION_HELP
+
+    def safe_get_log_level(self, args, error_level=None):
+        """
+        Get the user-requested log level without raising an exception.
+
+        Returns the log level as an integer.
+
+        Arguments:
+          error_level: the log level that should be used if a UsageException occurs.
+
+        """
+        if error_level is None:
+            error_level = LOG_LEVEL_USAGE_ERROR
+        try:
+            ns = self.parse_args(args=args)  # Namespace object
+        except UsageException:
+            level = parse_log_level(error_level)
+        else:
+            level = ns.log_level
+        return level

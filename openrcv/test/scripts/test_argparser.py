@@ -7,40 +7,81 @@ from openrcv.scripts.argparser import create_argparser, get_log_level
 from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 
 
-# TODO: add a test for good args.
+# Sample valid command syntax.
+VALID_COMMAND = ['count', 'path.py']
+
+
 class ModuleTestCase(UnitCase):
 
-    def call_get_log_level(self, parser, args):
-        return get_log_level(parser, args, default=35)
+    """Test the module-level functions."""
 
-    @skipIfTravis()
-    def test_get_log_level(self):
+    def _get_valid_args(self, level):
+        args = ['--log-level', level]
+        # We need to include valid command syntax in order to avoid a
+        # UsageException.
+        args.extend(VALID_COMMAND)
+        return args
+
+    def call_get_log_level(self, level):
         parser = create_argparser()
-        self.assertEqual(self.call_get_log_level(parser, ['input_path', '--log-level', 'DEBUG']), 10)
-        # Check what would otherwise be a UsageException.
+        args = self._get_valid_args(level)
+        return get_log_level(parser, args, error_level=42)
+
+    def call_get_log_level_default_error_level(self, level):
+        parser = create_argparser()
+        args = self._get_valid_args(level)
+        return get_log_level(parser, args)
+
+    def test_get_log_level__valid_string(self):
+        actual = self.call_get_log_level('DEBUG')
+        self.assertEqual(actual, 10)
+
+    def test_get_log_level__int(self):
+        actual = self.call_get_log_level('17')
+        self.assertEqual(actual, 17)
+
+    def test_get_log_level__invalid_value(self):
+        """Check an invalid log level string."""
+        actual = self.call_get_log_level('FOO')
+        self.assertEqual(actual, 42)
+
+    def test_get_log_level__default_error_level(self):
+        """Check the default error level."""
+        # We pass an invalid log-level value to trigger the error.
+        actual = self.call_get_log_level_default_error_level('FOO')
+        self.assertEqual(actual, 20)  # 20 means INFO
+
+    def test_get_log_level__no_level(self):
+        """Check not passing the --log-level option."""
+        parser = create_argparser()
+        actual = get_log_level(parser, VALID_COMMAND, error_level=42)
+        self.assertEqual(actual, 20)
+
+    def test_get_log_level__invalid_command(self):
+        """Check that passing invalid command syntax returns the error level."""
+        parser = create_argparser()
         with self.assertRaises(UsageException):
             parser.parse_args([])
-        self.assertEqual(self.call_get_log_level(parser, []), 35)
-        # Check an unrecognized string.
-        self.assertEqual(self.call_get_log_level(parser, ['input_path', '--log-level', 'FOO']), 35)
-        # Check not passing the --log-level option.
-        self.assertEqual(self.call_get_log_level(parser, ['input_path']), 20)
-        # Test what happens if the parser doesn't have a --log-level option.
+        actual = get_log_level(parser, [], error_level=42)
+        self.assertEqual(actual, 42)
+
+    def test_get_log_level__unsupported_parser(self):
+        """Check using an ArgumentParser that doesn't support --log-level."""
         parser = ArgumentParser()
         with self.assertRaises(AttributeError):
-            self.assertEqual(self.call_get_log_level(parser, []), 40)
+            actual = get_log_level(parser, [], error_level=42)
 
 
-class CreateArgparserTestCase(UnitCase):
+class ArgumentParserTestCase(UnitCase):
 
-    """Test create_argparser()."""
+    """Test the ArgumentParser object returned by create_argparser()."""
 
     def test_create_argparser(self):
         parser = create_argparser()
         with self.assertRaises(UsageException) as cm:
             parser.parse_args([])
         err = cm.exception
-        self.assertEqual(err.args, ('the following arguments are required: INPUT_PATH', ))
+        self.assertEqual(err.args, ('the following arguments are required: COMMAND', ))
         parser = err.parser
         self.assertEqual(type(parser), ArgParser)
         self.assertEqual(parser.prog, "rcv")
@@ -51,9 +92,9 @@ class CreateArgparserTestCase(UnitCase):
             parser.parse_args(["--help"])
 
     # Convenience function so we don't need to pass an input path.
-    def parse_args(self, args):
+    def parse_args(self, pre_args):
         parser = create_argparser()
-        args = ["input_path"] + args
+        args = pre_args + VALID_COMMAND
         return parser.parse_args(args)
 
     def parse_log_level(self, args):

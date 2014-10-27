@@ -10,6 +10,7 @@ from traceback import format_exc
 import colorlog
 
 from openrcv.scripts.argparse import parse_log_level, HelpRequested, UsageException
+# TODO: remove these imports (e.g. by making them properties of the parser).
 from openrcv.scripts.argparser import get_log_level, LOG_LEVEL_DEFAULT, OPTION_HELP
 
 
@@ -128,14 +129,15 @@ def print_usage_error(parser, msg, file_=None):
 
 
 # TODO: test the UsageException code path.
-def main_status(parser, do_func, argv, stdout=None, log_file=None):
+# TODO: choose a better name.
+def main_status(parser, argv, stdout=None, log_file=None):
     """
     Arguments:
       parser: an argparse.ArgumentParser object.
 
     """
     args = argv[1:]
-    log_level = get_log_level(parser, args, default=LOG_LEVEL_DEFAULT)
+    log_level = get_log_level(parser, args)
 
     if stdout is None:
         stdout = sys.stdout
@@ -144,7 +146,8 @@ def main_status(parser, do_func, argv, stdout=None, log_file=None):
         try:
             ns = parser.parse_args(args=args)  # Namespace object
             log.debug("ns: %r" % ns)
-            do_func(ns)
+            print(repr(ns))
+            ns.func(ns)
             status = EXIT_STATUS_SUCCESS
         except HelpRequested as exc:
             parser = exc.parser
@@ -172,8 +175,8 @@ def main_status(parser, do_func, argv, stdout=None, log_file=None):
 # functions (though we choose _main() as the function that returns an exit
 # status rather than main()):
 # http://www.artima.com/weblogs/viewpost.jsp?thread=4829
-def main(parser, do_func, argv=None):
+def main(parser, argv=None):
     if argv is None:
         argv = sys.argv
-    status = main_status(parser, do_func, argv)
+    status = main_status(parser, argv)
     sys.exit(status)

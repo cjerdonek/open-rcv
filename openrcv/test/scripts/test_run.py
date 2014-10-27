@@ -15,4 +15,4 @@ class MainTestCase(UnitCase):
         def do_func(args):
             raise Exception("foo")
         with open(os.devnull, "w") as f:
-            self.assertEqual(main_status(parser, do_func, ['prog', 'foo'], log_file=f), 1)
+            self.assertEqual(main_status(parser, [], log_file=f), 2)

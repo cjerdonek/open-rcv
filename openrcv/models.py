@@ -15,6 +15,7 @@ def make_candidates(candidate_count):
     return range(1, candidate_count + 1)
 
 
+# TODO: document a "ballot" data structure.
 class ContestInfo(object):
 
     """

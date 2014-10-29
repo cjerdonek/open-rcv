@@ -1,22 +1,35 @@
 
-from unittest.mock import patch
+from copy import copy
+from unittest.mock import patch, MagicMock
 
 from openrcv import datagen
 from openrcv.datagen import (gen_random_list, gen_random_ballot_list,
-                             BallotGenerator, STOP_CHOICE)
+                             BallotGenerator, UniqueBallotGenerator, STOP_CHOICE)
 from openrcv.utiltest.helpers import UnitCase
 
 
-# TODO: also test UniqueBallotGenerator.
-class BallotGeneratorTests(UnitCase):
+class CopyingMock(MagicMock):
 
-    def patch_random(self, return_value):
-        return patch('openrcv.datagen.random', return_value=return_value)
+    def __call__(self, *args, **kwargs):
+        # Shallow copy each arg.
+        args = (copy(arg) for arg in args)
+        kwargs = {k: copy(v) for k, v in kwargs}
+        return super().__call__(*args, **kwargs)
+
+
+class BallotGeneratorMixin(object):
 
     def patch_sample_one(self, values):
         # random.sample() returns a k-length list.
         values = ([v, ] for v in values)
-        return patch('openrcv.datagen.sample', side_effect=values)
+        return patch('openrcv.datagen.sample', new_callable=CopyingMock,
+                     side_effect=values)
+
+
+class BallotGeneratorTests(UnitCase, BallotGeneratorMixin):
+
+    def patch_random(self, return_value):
+        return patch('openrcv.datagen.random', return_value=return_value)
 
     def test_init__defaults(self):
         maker = BallotGenerator((1, 2, 3))
@@ -53,14 +66,47 @@ class BallotGeneratorTests(UnitCase):
             ballot = maker.make_ballot()
             self.assertTrue(len(ballot) > 0)
 
-    def test_make_ballot__simple(self):
-        """
-        Check make_ballot() relative to the return values of random.sample().
-
-        """
+    def test_make_ballot(self):
         maker = BallotGenerator((1, 2, 3), undervote=0)
-        with self.patch_sample_one((1, 1, STOP_CHOICE)):
+        with self.patch_sample_one((1, 1, STOP_CHOICE)) as mock_sample:
             self.assertEqual(maker.make_ballot(), [1, 1])
+            self.assertEqual(mock_sample.call_count, 3)
+            # Also check that random.sample() is being called with the
+            # right args each time.
+            expecteds = [
+                # The first call does not include STOP_CHOICE to ensure
+                # that the ballot is not an undervote.
+                ({1, 2, 3}, 1),
+                ({1, 2, 3, STOP_CHOICE}, 1),
+                ({1, 2, 3, STOP_CHOICE}, 1),
+            ]
+            for i, (actual, expected) in enumerate(zip(mock_sample.call_args_list, expecteds)):
+                with self.subTest(index=i):
+                    # The 0-th element is the positional args.
+                    self.assertEqual(actual[0], expected)
+
+
+class UniqueBallotGeneratorTests(UnitCase, BallotGeneratorMixin):
+
+    def test_make_ballot(self):
+        maker = UniqueBallotGenerator((1, 2, 3), undervote=0)
+        with self.patch_sample_one((1, 2, STOP_CHOICE)) as mock_sample:
+            self.assertEqual(maker.make_ballot(), [1, 2])
+            self.assertEqual(mock_sample.call_count, 3)
+            # Also check that random.sample() is being called with the
+            # right args each time (which is where UniqueBallotGenerator
+            # differs from BallotGenerator).
+            expecteds = [
+                ({1, 2, 3}, 1),
+                # Since this is the unique ballot generator, each call does
+                # not contain any of the previously chosen choices.
+                ({2, 3, STOP_CHOICE}, 1),
+                ({3, STOP_CHOICE}, 1),
+            ]
+            for i, (actual, expected) in enumerate(zip(mock_sample.call_args_list, expecteds)):
+                with self.subTest(index=i):
+                    # The 0-th element is the positional args.
+                    self.assertEqual(actual[0], expected)
 
 
 class ModuleTest(UnitCase):

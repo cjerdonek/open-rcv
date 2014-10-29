@@ -16,6 +16,7 @@ from openrcv.utils import FileInfo
 
 STOP_CHOICE = object()
 
+
 def gen_random_list(choices, max_length=None):
     """
     Generate a "random" list (allowing repetitions).
@@ -41,7 +42,6 @@ def gen_random_list(choices, max_length=None):
     return seq
 
 
-# TODO: unit-test these classes (at least some basic cases).
 # TODO: add a method to write `n` ballots to a StreamInfo object.
 class BallotGenerator(object):
 
@@ -90,7 +90,8 @@ class BallotGenerator(object):
 
         choices = self.choices.copy()
 
-        # Choose one choice before adding the "stop" choice.
+        # Choose one choice before adding the "stop" choice.  This ensures
+        # that the ballot is not an undervote.
         choice = self.choose(choices)
         ballot.append(choice)
         self.after_choice(choices, choice)

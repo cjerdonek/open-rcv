@@ -1,8 +1,51 @@
 
 from unittest.mock import patch
 
-from openrcv.datagen import gen_random_list, gen_random_ballot_list
+from openrcv import datagen
+from openrcv.datagen import (gen_random_list, gen_random_ballot_list,
+                             BallotGenerator)
 from openrcv.utiltest.helpers import UnitCase
+
+
+class BallotGeneratorTests(UnitCase):
+
+    def patch_random(self, return_value):
+        return patch('openrcv.datagen._random', return_value=return_value)
+
+    def test_init__defaults(self):
+        maker = BallotGenerator((1, 2, 3))
+        self.assertEqual(maker.choices, set([1, 2, 3]))
+        self.assertEqual(maker.max_length, 3)
+        self.assertEqual(maker.undervote, 0.1)
+
+    def test_init__defaults(self):
+        maker = BallotGenerator((1, 2, 3), max_length=4, undervote=0.5)
+        self.assertEqual(maker.choices, set([1, 2, 3]))
+        self.assertEqual(maker.max_length, 4)
+        self.assertEqual(maker.undervote, 0.5)
+
+    def test_choose(self):
+        maker = BallotGenerator((1, 2, 3))
+        self.assertEqual(maker.choose([1]), 1)
+
+    def test_make_ballot__undervote(self):
+        maker = BallotGenerator((1, 2, 3), undervote=0.5)
+        with self.patch_random(0.49):
+            self.assertEqual(maker.make_ballot(), [])
+        with self.patch_random(0.5):
+            ballot = maker.make_ballot()
+            self.assertTrue(len(ballot) > 0)
+        with self.patch_random(0.51):
+            ballot = maker.make_ballot()
+            self.assertTrue(len(ballot) > 0)
+
+    def test_make_ballot__undervote__zero(self):
+        """Check the zero edge case."""
+        # Zero chance of an undervote.
+        maker = BallotGenerator((1, 2, 3), undervote=0)
+        with self.patch_random(0):
+            ballot = maker.make_ballot()
+            self.assertTrue(len(ballot) > 0)
 
 
 class ModuleTest(UnitCase):

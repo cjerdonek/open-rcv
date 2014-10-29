@@ -10,8 +10,11 @@ import os
 import yaml
 
 from openrcv import counting
-from openrcv.datagen import random_contest
+from openrcv.datagen import (random_contest, BallotGenerator,
+                             UniqueBallotGenerator)
+from openrcv.formats.blt import BLTWriter
 from openrcv.jsmodels import JsonTestCaseOutput
+from openrcv.models import ContestInfo
 from openrcv.utils import logged_open
 
 
@@ -34,6 +37,18 @@ def count(ns):
     print(json_results.to_json())
 
 def rand_contest(ns):
+    contest = ContestInfo()
+    contest.candidates = ['A', 'B', 'C']
+    print(repr(contest))
+    writer = BLTWriter()
+    writer.write_contest(contest)
+    return
     print(repr(ns))
-    contest = random_contest(ns.candidates)
-    print(contest)
+    #contest = random_contest(ns.candidates)
+
+    choices = list(range(ns.candidates))
+    generator = NonUniqueBallotGenerator()
+    print(repr(generator.generate(choices)))
+    generator = UniqueBallotGenerator()
+    print(repr(generator.generate(choices)))
+    #print(contest)

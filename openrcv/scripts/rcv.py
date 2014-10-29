@@ -60,6 +60,8 @@ def add_command_randcontest(subparsers):
                         help='number of candidates.')
     parser.add_argument('-b', '--ballots', metavar='N', type=int,
                        help='number of ballots.')
+    # TODO: add output_path.
+    # TODO: add output_format (default to BLT for now).
     return parser, commands.rand_contest
 
 

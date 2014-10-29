@@ -111,6 +111,7 @@ def time_it(description):
 
 class ReprMixin(object):
 
+    # TODO: look up the proper return type.
     def __repr__(self):
         desc = self.repr_desc() or "--"
         return "<%s: [%s] %s>" % (self.__class__.__name__, desc, hex(id(self)))

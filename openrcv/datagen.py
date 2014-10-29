@@ -42,14 +42,16 @@ def gen_random_list(choices, max_length=None):
     return seq
 
 
-# TODO: write the ballots to a StreamInfo object (for the list use case).
+# TODO: unit-test these classes (at least some basic cases).
+# TODO: add a method to write `n` ballots to a StreamInfo object.
 class BallotGenerator(object):
 
-    def choose(self, choices):
-        # random.sample() returns a k-length list.
-        return sample(choices, 1)[0]
+    """
+    Generates random ballots (allowing duplicates).
 
-    def generate(self, choices, max_length=None, undervote=0.1):
+    """
+
+    def __init__(self, choices, max_length=None, undervote=0.1):
         """
         Arguments:
           choices: an iterable of choices from which to choose.
@@ -58,15 +60,36 @@ class BallotGenerator(object):
           undervote: probability of selecting an undervote.
 
         """
-        ballot = []
-        # random.random() returns a float in the range: [0.0, 1.0).
-        if _random() < undervote:
-            return ballot
-
         if max_length is None:
             max_length = len(choices)
 
-        choices = set(choices)
+        self.choices = set(choices)
+        self.max_length = max_length
+        self.undervote = undervote
+
+    def choose(self, choices):
+        """
+        Choose a single element of choices at random.
+
+        Arguments:
+          choices: a sequence or set of objects.
+
+        """
+        # random.sample() returns a k-length list.
+        return sample(choices, 1)[0]
+
+    def after_choice(self, choices, choice):
+        pass
+
+    def make_ballot(self):
+        ballot = []
+        # random.random() returns a float in the range: [0.0, 1.0).
+        # We use a strict inequality since otherwise it does not behave
+        # correctly on the edge case of undervote 0.
+        if _random() < self.undervote:
+            return ballot
+
+        choices = self.choices.copy()
 
         # Choose one choice before adding the "stop" choice.
         choice = self.choose(choices)
@@ -75,7 +98,7 @@ class BallotGenerator(object):
 
         choices.add(STOP_CHOICE)
 
-        for i in range(max_length - 1):
+        for i in range(self.max_length - 1):
             choice = self.choose(choices)
             if choice is STOP_CHOICE:
                 break
@@ -89,12 +112,6 @@ class UniqueBallotGenerator(BallotGenerator):
 
     def after_choice(self, choices, choice):
         choices.remove(choice)
-
-
-class NonUniqueBallotGenerator(BallotGenerator):
-
-    def after_choice(self, choices, choice):
-        pass
 
 
 def gen_random_ballot_list(choices, ballot_count, max_length=None):

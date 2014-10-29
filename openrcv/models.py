@@ -16,7 +16,9 @@ def make_candidates(candidate_count):
 
 
 # TODO: document a "ballot" data structure.
-class ContestInfo(object):
+# TODO: rename to ContestMeta.
+# TODO: create a new class called ContestInput that also references ballots.
+class ContestInfo(ReprMixin):
 
     """
     Attributes:
@@ -29,15 +31,17 @@ class ContestInfo(object):
     ballot_count = 0
 
     def __init__(self):
-        pass
+        self.candidates = []
+        self.name = None
+        self.seat_count = None
 
+    def repr_desc(self):
+        return "name=%r, candidates=%d" % (self.name, len(self.candidates))
+
+    # TODO: give this method or more accurate name.
     def get_candidates(self):
         """Return an iterable of the candidate numbers."""
         return make_candidates(len(self.candidates))
-
-    # TODO: look up the proper return type.
-    def __repr__(self):
-        return self.name
 
 
 class RoundResults(object):

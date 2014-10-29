@@ -3,14 +3,20 @@ from unittest.mock import patch
 
 from openrcv import datagen
 from openrcv.datagen import (gen_random_list, gen_random_ballot_list,
-                             BallotGenerator)
+                             BallotGenerator, STOP_CHOICE)
 from openrcv.utiltest.helpers import UnitCase
 
 
+# TODO: also test UniqueBallotGenerator.
 class BallotGeneratorTests(UnitCase):
 
     def patch_random(self, return_value):
-        return patch('openrcv.datagen._random', return_value=return_value)
+        return patch('openrcv.datagen.random', return_value=return_value)
+
+    def patch_sample_one(self, values):
+        # random.sample() returns a k-length list.
+        values = ([v, ] for v in values)
+        return patch('openrcv.datagen.sample', side_effect=values)
 
     def test_init__defaults(self):
         maker = BallotGenerator((1, 2, 3))
@@ -47,9 +53,19 @@ class BallotGeneratorTests(UnitCase):
             ballot = maker.make_ballot()
             self.assertTrue(len(ballot) > 0)
 
+    def test_make_ballot__simple(self):
+        """
+        Check make_ballot() relative to the return values of random.sample().
+
+        """
+        maker = BallotGenerator((1, 2, 3), undervote=0)
+        with self.patch_sample_one((1, 1, STOP_CHOICE)):
+            self.assertEqual(maker.make_ballot(), [1, 1])
+
 
 class ModuleTest(UnitCase):
 
+    # TODO: check whether this can be simplified using patch's API.
     def make_randint(self, values):
         values = iter(values)
         def randint(*args):
@@ -58,6 +74,10 @@ class ModuleTest(UnitCase):
             except StopIteration:  # pragma: no cover
                 raise Exception("to fix this, pass in more values for your test")
         return randint
+
+    def patch_randint(self, randint_vals):
+        randint = self.make_randint(randint_vals)
+        return patch('openrcv.datagen.randint', randint)
 
     def test_gen_random_list(self):
         # args=(choices, max_length=None), randint_vals, expected
@@ -75,8 +95,7 @@ class ModuleTest(UnitCase):
         )
         for args, randint_vals, expected in cases:
             with self.subTest(args=args, expected=expected, randint_vals=randint_vals):
-                randint = self.make_randint(randint_vals)
-                with patch('random.randint', randint):
+                with self.patch_randint(randint_vals):
                     self.assertEqual(gen_random_list(*args), expected)
 
     def test_gen_random_ballot_list(self):
@@ -87,8 +106,7 @@ class ModuleTest(UnitCase):
         )
         for args, randint_vals, expected in cases:
             with self.subTest(args=args, expected=expected, randint_vals=randint_vals):
-                randint = self.make_randint(randint_vals)
-                with patch('random.randint', randint):
+                with self.patch_randint(randint_vals):
                     ballots = gen_random_ballot_list(*args)
                     actual = tuple((b.choices for b in ballots))
                     self.assertEqual(actual, expected)

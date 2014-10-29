@@ -1,6 +1,7 @@
 TODO
 ====
 
+* Finish unit testing BallotGenerator.
 * Command should generate single BLT file with given candidates and ballots.
 * Add random_contest() function with flexible args.
 * Add "samplecontest" command so people can play with using it.

@@ -7,8 +7,7 @@ in the open-rcv-tests repo.
 
 """
 
-import random
-from random import random as _random, sample
+from random import randint, random, sample
 import openrcv.jsmodels as models
 from openrcv.jsmodels import JsonBallot, JsonContest, JsonContestFile
 from openrcv import utils
@@ -32,7 +31,7 @@ def gen_random_list(choices, max_length=None):
     choice_count = len(choices)
     for i in range(max_length):
         # This choice satisifes: 0 <= choice <= choice_count
-        choice_index = random.randint(0, choice_count)
+        choice_index = randint(0, choice_count)
         try:
             choice = choices[choice_index]
         except IndexError:
@@ -84,9 +83,9 @@ class BallotGenerator(object):
     def make_ballot(self):
         ballot = []
         # random.random() returns a float in the range: [0.0, 1.0).
-        # We use a strict inequality since otherwise it does not behave
-        # correctly on the edge case of undervote 0.
-        if _random() < self.undervote:
+        # A strict inequality is used so that the edge case of 0 undervote
+        # is handled correctly.
+        if random() < self.undervote:
             return ballot
 
         choices = self.choices.copy()

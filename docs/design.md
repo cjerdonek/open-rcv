@@ -18,10 +18,10 @@ Some of the pieces involved are as follows:
    specifies what contests should be tallied and how.  A contests file
    is the input that is passed to OpenRCV on the command-line.
    The format of a contests file is specific to OpenRCV, and it can be
-   either JSON or YAML.  A contests file contains references to one or more
-   input files, as well as specifying the format of those files.  In
-   particular, it is the contests file that says what parser should be
-   used to parse any input files for a contest.
+   either JSON or YAML. A contests file contains references to one or more
+   input files, specifies what counting method to use, what parsing method
+   to use for the input files, and what renderer should be used for the
+   eventual output.
 3. **Parser.**  A "parser" is a Python object responsible for converting
    one or more input files into a contest object.  A parser does not
    tally a contest.  It only converts the input into a standard

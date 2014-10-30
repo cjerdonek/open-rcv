@@ -118,6 +118,8 @@ def log_config(level, file_=None):
 def print_usage_error(parser, msg, file_=None):
     if file_ is None:
         file_ = sys.stderr
+    if len(sys.argv) == 1:
+        parser.print_help()
     parser.print_usage(file_)
     text = dedent("""\
     Command-line usage error: %s

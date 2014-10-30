@@ -86,10 +86,6 @@ def create_argparser(prog="rcv"):
             '"%s count %s".' % (OPTION_HELP.display(' or '), prog, OPTION_HELP[0]))
     subparsers = parser.add_subparsers(title='commands', metavar='COMMAND',
                                        description=desc)
-    # Setting required to True on subparsers causes an error to be raised if
-    # no command is provided.  See here for where this suggestion came from:
-    # http://stackoverflow.com/a/18283730/262819
-    # TODO: unit test this behavior.
     subparsers.required = True
 
     add_funcs = (

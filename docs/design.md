@@ -61,7 +61,7 @@ Data Flow
 When running OpenRCV from the command-line, the data flow is as follows:
 
 1. The user passes the path to a JSON or YAML contests file via the
-   command-line (e.g. by running 'rcv INPUT_PATH`).
+   command-line (e.g. by running `rcv INPUT_PATH`).
 2. OpenRCV reads the following information from the contests file:
    * the paths to any input files,
    * what parser to use,

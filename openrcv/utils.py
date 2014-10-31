@@ -120,7 +120,7 @@ class ReprMixin(object):
         return None
 
 
-class ObjectExtension(object):
+class ObjectExtension(ReprMixin):
 
     """An object wrapper allowing instance methods to be overridden."""
 
@@ -129,6 +129,9 @@ class ObjectExtension(object):
 
     def __getattr__(self, name):
         return getattr(self.object, name)
+
+    def repr_desc(self):
+        return "object=%r" % self.object
 
 
 class StreamInfo(ReprMixin):

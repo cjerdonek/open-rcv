@@ -31,6 +31,13 @@ class ObjectExtensionTests(UnitCase):
         def value(self):
             return 4
 
+    def test_repr(self):
+        """Check that existing methods are inherited."""
+        obj = self.Foo()
+        ext = ObjectExtension(obj)
+        start = "<ObjectExtension: [object=<openrcv.test.test_utils.ObjectExtensionTests.Foo object"
+        self.assertTrue(repr(ext).startswith(start))
+
     def test_inheritance(self):
         """Check that existing methods are inherited."""
         obj = self.Foo()

@@ -145,13 +145,22 @@ class UncloseableFile(ObjectExtension):
 class StreamInfo(ReprMixin):
 
     """
-    Abstract base class for wrapping files, file paths, and strings.
+    An object that can be opened to become a stream.
 
-    This class provides a common API that lets us write implementations that
-    work for all of the following equally: file paths, standard streams
-    like sys.stdout and sys.stderr, and strings.  Examples where this is
-    convenient include: unit testing and API's that support writing to
-    both paths and standard streams.
+    This is an abstract base class for handling things like file objects,
+    file paths, and strings with a common API.  StreamInfo instances
+    encapsulate the information needed to expose or open a stream.
+
+    The StreamInfo API lets us write higher-level APIs and implementations
+    that handle all of the following use cases equally: file paths,
+    strings, and standard streams like sys.stdout and sys.stderr (that are
+    open to begin with and shouldn't be closed).  In particular, APIs can
+    accept a StreamInfo object `stream_info` and then internally call
+    `with stream_info.open() as f:` at the appropriate place, etc.
+
+    This pattern is convenient for things like unit testing with strings
+    as opposed to the file system, and writing API's that support writing
+    to both standard streams and files defined by paths.
 
     """
 

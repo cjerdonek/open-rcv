@@ -15,25 +15,31 @@ def make_candidates(candidate_count):
     return range(1, candidate_count + 1)
 
 
-# TODO: document a "ballot" data structure.
-# TODO: rename to ContestMeta.
-# TODO: create a new class called ContestInput that also references ballots.
+# TODO: document the format of the ballots StreamInfo.
+# TODO: rename to ContestInput.
 class ContestInfo(ReprMixin):
 
     """
     Attributes:
-      candidates: a list of the names of all candidates, in numeric order.
-      name: name of contest.
+      ballots: a readable StreamInfo object of ballots.
+      candidates: an iterable of the names of all candidates, in numeric
+        order of their ballot ID.
+      name: contest name.
       seat_count: integer number of winners.
 
     """
 
     ballot_count = 0
 
-    def __init__(self):
+    def __init__(self, seat_count=None):
+        if seat_count is None:
+            seat_count = 1
+
+        self.ballots = None
         self.candidates = []
         self.name = None
-        self.seat_count = None
+
+        self.seat_count = seat_count
 
     def repr_desc(self):
         return "name=%r, candidates=%d" % (self.name, len(self.candidates))

@@ -30,6 +30,15 @@ class BLTWriter(Writer):
     # TODO: make a helper method that creates a file stream_info for BLT
     # purposes (e.g. covering the encoding).
 
+    def write_values(self, values):
+        line = " ".join((str(v) for v in values))
+        self.writeln(line)
+
+    def _write_contest(self, contest):
+        seat_count = contest.seat_count
+        assert seat_count is not None
+        self.write_values([len(contest.candidates), seat_count])
+
     def write_contest(self, contest):
         """
         Arguments:
@@ -37,4 +46,4 @@ class BLTWriter(Writer):
 
         """
         with self.open():
-            self.writeln("a b c")
+            self._write_contest(contest)

@@ -182,6 +182,7 @@ class PermanentFileInfo(StreamInfo):
         return "stream=%r" % self.file
 
     def open_object(self, mode):
+        # We call closing() to return a context manager.
         return closing(UncloseableFile(self.file))
 
 

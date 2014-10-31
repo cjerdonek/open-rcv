@@ -21,11 +21,11 @@ class Writer(object):
             self.file = f
             yield
 
-    def write_line(self, line):
+    def writeln(self, line):
         self.file.write(line + "\n")
 
 
-class BLTWriter(object):
+class BLTWriter(Writer):
 
     # TODO: make a helper method that creates a file stream_info for BLT
     # purposes (e.g. covering the encoding).
@@ -36,4 +36,5 @@ class BLTWriter(object):
           contest: a ContestInput object.
 
         """
-        self.writeln("a b c")
+        with self.open():
+            self.writeln("a b c")

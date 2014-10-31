@@ -6,6 +6,7 @@ The rcv command for counting ballots.
 
 import logging
 import os
+import sys
 
 import yaml
 
@@ -15,7 +16,7 @@ from openrcv.datagen import (random_contest, BallotGenerator,
 from openrcv.formats.blt import BLTWriter
 from openrcv.jsmodels import JsonTestCaseOutput
 from openrcv.models import ContestInfo
-from openrcv.utils import logged_open
+from openrcv.utils import logged_open, PermanentFileInfo
 
 
 log = logging.getLogger(__name__)
@@ -40,11 +41,10 @@ def rand_contest(ns):
     contest = ContestInfo()
     contest.candidates = ['A', 'B', 'C']
     print(repr(contest))
-    writer = BLTWriter()
+    file_info = PermanentFileInfo(sys.stdout)
+    writer = BLTWriter(file_info)
     writer.write_contest(contest)
     return
-    print(repr(ns))
-    #contest = random_contest(ns.candidates)
 
     choices = list(range(ns.candidates))
     generator = NonUniqueBallotGenerator()

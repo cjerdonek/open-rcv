@@ -1,5 +1,5 @@
 
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from datetime import datetime
 import io
 import json
@@ -144,6 +144,21 @@ class UncloseableFile(ObjectExtension):
 
 class StreamInfo(ReprMixin):
 
+    """
+    Abstract base class for wrapping files, file paths, and strings.
+
+    This class provides a common API that lets us write implementations that
+    work for all of the following equally: file paths, standard streams
+    like sys.stdout and sys.stderr, and strings.  Examples where this is
+    convenient include: unit testing and API's that support writing to
+    both paths and standard streams.
+
+    """
+
+    def open_object(self, mode):
+        """Return a file object that is also a context manager."""
+        raise NotImplementedError("by object: %r" % self)
+
     def open(self, mode=None):
         """
         Open the stream, and return a file object.
@@ -156,6 +171,18 @@ class StreamInfo(ReprMixin):
         if mode is None:
             mode = "r"
         return self.open_object(mode)
+
+
+class PermanentFileInfo(StreamInfo):
+
+    def __init__(self, file_):
+        self.file = file_
+
+    def repr_desc(self):
+        return "stream=%r" % self.file
+
+    def open_object(self, mode):
+        return closing(UncloseableFile(self.file))
 
 
 # TODO: default to ASCII.
@@ -176,6 +203,7 @@ class PathInfo(StreamInfo):
         return logged_open(self.path, mode, *self.args, **self.kwargs)
 
 
+# TODO: check whether it would simplify things to use an ObjectExtension instead.
 class _EjectingStringIO(io.StringIO):
 
     """A StringIO wrapper that saves its contents when closing."""

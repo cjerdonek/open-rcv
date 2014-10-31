@@ -52,7 +52,7 @@ Install the project in "develop" mode:
 
     $ pip install -e .[dev,test]
 
-This lets you `openrcv` from the command-line as if you had installed
+This lets you run `rcv` from the command-line as if you had installed
 it from PyPI.
 
 The `[dev,test]` portion of the command means to install the `extras_require`

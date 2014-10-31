@@ -1,7 +1,9 @@
 TODO
 ====
 
-* Finish unit testing BallotGenerator.
+* Implement and test `BLTWriter.write_contest()`.
+* Add a test for help with no args.
+* Remove the error text on calling with no args.
 * Command should generate single BLT file with given candidates and ballots.
 * Add random_contest() function with flexible args.
 * Add "samplecontest" command so people can play with using it.

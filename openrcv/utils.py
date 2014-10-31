@@ -134,6 +134,14 @@ class ObjectExtension(ReprMixin):
         return "object=%r" % self.object
 
 
+class UncloseableFile(ObjectExtension):
+
+    """Used for wrapping standard streams like sys.stderr."""
+
+    def close(self):
+        pass
+
+
 class StreamInfo(ReprMixin):
 
     def open(self, mode=None):

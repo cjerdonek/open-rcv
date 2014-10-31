@@ -1,5 +1,7 @@
 
-from openrcv.utils import ObjectExtension, ReprMixin, StringInfo
+import sys
+
+from openrcv.utils import ObjectExtension, ReprMixin, StringInfo, UncloseableFile
 from openrcv.utiltest.helpers import UnitCase
 
 
@@ -49,6 +51,19 @@ class ObjectExtensionTests(UnitCase):
         obj = self.Foo()
         ext = self.FooExtension(obj)
         self.assertEqual(ext.value(), 4)
+
+
+class UncloseableFileTests(UnitCase):
+
+    def test_standard_stream(self):
+        """Test that closing a standard stream doesn't do anything when wrapped."""
+        # It's better to test with sys.stdout than with sys.stderr,
+        # because if the test fails with sys.stderr, then we won't see
+        # any of the test output from that point on.
+        f = UncloseableFile(sys.stdout)
+        self.assertFalse(f.closed)
+        f.close()
+        self.assertFalse(f.closed)
 
 
 class StringInfoTest(UnitCase):

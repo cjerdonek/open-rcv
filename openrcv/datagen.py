@@ -11,7 +11,7 @@ from random import randint, random, sample
 import openrcv.jsmodels as models
 from openrcv.jsmodels import JsonBallot, JsonContest, JsonContestFile
 from openrcv import utils
-from openrcv.utils import FileInfo
+from openrcv.utils import PathInfo
 
 
 STOP_CHOICE = object()

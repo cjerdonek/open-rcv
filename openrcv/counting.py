@@ -19,7 +19,7 @@ from openrcv.models import ContestResults, RoundResults
 from openrcv.parsing import (make_internal_ballot_line, parse_integer_line,
                              parse_internal_ballot, BLTParser, Parser)
 from openrcv import utils
-from openrcv.utils import FileInfo, ENCODING_INTERNAL_BALLOTS
+from openrcv.utils import PathInfo, ENCODING_INTERNAL_BALLOTS
 
 
 log = logging.getLogger(__name__)
@@ -159,8 +159,8 @@ def count_irv_contest(ballot_stream, candidates):
 
 def _count_irv(sub_dir, blt_path):
     ballot_path = os.path.join(sub_dir, "ballots.txt")
-    ballot_stream = FileInfo(ballot_path, encoding=utils.ENCODING_INTERNAL_BALLOTS)
-    blt_stream = FileInfo(blt_path)
+    ballot_stream = PathInfo(ballot_path, encoding=utils.ENCODING_INTERNAL_BALLOTS)
+    blt_stream = PathInfo(blt_path)
 
     parser = BLTParser(ballot_stream)
     contest = parser.parse(blt_stream)

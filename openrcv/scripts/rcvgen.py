@@ -18,7 +18,7 @@ from openrcv.jsmodels import (JsonContestFile, JsonRoundResults, JsonTestCase,
                               JsonTestCaseOutput, JsonTestCaseFile)
 from openrcv.scripts.run import main
 from openrcv import utils
-from openrcv.utils import FileInfo, StringInfo
+from openrcv.utils import PathInfo, StringInfo
 
 
 log = logging.getLogger(__name__)
@@ -83,7 +83,7 @@ def make_input_test_file(argv):
     # target_path="sub/open-rcv-tests/contests.json"
 
     test_file = create_json_tests()
-    stream_info = FileInfo("temp.json")
+    stream_info = PathInfo("temp.json")
     models.write_json(test_file.to_jsobj(), stream_info)
 
     with stream_info.open() as f:

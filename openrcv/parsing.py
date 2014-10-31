@@ -127,7 +127,7 @@ class BLTParser(Parser):
 
         """
         if output_info is None:
-            output_info = utils.FileInfo(os.devnull)
+            output_info = utils.PathInfo(os.devnull)
         # We check the argument here to fail fast and help the user locate
         # the source of the issue more quickly.
         assert isinstance(output_info, utils.StreamInfo)

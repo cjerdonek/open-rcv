@@ -133,11 +133,11 @@ class StreamInfo(ReprMixin):
         """
         if mode is None:
             mode = "r"
-        return self._open(mode)
+        return self.open_object(mode)
 
 
 # TODO: default to ASCII.
-class FileInfo(StreamInfo):
+class PathInfo(StreamInfo):
 
     """A wrapped file path that opens to become a file object."""
 
@@ -150,7 +150,7 @@ class FileInfo(StreamInfo):
         self.args = args
         self.kwargs = kwargs
 
-    def _open(self, mode):
+    def open_object(self, mode):
         return logged_open(self.path, mode, *self.args, **self.kwargs)
 
 
@@ -178,7 +178,7 @@ class StringInfo(StreamInfo):
     """
     A wrapped string that opens to become an in-memory text stream.
 
-    This class allows functions that accept a FileInfo object to be called
+    This class allows functions that accept a PathInfo object to be called
     using strings.  In particular, writing to disk and creating temporary
     files isn't necessary.  This is especially convenient for testing.
 
@@ -201,7 +201,7 @@ class StringInfo(StreamInfo):
         return repr(value[:limit]) + "..."
 
     # TODO: test this method on short text strings.
-    def _open(self, mode):
+    def open_object(self, mode):
         value = self.value
         display = self.get_display_value(limit=24)
         # As a precaution, make sure the string is empty if not reading.

@@ -7,7 +7,7 @@ Supporting code for JSON serialization.
 import json
 import logging
 
-from openrcv.utils import FileInfo, ReprMixin, ENCODING_JSON
+from openrcv.utils import PathInfo, ReprMixin, ENCODING_JSON
 
 
 log = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def read_json_path(path):
     Read a JSON file and return its contents as a JSON object.
 
     """
-    stream_info = JsonFileInfo(path)
+    stream_info = JsonPathInfo(path)
     with stream_info.open() as f:
         jsobj = json.load(f)
     return jsobj
@@ -53,7 +53,7 @@ def write_json(obj, stream_info=None, path=None):
         jsobj = obj
     if path is not None:
         assert stream_info is None
-        stream_info = JsonFileInfo(path)
+        stream_info = JsonPathInfo(path)
     with stream_info.open("w") as f:
         return call_json(json.dump, jsobj, f)
 
@@ -99,7 +99,7 @@ def to_jsobj(obj):
     return obj.to_jsobj()
 
 
-class JsonFileInfo(FileInfo):
+class JsonPathInfo(PathInfo):
 
     def __init__(self, path):
         super().__init__(path, encoding=ENCODING_JSON)

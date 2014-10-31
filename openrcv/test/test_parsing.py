@@ -6,7 +6,7 @@ import unittest
 
 from openrcv.models import ContestInfo
 from openrcv.parsing import make_internal_ballot_line, BLTParser, ParsingError
-from openrcv.utils import FileInfo, StringInfo
+from openrcv.utils import PathInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
@@ -61,7 +61,7 @@ class BLTParserTest(UnitCase):
     def test_init__no_args(self):
         parser = BLTParser()
         output_info = parser.output_info
-        self.assertIs(type(output_info), FileInfo)
+        self.assertIs(type(output_info), PathInfo)
         self.assertEqual(output_info.path, os.devnull)
 
     # TODO: test passing

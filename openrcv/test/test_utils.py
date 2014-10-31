@@ -37,7 +37,7 @@ class ObjectExtensionTests(UnitCase):
         """Check that existing methods are inherited."""
         obj = self.Foo()
         actual = repr(ObjectExtension(obj))
-        expected = "<ObjectExtension: [object=<openrcv.test.test_utils.ObjectExtensionTests.Foo object"
+        expected = "<ObjectExtension: [object=%r" % obj
         # We check only the beginning of the strings to avoid dealing with hex IDs.
         self.assertEqual(actual[:len(expected)], expected)
 

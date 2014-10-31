@@ -1,5 +1,5 @@
 
-from openrcv.utils import ReprMixin, StringInfo
+from openrcv.utils import ObjectExtension, ReprMixin, StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
@@ -19,6 +19,29 @@ class ReprMixinTest(UnitCase):
         obj = ReprMixinTest.ReprSample()
         expected = "<ReprSample: [foo] %s>" % hex(id(obj))
         self.assertEqual(repr(obj), expected)
+
+
+class ObjectExtensionTests(UnitCase):
+
+    class Foo(object):
+        def value(self):
+            return 3
+
+    class FooExtension(ObjectExtension):
+        def value(self):
+            return 4
+
+    def test_inheritance(self):
+        """Check that existing methods are inherited."""
+        obj = self.Foo()
+        ext = ObjectExtension(obj)
+        self.assertEqual(ext.value(), 3)
+
+    def test_overriding(self):
+        """Check that existing methods can be overridden."""
+        obj = self.Foo()
+        ext = self.FooExtension(obj)
+        self.assertEqual(ext.value(), 4)
 
 
 class StringInfoTest(UnitCase):

@@ -5,7 +5,8 @@ from textwrap import dedent
 import unittest
 
 from openrcv.models import ContestInfo
-from openrcv.parsing import make_internal_ballot_line, BLTParser, ParsingError
+from openrcv.parsing import (make_internal_ballot_line, parse_internal_ballot,
+                             BLTParser, ParsingError)
 from openrcv.utils import PathInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
@@ -20,6 +21,22 @@ class ModuleTest(UnitCase):
         self.assertEqual(make_internal_ballot_line(1, (2, ), "\n"), "1 2\n")
         # Check the final-character argument with empty choices.
         self.assertEqual(make_internal_ballot_line(1, (), "\n"), "1\n")
+
+    def test_parse_internal_ballot(self):
+        cases = [
+            ("1 2", (1, (2, ))),
+            ("1", (1, ())),
+            # Leading and trailing space are okay
+            (" 1 2", (1, (2, ))),
+            ("1 2 \n", (1, (2, ))),
+        ]
+        for line, expected in cases:
+            with self.subTest(line=line, expected=expected):
+                self.assertEqual(parse_internal_ballot(line), expected)
+
+    def test_parse_internal_ballot__non_integer(self):
+        with self.assertRaises(ValueError):
+            parse_internal_ballot("f 2 \n")
 
 
 class BLTParserTest(UnitCase):

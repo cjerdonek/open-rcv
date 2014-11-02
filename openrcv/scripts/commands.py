@@ -40,7 +40,9 @@ def count(ns, stdout=None):
     print(json_results.to_json())
 
 
-def rand_contest(ns, stdout):
+def rand_contest(ns, stdout=None):
+    if stdout is None:
+        stdout = sys.stdout
     output_dir = ns.output_dir
     output_paths = []
     if not output_dir:

@@ -61,7 +61,7 @@ class CaseMixin(object):
 
     def assertStartsWith(self, text, initial):
         self.assertEqual(text[:len(initial)], initial,
-            msg="text: '%s'\ndoes not start with: %r" % (text, initial))
+            msg='The string ...\n"""%s"""\ndoes not start with: %r' % (text, initial))
 
 
 # This is for convenience to reduce typing.

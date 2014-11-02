@@ -10,7 +10,7 @@ import logging
 from textwrap import dedent
 
 from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
-                                      Option, UsageException)
+                                      HelpRequested, Option, UsageException)
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
 
@@ -38,10 +38,6 @@ OpenRCV command-line tool.
 def main():
     parser = create_argparser()
     _main(parser)
-
-
-def help_command():
-    pass
 
 
 def add_help(parser):
@@ -117,12 +113,6 @@ def create_argparser(prog="rcv"):
     subparsers = parser.add_subparsers(title='commands', metavar='COMMAND',
                                        description=desc)
     subparsers.formatter_class = RawDescriptionHelpFormatter
-
-    # Default to running help.
-    #parser.set_defaults(run_command=command_func)
-
-    # TODO: default to help action?
-    subparsers.required = True
 
     add_funcs = (
         add_command_count,

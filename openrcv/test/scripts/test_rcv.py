@@ -60,10 +60,12 @@ class SafeGetLogLevelTestCase(UnitCase):
 
     def test_safe_get_log_level__invalid_command(self):
         """Check that passing invalid command syntax returns the error level."""
+        bad_args = ['bad_command']
         parser = create_argparser()
+        # First double-check that the args are bad and raise a UsageException.
         with self.assertRaises(UsageException):
-            parser.parse_args([])
-        actual = parser.safe_get_log_level([], error_level=42)
+            parser.parse_args(bad_args)
+        actual = parser.safe_get_log_level(bad_args, error_level=42)
         self.assertEqual(actual, 42)
 
     def test_safe_get_log_level__unsupported_parser(self):
@@ -77,20 +79,44 @@ class ArgumentParserTestCase(UnitCase):
 
     """Test the ArgumentParser object returned by create_argparser()."""
 
-    def test_create_argparser(self):
-        parser = create_argparser()
+    def parser(self):
+        return create_argparser()
+
+    # TODO: test good args.
+    def test_bad_command(self):
+        parser = self.parser()
         with self.assertRaises(UsageException) as cm:
-            parser.parse_args([])
+            parser.parse_args(['bad_command'])
         err = cm.exception
-        self.assertEqual(err.args, ('the following arguments are required: COMMAND', ))
+        self.assertEqual(len(err.args), 1)
+        self.assertStartsWith(str(err),
+            "argument COMMAND: invalid choice: 'bad_command' (choose from ")
         parser = err.parser
         self.assertEqual(type(parser), RcvArgumentParser)
         self.assertEqual(parser.prog, "rcv")
 
-    def test_create_argparser__help(self):
-        parser = create_argparser()
+    def test_help(self):
+        parser = self.parser()
         with self.assertRaises(HelpRequested):
             parser.parse_args(["--help"])
+
+    def test_no_args(self):
+        """Check that no default run_command is set."""
+        parser = self.parser()
+        with self.assertRaises(AttributeError):
+            parser.run_command
+
+    def test_bare_command(self):
+        """
+        Check that --help does not happen with args like: rcv randcontest.
+
+        This is to check our work-around for this argparse bug:
+        http://bugs.python.org/issue9351
+        """
+        parser = self.parser()
+        ns = parser.parse_args(["randcontest"])
+        with open(os.devnull, "w") as f:
+            ns.run_command(ns, stdout=f)
 
     # Convenience function so we don't need to pass an input path.
     def parse_args(self, pre_args):

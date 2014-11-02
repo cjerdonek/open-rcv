@@ -8,14 +8,15 @@ from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
-def test_command(ns, stdout=None):
+def foo_command(ns, stdout=None):
     return "foo"
 
 
 # We use a minimal ArgumentParser for our tests.
-def make_argparser():
+def make_argparser(command=None):
     parser = RcvArgumentParser()
-    parser.set_defaults(run_command=test_command)
+    if command is not None:
+        parser.set_defaults(run_command=command)
     parser.set_defaults(log_level=20)  # level name INFO
     return parser
 
@@ -25,18 +26,29 @@ class NonExitingMainTests(UnitCase):
 
     """Tests non_exiting_main()."""
 
-    def test_output(self):
+    def test_good_command(self):
         """Check that output is written to stdout."""
+        parser = make_argparser(foo_command)
+        info = StringInfo()
+        with info.open("w") as f:
+            status = non_exiting_main(parser, [], stdout=f)
+        self.assertEqual(status, 0)
+        self.assertEqual(info.value, "foo")
+
+    def test_empty_args(self):
+        """Check that empty args triggers help."""
         parser = make_argparser()
         info = StringInfo()
         with info.open("w") as f:
             status = non_exiting_main(parser, [], stdout=f)
-        self.assertEqual(info.value, "foo")
+        self.assertEqual(status, 0)
+        # Confirm that help is displayed.
+        self.assertStartsWith(info.value, "usage: ")
 
     def test_non_exiting_main__exception(self):
-        parser = create_argparser()
+        def raise_exc(*args, **kwargs):
+            raise ValueError("foo")
+        parser = make_argparser(command=raise_exc)
         # TODO: check stdout.
-        def do_func(args):
-            raise Exception("foo")
-        with open(os.devnull, "w") as f:
-            self.assertEqual(non_exiting_main(parser, [], log_file=f), 2)
+        with self.assertRaises(ValueError):
+            non_exiting_main(parser, ['foo'])

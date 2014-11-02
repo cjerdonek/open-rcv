@@ -147,7 +147,19 @@ def non_exiting_main(parser, argv, stdout=None, log_file=None):
         try:
             ns = parser.parse_args(args=args)  # Namespace object
             log.debug("ns: %r" % ns)
-            output = ns.run_command(ns, stdout=stdout)
+            # Make no args default to running help.
+            try:
+                # There seems to be a bug in argparse where the parent
+                # parser's default run_command is used for args like
+                # "rcv randcontest" (when nothing is after randcontest),
+                # when parser.set_defaults(run_command=...) is used to set
+                # the default on the parent parser.  Thus we use try-except
+                # here instead.  I believe this is the issue:
+                # http://bugs.python.org/issue9351
+                command = ns.run_command
+            except AttributeError:
+                raise HelpRequested(parser=parser)
+            output = command(ns, stdout=stdout)
             if output is not None:
                 stdout.write(output)
             status = EXIT_STATUS_SUCCESS
@@ -170,9 +182,9 @@ def non_exiting_main(parser, argv, stdout=None, log_file=None):
         # is that exceptions don't show up during test failures.
         # except Exception as err:
             #
-            # Log the full exception info for "unexpected" exceptions.
-            #log.error(format_exc())
-            #status = EXIT_STATUS_FAIL
+            # # Log the full exception info for "unexpected" exceptions.
+            # log.error(format_exc())
+            # status = EXIT_STATUS_FAIL
 
     return status
 

@@ -101,13 +101,15 @@ class ContestInfo(ReprMixin):
 
     ballot_count = 0
 
-    def __init__(self, seat_count=None):
+    def __init__(self, seat_count=None, name=None):
         if seat_count is None:
             seat_count = 1
+        if name is None:
+            name = "Election Contest"
 
         self.ballots_resource = None
         self.candidates = []
-        self.name = None
+        self.name = name
 
         self.seat_count = seat_count
 

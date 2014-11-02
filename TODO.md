@@ -1,7 +1,8 @@
 TODO
 ====
 
-* Implement and test `BLTWriter.write_contest()`.
+* Flesh out rest of `rand_contest` command (including output_path, etc).
+* Also implement a `test` format.
 * Add a test for help with no args.
 * Remove the error text on calling with no args.
 * Command should generate single BLT file with given candidates and ballots.

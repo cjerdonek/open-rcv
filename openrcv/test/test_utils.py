@@ -97,4 +97,5 @@ class StringInfoTest(UnitCase):
         stream = StringInfo()
         stream.value = ""  # Even an empty string triggers the ValueError.
         with self.assertRaises(ValueError):
-            stream.open("w")
+            with stream.open("w"):
+                pass

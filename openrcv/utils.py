@@ -102,6 +102,7 @@ def time_it(description):
     log.info("start: %s..." % description)
     start_time = timeit.default_timer()
     yield
+    # TODO: log the end in a finally block so it shows during exceptions, too.
     elapsed = timeit.default_timer() - start_time
     log.info("done: %s: %.4f seconds" % (description, elapsed))
 
@@ -109,9 +110,11 @@ def time_it(description):
 @contextmanager
 def tracked(iterable, label=None):
     """
-    A context manager providing better exceptions during iteration.
+    Return a context manager for iteration that provides item-level
+    information when an exception occurs.
 
-    Returns a new iterator object.
+    The context manager yields an iterator object as the target that we
+    call a "tracking iterator."
     """
     if label is None:
         label = 'item'
@@ -119,8 +122,11 @@ def tracked(iterable, label=None):
     try:
         iterator = tracker.make_iterator(iterable)
         yield iterator
-    except:
-        raise Exception("during %s number %d: %r" % (label, tracker.item_number, tracker.item))
+    except Exception as exc:
+        # TODO: find a way of including additional information in the stack
+        # trace that doesn't involve raising a new exception (and unnecessarily
+        # lengthening the stack trace display).
+        raise type(exc)("during %s number %d: %r" % (label, tracker.item_number, tracker.item))
 
 
 class _IteratorTracker(object):
@@ -204,17 +210,27 @@ class StreamInfo(ReprMixin):
         """Return a file object that is also a context manager."""
         raise NotImplementedError("by object: %r" % self)
 
+    @contextmanager
     def open(self, mode=None):
         """
         Open the stream, and return a file object.
 
-        Specifically, this method returns an io.IOBase object.  IOBase
-        objects are iterable.  Iterating over them yields the lines in
-        the stream.
+        The return value is both a context manager and an iterable.
+        Iterating over the return value yields the lines in the stream.
+        An io.IOBase object is an example of a return value having these
+        properties.
         """
         if mode is None:
             mode = "r"
-        return self.open_object(mode)
+        with self.open_object(mode) as f:
+            try:
+                yield f
+            except Exception as exc:
+                # To aid troubleshooting, we include what file was opened.
+                # TODO: find a way of including additional information in the stack
+                # trace that doesn't involve raising a new exception (and unnecessarily
+                # lengthening the stack trace display).
+                raise type(exc)("with open stream: %r" % self)
 
 
 class PermanentFileInfo(StreamInfo):

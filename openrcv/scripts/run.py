@@ -147,7 +147,7 @@ def non_exiting_main(parser, argv, stdout=None, log_file=None):
         try:
             ns = parser.parse_args(args=args)  # Namespace object
             log.debug("ns: %r" % ns)
-            output = ns.run_command(ns)
+            output = ns.run_command(ns, stdout=stdout)
             if output is not None:
                 stdout.write(output)
             status = EXIT_STATUS_SUCCESS

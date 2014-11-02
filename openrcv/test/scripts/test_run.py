@@ -8,7 +8,7 @@ from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
-def test_command(ns):
+def test_command(ns, stdout=None):
     return "foo"
 
 

@@ -5,7 +5,9 @@ Supports the "rcv" command-line command (aka console_script).
 """
 
 import argparse
+from argparse import RawDescriptionHelpFormatter
 import logging
+from textwrap import dedent
 
 from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
                                       Option, UsageException)
@@ -38,8 +40,14 @@ def main():
     _main(parser)
 
 
+def help_command():
+    pass
+
 def add_command(subparsers, add_func):
     parser, command_func = add_func(subparsers)
+    # The RawDescriptionHelpFormatter preserves line breaks in the
+    # description and epilog strings.
+    parser.formatter_class = RawDescriptionHelpFormatter
     parser.set_defaults(run_command=command_func)
 
 
@@ -54,12 +62,20 @@ def add_command_count(subparsers):
 
 def add_command_randcontest(subparsers):
     help = 'Create a random sample contest.'
-    parser = subparsers.add_parser('randcontest', help=help,
-        description=help)
-    parser.add_argument('-c', '--candidates', metavar='N', type=int, default=6,
-                        help='number of candidates.')
+    desc = dedent("""\
+    Create a random sample contest.
+
+    If writing to files, writes the file paths to stdout.
+    """)
+    parser = subparsers.add_parser('randcontest', help=help, description=desc)
     parser.add_argument('-b', '--ballots', metavar='N', type=int,
                        help='number of ballots.')
+    parser.add_argument('-c', '--candidates', metavar='N', type=int, default=6,
+                        help='number of candidates.')
+    parser.add_argument('-o', '--output-dir', metavar='OUTPUT_DIR',
+        help=("the directory to which to write any output files, or "
+              "write to stdout if the empty string.  Defaults to the "
+              "empty string."))
     # TODO: add output_path.
     # TODO: add output_format (default to BLT for now).
     return parser, commands.rand_contest
@@ -71,7 +87,8 @@ def create_argparser(prog="rcv"):
     Return an ArgumentParser object.
 
     """
-    parser = RcvArgumentParser(prog=prog, description=DESCRIPTION, add_help=False)
+    parser = RcvArgumentParser(prog=prog, description=DESCRIPTION, add_help=False,
+                               formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument('--log-level', metavar='LEVEL',
         default=LOG_LEVEL_DEFAULT, type=parse_log_level,
         help=("logging level name or number (e.g. CRITICAL, ERROR, WARNING, "
@@ -81,11 +98,20 @@ def create_argparser(prog="rcv"):
     parser.add_argument(*OPTION_HELP, action=HelpAction,
         help='show this help message and exit.')
 
-    desc = ("Available commands are below. For help with a particular "
-            "command, pass %s after the command name. For example, "
-            '"%s count %s".' % (OPTION_HELP.display(' or '), prog, OPTION_HELP[0]))
+    desc = dedent("""\
+    Available commands are below.
+
+    For help with a particular command, pass %s after the command name.
+    For example, `%s count %s`.
+    """ % (OPTION_HELP.display(' or '), prog, OPTION_HELP[0]))
     subparsers = parser.add_subparsers(title='commands', metavar='COMMAND',
                                        description=desc)
+    subparsers.formatter_class = RawDescriptionHelpFormatter
+
+    # Default to running help.
+    #parser.set_defaults(run_command=command_func)
+
+    # TODO: default to help action?
     subparsers.required = True
 
     add_funcs = (

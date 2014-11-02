@@ -130,16 +130,16 @@ def print_usage_error(parser, msg, file_=None):
 
 
 # TODO: test the UsageException code path.
-# TODO: choose a better name.
-def main_status(parser, argv, stdout=None, log_file=None):
+def non_exiting_main(parser, argv, stdout=None, log_file=None):
     """
+    Run the program, and return the exit status without exiting.
+
     Arguments:
       parser: an argparse.ArgumentParser object.
 
     """
     args = argv[1:]
     log_level = parser.safe_get_log_level(args)
-
     if stdout is None:
         stdout = sys.stdout
     with log_config(level=log_level, file_=log_file):
@@ -147,7 +147,9 @@ def main_status(parser, argv, stdout=None, log_file=None):
         try:
             ns = parser.parse_args(args=args)  # Namespace object
             log.debug("ns: %r" % ns)
-            ns.run_command(ns)
+            output = ns.run_command(ns)
+            if output is not None:
+                stdout.write(output)
             status = EXIT_STATUS_SUCCESS
         except HelpRequested as exc:
             parser = exc.parser
@@ -163,10 +165,14 @@ def main_status(parser, argv, stdout=None, log_file=None):
             assert len(err_args) == 1
             print_usage_error(parser, err_args[0], file_=log_file)
             status = EXIT_STATUS_USAGE_ERROR
-        except Exception as err:
+        # TODO: decide whether to handle the error case manually, or let
+        # Python do it by default.  One problem with the former
+        # is that exceptions don't show up during test failures.
+        # except Exception as err:
+            #
             # Log the full exception info for "unexpected" exceptions.
-            log.error(format_exc())
-            status = EXIT_STATUS_FAIL
+            #log.error(format_exc())
+            #status = EXIT_STATUS_FAIL
 
     return status
 
@@ -178,5 +184,5 @@ def main_status(parser, argv, stdout=None, log_file=None):
 def main(parser, argv=None):
     if argv is None:
         argv = sys.argv
-    status = main_status(parser, argv)
+    status = non_exiting_main(parser, argv)
     sys.exit(status)

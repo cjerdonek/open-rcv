@@ -38,12 +38,12 @@ class CaseMixin(object):
 
         unittest's default display looks like this, for example:
 
-          ERROR: test_main_status__exception (openrcv.test.scripts.test_run.MainTestCase)
+          ERROR: test_non_exiting_main__exception (openrcv.test.scripts.test_run.MainTestCase)
 
         The new display looks like this--
 
-          ERROR: MainTestCase.test_main_status__exception
-           >> openrcv.test.scripts.test_run.MainTestCase.test_main_status__exception
+          ERROR: MainTestCase.test_non_exiting_main__exception
+           >> openrcv.test.scripts.test_run.MainTestCase.test_non_exiting_main__exception
 
         Specifically, the string on the second line can be cut-and-paste
         to the command-line as is.

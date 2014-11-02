@@ -213,12 +213,10 @@ class StreamInfo(ReprMixin):
     @contextmanager
     def open(self, mode=None):
         """
-        Open the stream, and return a file object.
+        Open the stream, and return a context manager for the stream.
 
-        The return value is both a context manager and an iterable.
-        Iterating over the return value yields the lines in the stream.
-        An io.IOBase object is an example of a return value having these
-        properties.
+        The context manager yields an iterable that in turn yields the
+        lines in the stream (for example an io.IOBase object).
         """
         if mode is None:
             mode = "r"

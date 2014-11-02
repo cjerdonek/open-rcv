@@ -75,7 +75,8 @@ class StringInfoTest(UnitCase):
 
     def test_init__no_args(self):
         stream = StringInfo()
-        self.assertEqual(stream.value, None)
+        self.assertEqual(stream.initial_value, None)
+        self.assertEqual(stream.value, "")
 
     def test_open__read(self):
         stream = StringInfo("abc")
@@ -86,16 +87,18 @@ class StringInfoTest(UnitCase):
         self.assertEqual(stream.value, "abc")
 
     def test_open__write(self):
-        stream = StringInfo()
-        with stream.open("w") as f:
+        info = StringInfo()
+        with info.open("w") as f:
             f.write("abc")
-        # The value can be obtained from the attribute.
-        self.assertEqual(stream.value, "abc")
+            # Test before closing.
+            self.assertEqual(info.value, "abc")
+        # Test after closing.
+        self.assertEqual(info.value, "abc")
 
     def test_open__write__non_none(self):
         """Test writing to a StringInfo initialized to a string."""
-        stream = StringInfo()
-        stream.value = ""  # Even an empty string triggers the ValueError.
+        stream = StringInfo("")
+        # Even an empty string triggers the ValueError.
         with self.assertRaises(ValueError):
             with stream.open("w"):
                 pass

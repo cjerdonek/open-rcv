@@ -1,7 +1,7 @@
 
 from contextlib import closing, contextmanager
 from datetime import datetime
-import io
+from io import StringIO
 import json
 import logging
 import os
@@ -261,37 +261,23 @@ class PathInfo(StreamInfo):
         return logged_open(self.path, mode, *self.args, **self.kwargs)
 
 
-# TODO: check whether it would simplify things to use an ObjectExtension instead.
-class _EjectingStringIO(io.StringIO):
-
-    """A StringIO wrapper that saves its contents when closing."""
-
-    def __init__(self, initial_value, info):
-        """
-        Arguments:
-          info: a StringInfo object.
-        """
-        super().__init__(initial_value)
-        self.info = info
-
-    def close(self):
-        self.info.value = self.getvalue()
-        # The memory buffer is discarded when the object is closed.
-        super().close()
-
-
 class StringInfo(StreamInfo):
 
     """
-    A wrapped string that opens to become an in-memory text stream.
+    A StreamInfo object that opens to become an in-memory text stream.
 
     This class allows functions that accept a PathInfo object to be called
     using strings.  In particular, writing to disk and creating temporary
     files isn't necessary.  This is especially convenient for testing.
     """
 
-    def __init__(self, value=None):
-        self.value = value
+    def __init__(self, initial_value=None):
+        self._stream = StringIO(initial_value)
+        self.initial_value = initial_value
+
+    @property
+    def value(self):
+        return self._stream.getvalue()
 
     def repr_desc(self):
         return "contents=%s" % (self.get_display_value(10), )
@@ -306,11 +292,13 @@ class StringInfo(StreamInfo):
         return repr(value[:limit]) + "..."
 
     # TODO: test this method on short text strings.
+    @contextmanager
     def open_object(self, mode):
-        value = self.value
+        initial = self.initial_value
         display = self.get_display_value(limit=24)
         # As a precaution, make sure the string is empty if not reading.
-        if (value is not None and mode != "r"):
+        if (initial is not None and mode != "r"):
+            # TODO: improve this error message.
             raise ValueError("Cannot write to string that already has a value: %r" % display)
         log.info("opening in-memory text stream (mode=%r): contents=%r" % (mode, display))
-        return _EjectingStringIO(self.value, self)
+        yield self._stream

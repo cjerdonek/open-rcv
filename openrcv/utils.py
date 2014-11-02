@@ -70,7 +70,6 @@ def make_temp_dirname(name=None):
 def temp_dir(path):
     """
     Create a directory at the given path for temporary use.
-
     """
     log_create_dir(path)
     os.mkdir(path)
@@ -85,7 +84,6 @@ def temp_dir_inside(parent_dir):
     Create a directory inside the given directory for temporary use.
 
     Returns the path to the directory created.
-
     """
     dir_name = make_temp_dirname()
     dir_path = os.path.join(parent_dir, dir_name)
@@ -100,13 +98,52 @@ def time_it(description):
 
     Arguments:
       description: task description for logging purposes
-
     """
     log.info("start: %s..." % description)
     start_time = timeit.default_timer()
     yield
     elapsed = timeit.default_timer() - start_time
     log.info("done: %s: %.4f seconds" % (description, elapsed))
+
+
+@contextmanager
+def tracked(iterable, label=None):
+    """
+    A context manager providing better exceptions during iteration.
+
+    Returns a new iterator object.
+    """
+    if label is None:
+        label = 'item'
+    tracker = _IteratorTracker()
+    try:
+        iterator = tracker.make_iterator(iterable)
+        yield iterator
+    except:
+        raise Exception("during %s number %d: %r" % (label, tracker.item_number, tracker.item))
+
+
+class _IteratorTracker(object):
+
+    """
+    Records progress of an iterator.
+    """
+
+    def __init__(self):
+        self.item_number = 0
+        self.item = None
+
+    def make_iterator(self, iterable):
+        """
+        Return a new iterator object yielding the same items.
+
+        We call the return value a "tracked iterator."
+
+        """
+        for item_number, item in enumerate(iterable, start=1):
+            self.item = item
+            self.item_number = item_number
+            yield item
 
 
 class ReprMixin(object):
@@ -161,7 +198,6 @@ class StreamInfo(ReprMixin):
     This pattern is convenient for things like unit testing with strings
     as opposed to the file system, and writing API's that support writing
     to both standard streams and files defined by paths.
-
     """
 
     def open_object(self, mode):
@@ -175,7 +211,6 @@ class StreamInfo(ReprMixin):
         Specifically, this method returns an io.IOBase object.  IOBase
         objects are iterable.  Iterating over them yields the lines in
         the stream.
-
         """
         if mode is None:
             mode = "r"
@@ -203,7 +238,6 @@ class PathInfo(StreamInfo):
     def __init__(self, path, *args, **kwargs):
         """
         The `mode` argument to open() should not be included here.
-
         """
         self.path = path
         self.args = args
@@ -222,7 +256,6 @@ class _EjectingStringIO(io.StringIO):
         """
         Arguments:
           info: a StringInfo object.
-
         """
         super().__init__(initial_value)
         self.info = info
@@ -241,7 +274,6 @@ class StringInfo(StreamInfo):
     This class allows functions that accept a PathInfo object to be called
     using strings.  In particular, writing to disk and creating temporary
     files isn't necessary.  This is especially convenient for testing.
-
     """
 
     def __init__(self, value=None):
@@ -253,7 +285,6 @@ class StringInfo(StreamInfo):
     def get_display_value(self, limit=None):
         """
         Return the first `limit` characters plus "...".
-
         """
         value = self.value
         if limit is None or not value or len(value) <= limit:

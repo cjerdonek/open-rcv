@@ -59,6 +59,10 @@ class CaseMixin(object):
                  path,
                  mod_name, cls.__name__, self._testMethodName))
 
+    def assertStartsWith(self, text, initial):
+        self.assertEqual(text[:len(initial)], initial,
+            msg="text: '%s'\ndoes not start with: %r" % (text, initial))
+
 
 # This is for convenience to reduce typing.
 class UnitCase(CaseMixin, unittest.TestCase):

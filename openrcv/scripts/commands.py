@@ -39,6 +39,7 @@ def count(ns, stdout=None):
     json_results = JsonTestCaseOutput.from_contest_results(results)
     print(json_results.to_json())
 
+
 def rand_contest(ns, stdout):
     output_dir = ns.output_dir
     output_paths = []
@@ -59,7 +60,7 @@ def rand_contest(ns, stdout):
     print(repr(contest))
     writer = BLTWriter(stream_info)
     writer.write_contest(contest)
-    return "\n".join(output_paths) + "\n"
+    return "\n".join(output_paths) + "\n" if output_paths else None
 
     choices = list(range(ns.candidates))
     generator = NonUniqueBallotGenerator()

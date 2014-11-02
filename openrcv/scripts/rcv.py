@@ -43,17 +43,29 @@ def main():
 def help_command():
     pass
 
+
+def add_help(parser):
+    # The add_argument() call for help is modeled after how argparse
+    # does it internally.
+    parser.add_argument(*OPTION_HELP, action=HelpAction,
+        help='show this help message and exit.')
+
+
 def add_command(subparsers, add_func):
     parser, command_func = add_func(subparsers)
     # The RawDescriptionHelpFormatter preserves line breaks in the
     # description and epilog strings.
     parser.formatter_class = RawDescriptionHelpFormatter
     parser.set_defaults(run_command=command_func)
+    # TODO: DRY up the fact that add_help=False needs to be added
+    # when adding each command.
+    add_help(parser)
 
 
 def add_command_count(subparsers):
     parser = subparsers.add_parser('count', help='Tally one or more contests.',
-        description='Tally the contests specified by the contests file at INPUT_PATH.')
+        description='Tally the contests specified by the contests file at INPUT_PATH.',
+        add_help=False)
     parser.add_argument('input_path', metavar='INPUT_PATH',
         help=("path to a contests configuration file. Supported file "
               "formats are JSON (*.json) and YAML (*.yaml or *.yml)."))
@@ -67,15 +79,15 @@ def add_command_randcontest(subparsers):
 
     If writing to files, writes the file paths to stdout.
     """)
-    parser = subparsers.add_parser('randcontest', help=help, description=desc)
+    parser = subparsers.add_parser('randcontest', help=help, description=desc,
+                                   add_help=False)
     parser.add_argument('-b', '--ballots', metavar='N', type=int,
                        help='number of ballots.')
     parser.add_argument('-c', '--candidates', metavar='N', type=int, default=6,
                         help='number of candidates.')
     parser.add_argument('-o', '--output-dir', metavar='OUTPUT_DIR',
-        help=("the directory to which to write any output files, or "
-              "write to stdout if the empty string.  Defaults to the "
-              "empty string."))
+        help=("directory to write output files to, or write to stdout "
+              "if the empty string.  Defaults to the empty string."))
     # TODO: add output_path.
     # TODO: add output_format (default to BLT for now).
     return parser, commands.rand_contest
@@ -94,9 +106,7 @@ def create_argparser(prog="rcv"):
         help=("logging level name or number (e.g. CRITICAL, ERROR, WARNING, "
               "INFO, DEBUG, 10, 20, etc). "
               "Defaults to %s." % LOG_LEVEL_DEFAULT_NAME))
-    # The add_argument() call for help is modeled after how argparse does it.
-    parser.add_argument(*OPTION_HELP, action=HelpAction,
-        help='show this help message and exit.')
+    add_help(parser)
 
     desc = dedent("""\
     Available commands are below.

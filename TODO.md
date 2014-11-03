@@ -1,13 +1,9 @@
 TODO
 ====
 
-* Work on ballot writer for "internal" format.
+* Work on ballot writer for "internal" and "JSON test" formats.
 * Work on outputting JSON test for rand_contest.
-* Flesh out rest of `rand_contest` command (including output_path, etc).
-* Also implement a `test` format.
-* Add a test for help with no args.
-* Remove the error text on calling with no args.
-* Command should generate single BLT file with given candidates and ballots.
+* Flesh out rest of `rand_contest` command (number of ballots, etc).
 * Add random_contest() function with flexible args.
 * Add "samplecontest" command so people can play with using it.
   - Also add "random election" command.

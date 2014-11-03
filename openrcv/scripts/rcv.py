@@ -111,7 +111,7 @@ def add_command_randcontest(subparsers):
         help=("directory to write output files to, or write to stdout "
               "if the empty string.  Defaults to the empty string."))
     parser.add_argument('-f', '--output-format', metavar='OUTPUT_FORMAT',
-        type=writer_type,
+        type=writer_type, default=OUTPUT_FORMAT_DEFAULT,
         help=("the output format.  Choose from: {!s}. Defaults to {!r}.".
               format(", ".join(OUTPUT_FORMATS), OUTPUT_FORMAT_DEFAULT)))
     return parser, commands.rand_contest

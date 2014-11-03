@@ -11,6 +11,9 @@ from textwrap import dedent
 
 from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
                                       HelpRequested, Option, UsageException)
+import openrcv.formats.blt
+import openrcv.formats.internal
+import openrcv.formats.json
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
 
@@ -27,17 +30,39 @@ LOG_LEVEL_DEFAULT_NAME = logging.getLevelName(LOG_LEVEL_DEFAULT)
 # The log level that should be used if the ArgumentParser raises a UsageException.
 LOG_LEVEL_USAGE_ERROR = 20  # corresponds to INFO.
 
-OPTION_HELP = Option(('-h', '--help'))
-
 DESCRIPTION = """\
 OpenRCV command-line tool.
 
 """
 
+OPTION_HELP = Option(('-h', '--help'))
+
+OUTPUT_FORMAT_BLT = 'blt'
+OUTPUT_FORMAT_INTERNAL = 'internal'
+OUTPUT_FORMAT_TEST = 'test'
+# TODO: default to OpenRCV format.
+OUTPUT_FORMAT_DEFAULT = OUTPUT_FORMAT_BLT
+
+WRITER_CLASSES = {
+    OUTPUT_FORMAT_BLT: openrcv.formats.blt.BLTWriter,
+    OUTPUT_FORMAT_INTERNAL: openrcv.formats.internal.InternalWriter,
+    OUTPUT_FORMAT_TEST: openrcv.formats.json.JsonWriter,
+}
+
+OUTPUT_FORMATS = sorted(WRITER_CLASSES.keys())
+
 
 def main():
     parser = create_argparser()
     _main(parser)
+
+
+def writer_type(label):
+    try:
+        return WRITER_CLASSES[label]
+    except KeyError:
+        raise argparse.ArgumentTypeError("\ninvalid argument choice: %r\n"
+            "Choose from: %s" % (label, ", ".join(OUTPUT_FORMATS)))
 
 
 def add_help(parser):
@@ -73,7 +98,8 @@ def add_command_randcontest(subparsers):
     desc = dedent("""\
     Create a random sample contest.
 
-    If writing to files, writes the file paths to stdout.
+    If the contest is written to files instead of stdout, then the
+    output file paths are written to stdout instead.
     """)
     parser = subparsers.add_parser('randcontest', help=help, description=desc,
                                    add_help=False)
@@ -84,8 +110,10 @@ def add_command_randcontest(subparsers):
     parser.add_argument('-o', '--output-dir', metavar='OUTPUT_DIR',
         help=("directory to write output files to, or write to stdout "
               "if the empty string.  Defaults to the empty string."))
-    # TODO: add output_path.
-    # TODO: add output_format (default to BLT for now).
+    parser.add_argument('-f', '--output-format', metavar='OUTPUT_FORMAT',
+        type=writer_type,
+        help=("the output format.  Choose from: {!s}. Defaults to {!r}.".
+              format(", ".join(OUTPUT_FORMATS), OUTPUT_FORMAT_DEFAULT)))
     return parser, commands.rand_contest
 
 

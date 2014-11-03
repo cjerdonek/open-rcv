@@ -2,7 +2,7 @@
 import logging
 import os
 
-from openrcv.models import ContestInfo
+from openrcv.models import ContestInput
 from openrcv import utils
 from openrcv.utils import time_it, FILE_ENCODING
 
@@ -134,7 +134,7 @@ class BLTParser(Parser):
         self.output_info = output_info
 
     def get_parse_return_value(self):
-        """Return a ContestInfo object."""
+        """Return a ContestInput object."""
         return self.info
 
     def parse_next_line_text(self, lines):
@@ -162,7 +162,7 @@ class BLTParser(Parser):
         return ballot_count
 
     def parse_lines(self, lines):
-        info = ContestInfo()
+        info = ContestInput()
         self.info = info
 
         # First line.

@@ -89,8 +89,7 @@ class BallotStreamResource(BallotsResourceBase):
                 yield ballots
 
 
-# TODO: rename to ContestInput.
-class ContestInfo(ReprMixin):
+class ContestInput(ReprMixin):
 
     """
     Attributes:

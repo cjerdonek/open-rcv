@@ -31,7 +31,7 @@ TODO
 * Make an `update_test_files()` function that reindices and updates expecteds.
 * Add tie-break and add convention to docs or code comment.
 * Create a "top-level" function to tabulate an election from a path to
-  an internal ballot file and a ContestInfo object.
+  an internal ballot file and a ContestInput object.
 * Add auto-generation comment to top of `setup_long_description.rst`.
 * Only include newest changes in README.
 * Add nice online documentation (convert to reST).

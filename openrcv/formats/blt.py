@@ -31,7 +31,7 @@ BLT_ENCODING = 'utf-8'
 
 # TODO: move the code to parse BLT files here.
 
-class BLTWriter(FormatWriter):
+class BLTOutputFormat(FormatWriter):
 
     def get_file_info(self):
         return os.path.join(self.output_dir, "output.blt"), BLT_ENCODING
@@ -40,15 +40,14 @@ class BLTWriter(FormatWriter):
         """
         Arguments:
           contest: a ContestInput object.
-
         """
         stream_info, output_paths = self.get_output_info(self.get_file_info)
-        file_writer = _BLTFileWriter(stream_info)
+        file_writer = BLTFileWriter(stream_info)
         file_writer.write_contest(contest)
         return output_paths
 
 
-class _BLTFileWriter(FileWriter):
+class BLTFileWriter(FileWriter):
 
     @classmethod
     def make_path_info(cls, path):
@@ -78,7 +77,6 @@ class _BLTFileWriter(FileWriter):
         """
         Arguments:
           contest: a ContestInput object.
-
         """
         with self.open():
             self._write_contest(contest)

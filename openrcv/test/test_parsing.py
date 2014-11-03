@@ -4,7 +4,7 @@ import os
 from textwrap import dedent
 import unittest
 
-from openrcv.models import ContestInfo
+from openrcv.models import ContestInput
 from openrcv.parsing import (make_internal_ballot_line, parse_internal_ballot,
                              BLTParser, ParsingError)
 from openrcv.utils import PathInfo, StringInfo
@@ -88,7 +88,7 @@ class BLTParserTest(UnitCase):
         output_info = StringInfo()
         info = self.parse_blt(self.BLT_STRING, output_info=output_info)
         # TODO: test the other attributes.
-        self.assertEqual(type(info), ContestInfo)
+        self.assertEqual(type(info), ContestInput)
         self.assertEqual(info.name, '"My Election"')
         self.assertEqual(info.ballot_count, 2)
         self.assertEqual(output_info.value, "2 2\n1 2 4 3 1\n")
@@ -96,7 +96,7 @@ class BLTParserTest(UnitCase):
     def test_parse__terminal_empty_lines(self):
         """Test a BLT string with empty lines at the end."""
         info = self.parse_blt(self.BLT_STRING + "\n\n")
-        self.assertEqual(type(info), ContestInfo)
+        self.assertEqual(type(info), ContestInput)
         self.assertEqual(info.name, '"My Election"')
 
     def test_parse__terminal_non_empty_lines(self):
@@ -117,5 +117,5 @@ class BLTParserTest(UnitCase):
         """Test passing no output StreamInfo object."""
         info = self.parse_blt(self.BLT_STRING)
         # TODO: test the other attributes.
-        self.assertEqual(type(info), ContestInfo)
+        self.assertEqual(type(info), ContestInput)
         self.assertEqual(info.ballot_count, 2)

@@ -1,16 +1,16 @@
 
 from textwrap import dedent
 
-from openrcv.formats.blt import BLTWriter
-from openrcv.models import BallotsResource, ContestInfo
+from openrcv.formats.blt import BLTFileWriter
+from openrcv.models import BallotsResource, ContestInput
 from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
-class BLTWriterTest(UnitCase):
+class BLTFileWriterTest(UnitCase):
 
     def test(self):
-        contest = ContestInfo()
+        contest = ContestInput()
         contest.name = "Foo"
         contest.candidates = ['A', 'B', 'C']
         contest.seat_count = 1
@@ -19,8 +19,8 @@ class BLTWriterTest(UnitCase):
             (1, (2, )),
         ]
         contest.ballots_resource = BallotsResource(ballots)
-        output = StringInfo()
-        writer = BLTWriter(output)
+        stream_info = StringInfo()
+        writer = BLTFileWriter(stream_info)
         writer.write_contest(contest)
         expected = dedent("""\
         3 1
@@ -32,4 +32,4 @@ class BLTWriterTest(UnitCase):
         "C"
         "Foo\"
         """)
-        self.assertEqual(output.value, expected)
+        self.assertEqual(stream_info.value, expected)

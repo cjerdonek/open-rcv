@@ -1,7 +1,7 @@
 
 from textwrap import dedent
 
-from openrcv.models import BallotsResource, BallotStreamResource, ContestInfo
+from openrcv.models import BallotsResource, BallotStreamResource, ContestInput
 from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
@@ -34,9 +34,9 @@ class BallotStreamResourceTest(UnitCase):
         self.assertEqual(ballots, ['2 1 2', '3 1'])
 
 
-class ContestInfoTest(UnitCase):
+class ContestInputTest(UnitCase):
 
     def test_get_candidates(self):
-        contest = ContestInfo()
+        contest = ContestInput()
         contest.candidates = ["Alice", "Bob", "Carl"]
         self.assertEqual(contest.get_candidates(), range(1, 4))

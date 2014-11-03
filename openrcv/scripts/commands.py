@@ -44,13 +44,8 @@ def rand_contest(ns, stdout=None):
     if stdout is None:
         stdout = sys.stdout
     output_dir = ns.output_dir
-    output_paths = []
-    if not output_dir:
-        stream_info = PermanentFileInfo(stdout)
-    else:
-        output_path = os.path.join(output_dir, "output.blt")
-        stream_info = PathInfo(output_path)
-        output_paths.append(output_path)
+    writer_class = ns.output_format
+
     contest = ContestInfo()
     contest.candidates = ['A', 'B', 'C']
     contest.seat_count = 1
@@ -58,10 +53,15 @@ def rand_contest(ns, stdout=None):
     2 1 1
     3 5 1
     """))
-    contest.ballots_resource = BallotStreamResource(ballot_stream_info, parse=parse_internal_ballot)
+    ballots_resource = BallotStreamResource(ballot_stream_info, parse=parse_internal_ballot)
+    # with ballots_resource() as ballots:
+    #     print(repr(list(ballots)))
+    # return
+    contest.ballots_resource = ballots_resource
     print(repr(contest))
-    writer = BLTWriter(stream_info)
-    writer.write_contest(contest)
+
+    writer = writer_class(output_dir=output_dir, stdout=stdout)
+    output_paths = writer.write_contest(contest)
     return "\n".join(output_paths) + "\n" if output_paths else None
 
     choices = list(range(ns.candidates))

@@ -21,32 +21,12 @@ Here is an example BLT file (taken from: https://code.google.com/p/droop/wiki/Bl
 
 """
 
-from contextlib import contextmanager
-
-from openrcv.parsing import parse_internal_ballot
-from openrcv.utils import tracked
+from openrcv.utils import Writer
 
 
 BLT_ENCODING = 'utf-8'
 
 # TODO: move the code to parse BLT files here.
-
-# TODO: move this to a more central location.
-# TODO: compare implementation with wineds-converter.
-class Writer(object):
-
-    def __init__(self, stream_info):
-        self.stream_info = stream_info
-
-    @contextmanager
-    def open(self):
-        with self.stream_info.open("w") as f:
-            self.file = f
-            yield
-
-    def writeln(self, line):
-        self.file.write(line + "\n")
-
 
 class BLTWriter(Writer):
 

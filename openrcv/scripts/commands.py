@@ -54,11 +54,7 @@ def rand_contest(ns, stdout=None):
     3 5 1
     """))
     ballots_resource = BallotStreamResource(ballot_stream_info, parse=parse_internal_ballot)
-    # with ballots_resource() as ballots:
-    #     print(repr(list(ballots)))
-    # return
     contest.ballots_resource = ballots_resource
-    print(repr(contest))
 
     writer = writer_class(output_dir=output_dir, stdout=stdout)
     output_paths = writer.write_contest(contest)

@@ -28,9 +28,10 @@ at a time -- as opposed to having to load them into memory all at once.
 """
 
 from openrcv.counting import InternalBallotsNormalizer
+from openrcv.formats.internal import format_ballot
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonObjError, JsonableMixin)
 from openrcv.models import make_candidates, BallotsResourceBase, RoundResults
-from openrcv.parsing import make_internal_ballot_line, parse_internal_ballot
+from openrcv.parsing import parse_internal_ballot
 from openrcv.utils import StringInfo
 
 
@@ -104,7 +105,7 @@ class JsonBallot(JsonableMixin):
 
     def to_internal_ballot(self, final=''):
         """Return the ballot as an internal ballot string."""
-        return make_internal_ballot_line(self.weight, self.choices, final=final)
+        return format_ballot(self.weight, self.choices, final=final)
 
 
 class JsonContest(JsonableMixin):

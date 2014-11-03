@@ -41,7 +41,8 @@ class BLTOutputFormat(FormatWriter):
         Arguments:
           contest: a ContestInput object.
         """
-        stream_info, output_paths = self.get_output_info(self.get_file_info)
+        stream_infos, output_paths = self.make_output_info(self.get_file_info)
+        stream_info = stream_infos[0]
         file_writer = BLTFileWriter(stream_info)
         file_writer.write_contest(contest)
         return output_paths

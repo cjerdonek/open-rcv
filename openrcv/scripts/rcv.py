@@ -45,7 +45,7 @@ OUTPUT_FORMAT_DEFAULT = OUTPUT_FORMAT_BLT
 
 WRITER_CLASSES = {
     OUTPUT_FORMAT_BLT: openrcv.formats.blt.BLTOutputFormat,
-    OUTPUT_FORMAT_INTERNAL: openrcv.formats.internal.InternalWriter,
+    OUTPUT_FORMAT_INTERNAL: openrcv.formats.internal.InternalOutput,
     OUTPUT_FORMAT_TEST: openrcv.formats.json.JsonWriter,
 }
 OUTPUT_FORMATS = sorted(WRITER_CLASSES.keys())

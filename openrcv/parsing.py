@@ -2,6 +2,7 @@
 import logging
 import os
 
+from openrcv.formats.internal import format_ballot
 from openrcv.models import ContestInput
 from openrcv import utils
 from openrcv.utils import time_it, FILE_ENCODING
@@ -21,21 +22,6 @@ def parse_integer_line(line):
 
     """
     return (int(s) for s in line.split())
-
-
-def make_internal_ballot_line(weight, choices, final=''):
-    """
-    Return the internal ballot representation of the ballot.
-
-    Arguments:
-      choices: an iterable of choices.
-
-    """
-    choices = "" if not choices else " ".join((str(c) for c in choices))
-    # Only include the space separator if choices are present.
-    # Also, note that there is no terminal 0 like in the BLT format.
-    ballot = "%s%s%s%s" % (weight, " " if choices else "", choices, final)
-    return ballot
 
 
 def parse_internal_ballot(line):
@@ -152,7 +138,7 @@ class BLTParser(Parser):
                 break
             ballot_count += 1
             # Leave off the initial weight and terminal 0 for choices.
-            new_line = make_internal_ballot_line(weight, ints[1:-1])
+            new_line = format_ballot(weight, ints[1:-1])
             f.write(new_line + "\n")
         return ballot_count
 

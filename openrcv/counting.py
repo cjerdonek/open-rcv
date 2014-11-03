@@ -15,9 +15,9 @@ import string
 # and not depend on serialization, etc.  Serialization is supplemental
 # to any counting and not a prerequisite.
 
+from openrcv.formats.internal import format_ballot
 from openrcv.models import ContestResults, RoundResults
-from openrcv.parsing import (make_internal_ballot_line, parse_integer_line,
-                             parse_internal_ballot, BLTParser, Parser)
+from openrcv.parsing import (parse_integer_line, parse_internal_ballot, BLTParser, Parser)
 from openrcv import utils
 from openrcv.utils import PathInfo, ENCODING_INTERNAL_BALLOTS
 
@@ -213,7 +213,7 @@ class InternalBallotsNormalizer(Parser):
 
         with self.output_stream.open("w") as f:
             for weight, choices in normalized:
-                line = make_internal_ballot_line(weight, choices, "\n")
+                line = format_ballot(weight, choices, "\n")
                 f.write(line)
 
 

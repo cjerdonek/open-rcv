@@ -1,18 +1,6 @@
 
 """
-
-Terminology
------------
-
-iterator resource: an "iterator resource" is a callable that returns a
-  context manager that in turn yields an iterable.  Here is an example
-  of using an iterator resource `resource`:
-
-    with resource() as items:
-        for item in items:
-            # Do stuff.
-            ...
-
+Utility functions.
 """
 
 from contextlib import closing, contextmanager
@@ -145,51 +133,6 @@ class _MappedResource(object):
     def __call__(self):
         with self.resource() as items:
             yield map(self.func, items)
-
-
-@contextmanager
-def tracked(iterable, label=None):
-    """
-    Return a context manager for iteration that provides item-level
-    information when an exception occurs.
-
-    The context manager yields an iterator object as the target that we
-    call a "tracking iterator."
-    """
-    if label is None:
-        label = 'item'
-    tracker = _IteratorTracker()
-    try:
-        iterator = tracker.make_iterator(iterable)
-        yield iterator
-    except Exception as exc:
-        # TODO: find a way of including additional information in the stack
-        # trace that doesn't involve raising a new exception (and unnecessarily
-        # lengthening the stack trace display).
-        raise type(exc)("during %s number %d: %r" % (label, tracker.item_number, tracker.item))
-
-
-class _IteratorTracker(object):
-
-    """
-    Records progress of an iterator.
-    """
-
-    def __init__(self):
-        self.item_number = 0
-        self.item = None
-
-    def make_iterator(self, iterable):
-        """
-        Return a new iterator object yielding the same items.
-
-        We call the return value a "tracked iterator."
-
-        """
-        for item_number, item in enumerate(iterable, start=1):
-            self.item = item
-            self.item_number = item_number
-            yield item
 
 
 class ReprMixin(object):

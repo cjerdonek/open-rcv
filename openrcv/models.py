@@ -6,7 +6,8 @@ Internal models that do not require JSON serialization.
 
 from contextlib import contextmanager
 
-from openrcv.utils import tracked, ReprMixin
+from openrcv.resource import tracked
+from openrcv.utils import ReprMixin
 
 
 def make_candidates(candidate_count):
@@ -48,6 +49,7 @@ class BallotsResourceBase(object):
                 yield tracked_items
 
 
+# TODO: use the same class as BallotStreamResource.
 class BallotsResource(BallotsResourceBase):
 
     """A resource wrapper for a raw iterable of ballots."""
@@ -64,6 +66,7 @@ class BallotsResource(BallotsResourceBase):
         yield self.ballots
 
 
+# TODO: use the same class as BallotsResource.
 class BallotStreamResource(BallotsResourceBase):
 
     def __init__(self, stream_info, parse=None):
@@ -91,8 +94,8 @@ class ContestInfo(ReprMixin):
 
     """
     Attributes:
-      ballots_resource: a context manager factory function that exposes a
-        ballot stream.  This should be a BallotsResourceBase object.
+      ballots_resource: a context manager factory function that yields an
+        iterable of ballots (e.g. a BallotsResourceBase object).
       candidates: an iterable of the names of all candidates, in numeric
         order of their ballot ID.
       name: contest name.

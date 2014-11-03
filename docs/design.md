@@ -56,8 +56,8 @@ Some of the pieces involved are as follows:
 Data Flow
 ---------
 
-The section describes the flow when using OpenRCV to count a contest
-from the command-line, for example:
+This section describes the data flow when using OpenRCV to count a contest
+from the command-line:
 
     $ rcv count INPUT_PATH [options]
 

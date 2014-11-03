@@ -1,6 +1,8 @@
 TODO
 ====
 
+* Work on ballot writer for "internal" format.
+* Work on outputting JSON test for rand_contest.
 * Flesh out rest of `rand_contest` command (including output_path, etc).
 * Also implement a `test` format.
 * Add a test for help with no args.

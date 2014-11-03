@@ -6,7 +6,7 @@ Internal models that do not require JSON serialization.
 
 from contextlib import contextmanager
 
-from openrcv.resource import tracked
+from openrcv.resource import tracking
 from openrcv.utils import ReprMixin
 
 
@@ -45,7 +45,7 @@ class BallotsResourceBase(object):
     @contextmanager
     def __call__(self):
         with self.resource() as items:
-            with tracked(items, self.item_name) as tracked_items:
+            with tracking(items, self.item_name) as tracked_items:
                 yield tracked_items
 
 
@@ -83,7 +83,7 @@ class BallotStreamResource(BallotsResourceBase):
     @contextmanager
     def resource(self):
         with self.stream_info.open() as f:
-            with tracked(f, 'line') as lines:
+            with tracking(f, 'line') as lines:
                 parse = self.parse
                 ballots = map(parse, lines)
                 yield ballots

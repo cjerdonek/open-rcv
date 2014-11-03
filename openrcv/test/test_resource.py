@@ -1,16 +1,16 @@
 
-from openrcv.resource import tracked
+from openrcv.resource import tracking
 from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 
 
-class TrackedTest(UnitCase):
+class TrackingTest(UnitCase):
 
-    """Tests for tracked()."""
+    """Tests for tracking()."""
 
     def test(self):
         seq = [1, "a"]
         with self.assertRaises(ValueError) as cm:
-            with tracked(seq) as items:
+            with tracking(seq) as items:
                 for item in items:
                     int(item)
         # Check the exception text.

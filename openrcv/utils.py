@@ -111,30 +111,6 @@ def time_it(description):
     log.info("done: %s: %.4f seconds" % (description, elapsed))
 
 
-def map_resource(resource, func):
-    """
-    Transform an iterator resource by applying func to each element.
-
-    This function converts an iterator resource to a new iterator resource
-    by applying the given function to each element of the iterable.
-
-    """
-    mapped_resource = _MappedResource(resource, func)
-    return mapped_resource
-
-
-class _MappedResource(object):
-
-    def __init__(self, resource, func):
-        self.func = func
-        self.resource = resource
-
-    @contextmanager
-    def __call__(self):
-        with self.resource() as items:
-            yield map(self.func, items)
-
-
 class ReprMixin(object):
 
     # TODO: look up the proper return type.
@@ -288,7 +264,7 @@ class StringInfo(StreamInfo):
 
 
 # TODO: compare implementation with wineds-converter.
-class Writer(object):
+class FileWriter(object):
 
     def __init__(self, stream_info):
         self.stream_info = stream_info

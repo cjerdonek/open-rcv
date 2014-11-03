@@ -1,4 +1,20 @@
 
+"""
+
+Terminology
+-----------
+
+iterator resource: an "iterator resource" is a callable that returns a
+  context manager that in turn yields an iterable.  Here is an example
+  of using an iterator resource `resource`:
+
+    with resource() as items:
+        for item in items:
+            # Do stuff.
+            ...
+
+"""
+
 from contextlib import closing, contextmanager
 from datetime import datetime
 from io import StringIO
@@ -105,6 +121,30 @@ def time_it(description):
     # TODO: log the end in a finally block so it shows during exceptions, too.
     elapsed = timeit.default_timer() - start_time
     log.info("done: %s: %.4f seconds" % (description, elapsed))
+
+
+def map_resource(resource, func):
+    """
+    Transform an iterator resource by applying func to each element.
+
+    This function converts an iterator resource to a new iterator resource
+    by applying the given function to each element of the iterable.
+
+    """
+    mapped_resource = _MappedResource(resource, func)
+    return mapped_resource
+
+
+class _MappedResource(object):
+
+    def __init__(self, resource, func):
+        self.func = func
+        self.resource = resource
+
+    @contextmanager
+    def __call__(self):
+        with self.resource() as items:
+            yield map(self.func, items)
 
 
 @contextmanager
@@ -302,3 +342,19 @@ class StringInfo(StreamInfo):
             raise ValueError("Cannot write to string that already has a value: %r" % display)
         log.info("opening in-memory text stream (mode=%r): contents=%r" % (mode, display))
         yield self._stream
+
+
+# TODO: compare implementation with wineds-converter.
+class Writer(object):
+
+    def __init__(self, stream_info):
+        self.stream_info = stream_info
+
+    @contextmanager
+    def open(self):
+        with self.stream_info.open("w") as f:
+            self.file = f
+            yield
+
+    def writeln(self, line):
+        self.file.write(line + "\n")

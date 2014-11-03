@@ -14,14 +14,12 @@ Some of the pieces involved are as follows:
 1. **Input file.**  An "input file" is a file that contains ballot data and
    related contest information.  An input file can be in any number of
    formats (e.g. [BLT][blt-desc] or a jurisdiction-specific format).
-2. **Contests file.**  A "contests file" is a configuration file that
-   specifies what contests should be tallied and how.  A contests file
-   is the input that is passed to OpenRCV on the command-line.
-   The format of a contests file is specific to OpenRCV, and it can be
-   either JSON or YAML. A contests file contains references to one or more
-   input files, specifies what counting method to use, what parsing method
-   to use for the input files, and what renderer should be used for the
-   eventual output.
+2. **Contests file.**  A "contests file" is a JSON or YAML configuration
+   file with metadata about one or more contests.  For example, for each
+   contest it includes, the file contains path references to one or more
+   input files, states the format of the input files, and specifies what
+   counting method to use when counting the ballots.  The format of a
+   contests file is specific to OpenRCV.
 3. **Parser.**  A "parser" is a Python object responsible for converting
    one or more input files into a contest object.  A parser does not
    tally a contest.  It only converts the input into a standard
@@ -58,15 +56,18 @@ Some of the pieces involved are as follows:
 Data Flow
 ---------
 
-When running OpenRCV from the command-line, the data flow is as follows:
+The section describes the flow when using OpenRCV to count a contest
+from the command-line, for example:
+
+    $ rcv count INPUT_PATH [options]
 
 1. The user passes the path to a JSON or YAML contests file via the
-   command-line (e.g. by running `rcv INPUT_PATH`).
+   command-line, along with options like the output format (i.e.
+   what renderer to use).
 2. OpenRCV reads the following information from the contests file:
    * the paths to any input files,
-   * what parser to use,
-   * what counter to use, and
-   * what renderer to use.
+   * what parser to use, and
+   * what counter to use.
 3. The parser converts the input files into a contest object.
 4. The counter converts the contest object into a results object.
 5. The renderer converts the results object into output files.

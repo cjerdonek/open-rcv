@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import os
 
 from openrcv.scripts.rcv import create_argparser, RcvArgumentParser
-from openrcv.scripts.run import non_exiting_main
+from openrcv.scripts.run import make_usage_error, non_exiting_main
 from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
@@ -20,6 +20,21 @@ def make_argparser(command=None):
     parser.set_defaults(log_level=20)  # level name INFO
     return parser
 
+class MakeUsageErrorTest(UnitCase):
+
+    """Test make_usage_error()."""
+
+    def test_multiline_message(self):
+        """Check the formatting of a multi-line message
+
+        This test checks that the error message has no leading whitespace
+        when the message to insert contains more than one line.  Extra
+        whitespace was a bug that occurred before due to an improper use
+        of textwrap.dedent() combined with substituting multi-line strings
+        in a format string.
+        """
+        actual = make_usage_error("foo\nfoo", "--help")
+        self.assertStartsWith(actual, "Command-line usage error:")
 
 # TODO: add more tests for this.
 class NonExitingMainTests(UnitCase):

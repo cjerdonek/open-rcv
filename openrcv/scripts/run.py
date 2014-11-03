@@ -115,17 +115,21 @@ def log_config(level, file_=None):
     root.removeHandler(handler)
 
 
+def make_usage_error(msg, help_options):
+    text = dedent("""\
+    Command-line usage error: {!s}
+
+    Pass {!s} for help documentation and available options.""").format(msg, help_options)
+    return text
+
+
 def print_usage_error(parser, msg, file_=None):
     if file_ is None:
         file_ = sys.stderr
     if len(sys.argv) == 1:
         parser.print_help()
     parser.print_usage(file_)
-    text = dedent("""\
-    Command-line usage error: %s
-
-    Pass %s for help documentation and available options.""" %
-        (msg, parser.option_help.display(' or ')))
+    text = make_usage_error(msg, parser.option_help.display(' or '))
     log.error(text)
 
 

@@ -62,17 +62,16 @@ from the command-line:
     $ rcv count INPUT_PATH [options]
 
 1. The user passes the path to a JSON or YAML contests file via the
-   command-line, along with options like the output format (i.e.
-   what renderer to use).
+   command-line, along with options like the output format (i.e. what
+   renderer to use) and what paths to write any output to.
 2. OpenRCV reads the following information from the contests file:
    * the paths to any input files,
    * what parser to use, and
    * what counter to use.
 3. The parser converts the input files into a contest object.
 4. The counter converts the contest object into a results object.
-5. The renderer converts the results object into output files.
-   Typically, command-line options for the command issued in step (1)
-   specify the location to which the output files should be written.
+5. The renderer converts the results object into output files and writes
+   them to paths as specified on the command-line.
 
 Any of the steps above can also be done in isolation using OpenRCV's
 Python API (i.e. by importing `openrcv` as a Python package and

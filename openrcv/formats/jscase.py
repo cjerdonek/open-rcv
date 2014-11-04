@@ -7,7 +7,7 @@ Support for parsing and writing JSON test cases.
 from openrcv.formats.common import FormatWriter
 
 
-class JsonTestCaseOutput(FormatWriter):
+class JsonCaseOutput(FormatWriter):
 
     def get_ballot_info(self):
         return os.path.join(self.output_dir, "ballots.txt"), ENCODING_BALLOT_FILE

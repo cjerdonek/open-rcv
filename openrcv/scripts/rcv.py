@@ -11,9 +11,9 @@ from textwrap import dedent
 
 from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
                                       HelpRequested, Option, UsageException)
-import openrcv.formats.blt
-import openrcv.formats.internal
-import openrcv.formats.json_case
+from openrcv.formats.blt import BLTOutput
+from openrcv.formats.internal import InternalOutput
+from openrcv.formats.jscase import JsonCaseOutput
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
 
@@ -51,11 +51,11 @@ def main():
 
 def make_output_formats():
     formats = (
-        OutputFormat(OUTPUT_FORMAT_BLT, cls=openrcv.formats.blt.BLTOutput,
+        OutputFormat(OUTPUT_FORMAT_BLT, cls=BLTOutput,
                      desc="BLT format"),
-        OutputFormat(OUTPUT_FORMAT_INTERNAL, cls=openrcv.formats.blt.BLTOutput,
+        OutputFormat(OUTPUT_FORMAT_INTERNAL, cls=InternalOutput,
                      desc="internal OpenRCV format"),
-        OutputFormat(OUTPUT_FORMAT_TEST, cls=openrcv.formats.blt.BLTOutput,
+        OutputFormat(OUTPUT_FORMAT_TEST, cls=JsonCaseOutput,
                      desc="JSON test case"),
     )
     mapping = {format.label: format for format in formats}

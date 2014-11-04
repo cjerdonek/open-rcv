@@ -103,7 +103,7 @@ def add_command_randcontest(builder):
     labels = sorted(formats)
     list_desc = ", ".join((str(formats[label]) for label in labels))
     parser.add_argument('-f', '--output-format', metavar='OUTPUT_FORMAT',
-        type=builder.writer_type, default=formats[OUTPUT_FORMAT_DEFAULT].cls,
+        type=builder.writer_type, default=OUTPUT_FORMAT_DEFAULT,
         help=("the output format.  Choose from: {!s}. Defaults to: {!r}.".
               format(list_desc, OUTPUT_FORMAT_DEFAULT)))
     return parser, commands.rand_contest
@@ -168,10 +168,11 @@ class ArgParserBuilder(object):
 
     def writer_type(self, label):
         try:
-            return self.formats[label]
+            format = self.formats[label]
         except KeyError:
             raise argparse.ArgumentTypeError("\ninvalid argument choice: %r\n"
                 "Choose from: %s" % (label, ", ".join(OUTPUT_FORMATS)))
+        return format.cls
 
     def add_command(self, add_func):
         parser, command_func = add_func(self)

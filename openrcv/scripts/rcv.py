@@ -13,7 +13,7 @@ from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
                                       HelpRequested, Option, UsageException)
 import openrcv.formats.blt
 import openrcv.formats.internal
-import openrcv.formats.json
+import openrcv.formats.json_case
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
 
@@ -39,16 +39,9 @@ OPTION_HELP = Option(('-h', '--help'))
 
 OUTPUT_FORMAT_BLT = 'blt'
 OUTPUT_FORMAT_INTERNAL = 'internal'
-OUTPUT_FORMAT_TEST = 'test'
+OUTPUT_FORMAT_TEST = 'jscase'
 # TODO: default to OpenRCV format.
 OUTPUT_FORMAT_DEFAULT = OUTPUT_FORMAT_BLT
-
-WRITER_CLASSES = {
-    OUTPUT_FORMAT_BLT: openrcv.formats.blt.BLTOutputFormat,
-    OUTPUT_FORMAT_INTERNAL: openrcv.formats.internal.InternalOutput,
-    OUTPUT_FORMAT_TEST: openrcv.formats.json.JsonWriter,
-}
-OUTPUT_FORMATS = sorted(WRITER_CLASSES.keys())
 
 
 def main():
@@ -56,12 +49,17 @@ def main():
     _main(parser)
 
 
-def writer_type(label):
-    try:
-        return WRITER_CLASSES[label]
-    except KeyError:
-        raise argparse.ArgumentTypeError("\ninvalid argument choice: %r\n"
-            "Choose from: %s" % (label, ", ".join(OUTPUT_FORMATS)))
+def make_output_formats():
+    formats = (
+        OutputFormat(OUTPUT_FORMAT_BLT, cls=openrcv.formats.blt.BLTOutput,
+                     desc="BLT format"),
+        OutputFormat(OUTPUT_FORMAT_INTERNAL, cls=openrcv.formats.blt.BLTOutput,
+                     desc="internal OpenRCV format"),
+        OutputFormat(OUTPUT_FORMAT_TEST, cls=openrcv.formats.blt.BLTOutput,
+                     desc="JSON test case"),
+    )
+    mapping = {format.label: format for format in formats}
+    return mapping
 
 
 def add_help(parser):
@@ -71,18 +69,8 @@ def add_help(parser):
         help='show this help message and exit.')
 
 
-def add_command(subparsers, add_func):
-    parser, command_func = add_func(subparsers)
-    # The RawDescriptionHelpFormatter preserves line breaks in the
-    # description and epilog strings.
-    parser.formatter_class = RawDescriptionHelpFormatter
-    parser.set_defaults(run_command=command_func)
-    # TODO: DRY up the fact that add_help=False needs to be added
-    # when adding each command.
-    add_help(parser)
-
-
-def add_command_count(subparsers):
+def add_command_count(builder):
+    subparsers = builder.subparsers
     parser = subparsers.add_parser('count', help='Tally one or more contests.',
         description='Tally the contests specified by the contests file at INPUT_PATH.',
         add_help=False)
@@ -92,7 +80,9 @@ def add_command_count(subparsers):
     return parser, commands.count
 
 
-def add_command_randcontest(subparsers):
+def add_command_randcontest(builder):
+    subparsers = builder.subparsers
+    formats = builder.formats
     help = 'Create a random sample contest.'
     desc = dedent("""\
     Create a random sample contest.
@@ -109,10 +99,13 @@ def add_command_randcontest(subparsers):
     parser.add_argument('-o', '--output-dir', metavar='OUTPUT_DIR',
         help=("directory to write output files to, or write to stdout "
               "if the empty string.  Defaults to the empty string."))
+    # The output formats.
+    labels = sorted(formats)
+    list_desc = ", ".join((str(formats[label]) for label in labels))
     parser.add_argument('-f', '--output-format', metavar='OUTPUT_FORMAT',
-        type=writer_type, default=OUTPUT_FORMAT_DEFAULT,
-        help=("the output format.  Choose from: {!s}. Defaults to {!r}.".
-              format(", ".join(OUTPUT_FORMATS), OUTPUT_FORMAT_DEFAULT)))
+        type=builder.writer_type, default=formats[OUTPUT_FORMAT_DEFAULT].cls,
+        help=("the output format.  Choose from: {!s}. Defaults to: {!r}.".
+              format(list_desc, OUTPUT_FORMAT_DEFAULT)))
     return parser, commands.rand_contest
 
 
@@ -146,10 +139,49 @@ def create_argparser(prog="rcv"):
         add_command_randcontest,
     )
 
+    builder = ArgParserBuilder(subparsers)
     for add_func in add_funcs:
-        add_command(subparsers, add_func)
+        builder.add_command(add_func)
 
     return parser
+
+
+# TODO: move this to openrcv.formats.common.
+class OutputFormat(object):
+
+    def __init__(self, label, desc=None, cls=None):
+        self.cls = cls
+        self.desc = desc
+        self.label = label
+
+    def __str__(self):
+        return '"{!s}" ({!s})'.format(self.label, self.desc)
+
+
+class ArgParserBuilder(object):
+
+    """Support for constructing the script's argparse.ArgumentParser."""
+
+    def __init__(self, subparsers):
+        self.formats = make_output_formats()
+        self.subparsers = subparsers
+
+    def writer_type(self, label):
+        try:
+            return self.formats[label]
+        except KeyError:
+            raise argparse.ArgumentTypeError("\ninvalid argument choice: %r\n"
+                "Choose from: %s" % (label, ", ".join(OUTPUT_FORMATS)))
+
+    def add_command(self, add_func):
+        parser, command_func = add_func(self)
+        # The RawDescriptionHelpFormatter preserves line breaks in the
+        # description and epilog strings.
+        parser.formatter_class = RawDescriptionHelpFormatter
+        parser.set_defaults(run_command=command_func)
+        # TODO: DRY up the fact that add_help=False needs to be added
+        # when adding each command.
+        add_help(parser)
 
 
 class RcvArgumentParser(ArgParser):

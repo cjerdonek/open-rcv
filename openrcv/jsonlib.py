@@ -73,6 +73,7 @@ def from_jsobj(jsobj, cls=None):
         try:
             obj = cls()
         except TypeError:
+            # TODO: preserve the exception type below.
             # We don't get the class name otherwise.
             raise Exception("error constructing class: %s" % cls.__name__)
         obj.load_jsobj(jsobj)

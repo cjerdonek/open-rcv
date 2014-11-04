@@ -34,7 +34,9 @@ from openrcv.models import make_candidates, BallotsResourceBase, RoundResults
 from openrcv.parsing import parse_internal_ballot
 from openrcv.utils import StringInfo
 
+# TODO: rename this module to jscasemod.py (for JSON case models).
 
+# TODO: remove this class in favor of new pattern.
 class JsonBallot(JsonableMixin):
 
     """

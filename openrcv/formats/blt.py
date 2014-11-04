@@ -31,7 +31,7 @@ BLT_ENCODING = 'utf-8'
 
 # TODO: move the code to parse BLT files here.
 
-class BLTOutputFormat(FormatWriter):
+class BLTOutput(FormatWriter):
 
     def get_file_info(self):
         return os.path.join(self.output_dir, "output.blt"), BLT_ENCODING

@@ -259,7 +259,7 @@ class StringInfo(StreamInfo):
         if (initial is not None and mode != "r"):
             # TODO: improve this error message.
             raise ValueError("Cannot write to string that already has a value: %r" % display)
-        log.info("opening in-memory text stream (mode=%r): contents=%r" % (mode, display))
+        log.debug("opening in-memory text stream (mode=%r): contents=%r" % (mode, display))
         yield self._stream
 
 

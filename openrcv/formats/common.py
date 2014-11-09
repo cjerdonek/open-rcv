@@ -40,3 +40,15 @@ class FormatWriter(object):
     def stdout_info(self):
         """Return a StreamInfo object for stdout."""
         return PermanentFileInfo(self.stdout)
+
+    # TODO: get all the FormatWriter classes using this method.
+    def write_output(self, info_func, *args, **kwargs):
+        """
+        Arguments:
+          info_func: TODO.
+        """
+        file_funcs, write_func = info_func()
+        stream_infos, output_paths = self.make_output_info(file_funcs)
+        args = list(stream_infos) + list(args)
+        write_func(*args)
+        return output_paths

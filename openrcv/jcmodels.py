@@ -207,6 +207,7 @@ class JsonCaseContestInput(JsonableMixin):
     #     self.__init__(choices=choices, weight=weight)
 
 
+# TODO: remove this class.
 class JsonContest(JsonableMixin):
 
     """

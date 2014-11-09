@@ -1,7 +1,7 @@
 
 from textwrap import dedent
 
-from openrcv.jsonlib import JsonObjError, JS_NULL
+from openrcv.jsonlib import JsonableError, JsonDeserializeError, JS_NULL
 from openrcv.jcmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonContest,
                               JsonRoundResults, JsonTestCaseOutput)
 from openrcv.utils import StreamInfo, StringInfo
@@ -61,6 +61,20 @@ class JsonCaseBallotTest(UnitCase):
         expected = JsonCaseBallot(choices=(3, 1), weight=2)
         jc_ballot.assert_equal(expected)
 
+    def test_to_object(self):
+        jc_ballot = JsonCaseBallot(choices=(1, 2), weight=3)
+        ballot = jc_ballot.to_object()
+        self.assertEqual(ballot, (3, (1, 2)))
+
+    def test_from_jsobj(self):
+        jc_ballot = JsonCaseBallot.from_jsobj("2 3 4")
+        expected = JsonCaseBallot(choices=(3, 4), weight=2)
+        jc_ballot.assert_equal(expected)
+
+    def test_from_jsobj__bad_format(self):
+        """Check a string that does not parse."""
+        with self.assertRaises(JsonDeserializeError):
+            jc_ballot = JsonCaseBallot.from_jsobj("2 a 4")
 
 # TODO: remove this case after moving the tests.
 class JsonBallotTest(UnitCase):
@@ -96,7 +110,7 @@ class JsonBallotTest(UnitCase):
     def test_load_jsobj__bad_format(self):
         """Check a string that does not parse."""
         ballot = JsonBallot()
-        with self.assertRaises(JsonObjError):
+        with self.assertRaises(JsonableError):
             ballot.load_jsobj("1 a 2")
 
     def test_to_ballot_stream(self):

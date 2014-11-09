@@ -26,7 +26,8 @@ all at once.
 
 from openrcv.counting import InternalBallotsNormalizer
 from openrcv.formats.internal import format_ballot
-from openrcv.jsonlib import (from_jsobj, Attribute, JsonObjError, JsonableMixin)
+from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin,
+                             JsonDeserializeError)
 from openrcv.models import make_candidates, BallotsResourceBase, RoundResults
 from openrcv.parsing import parse_internal_ballot
 from openrcv.utils import StringInfo
@@ -59,6 +60,13 @@ class JsonCaseBallot(JsonableMixin):
         weight, choices = ballot
         self.__init__(choices=choices, weight=weight)
 
+    def to_object(self):
+        """
+        Arguments:
+          ballot: a Ballot object.
+        """
+        return self.weight, self.choices
+
     def load_jsobj(self, jsobj):
         """Read a JSON object, and set attributes to match."""
         try:
@@ -66,7 +74,7 @@ class JsonCaseBallot(JsonableMixin):
         except ValueError:
             # Can happen with "1 2 abc", for example.
             # ValueError: invalid literal for int() with base 10: 'abc'
-            raise JsonObjError("error parsing: %r" % jsobj)
+            raise JsonDeserializeError("error parsing: %r" % jsobj)
         self.__init__(choices=choices, weight=weight)
 
     def to_jsobj(self):
@@ -135,7 +143,7 @@ class JsonBallot(JsonableMixin):
         except ValueError:
             # Can happen with "1 2 abc", for example.
             # ValueError: invalid literal for int() with base 10: 'abc'
-            raise JsonObjError("error parsing: %r" % jsobj)
+            raise JsonableError("error parsing: %r" % jsobj)
         self.__init__(choices=choices, weight=weight)
 
     def to_jsobj(self):

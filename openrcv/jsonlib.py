@@ -125,7 +125,12 @@ class JsonPathInfo(PathInfo):
         super().__init__(path, encoding=ENCODING_JSON)
 
 
-class JsonObjError(Exception):
+# TODO: replace this with JsonSerialization and JsonDeserialization classes.
+class JsonableError(Exception):
+    pass
+
+
+class JsonDeserializeError(Exception):
     pass
 
 
@@ -236,13 +241,13 @@ class JsonableMixin(ReprMixin):
                 name, cls = attr.name, attr.cls
             except AttributeError:
                 # Make troubleshooting easier by providing the attr.
-                raise JsonObjError("error processing attribute: %r" % attr)
+                raise JsonableError("error processing attribute: %r" % attr)
             # TODO: handle and test None/JS_NULL.
             try:
                 value = getattr(self, name)
             except TypeError:
                 # Make troubleshooting easier by providing the name.
-                raise JsonObjError("error getting attribute: %r" % name)
+                raise JsonableError("error getting attribute: %r" % name)
             jsobj = to_jsobj(value)
             if jsobj is None:
                 # Don't write None values into the JSON object.

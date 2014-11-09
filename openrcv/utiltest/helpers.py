@@ -4,6 +4,7 @@ Helpers for unit testing.
 
 """
 
+from contextlib import contextmanager
 import os
 import sys
 import unittest
@@ -24,7 +25,6 @@ class CaseMixin(object):
 
     """
     General purpose mixin for unittest test cases.
-
     """
 
     def __str__(self):
@@ -47,7 +47,6 @@ class CaseMixin(object):
 
         Specifically, the string on the second line can be cut-and-paste
         to the command-line as is.
-
         """
         cls = self.__class__
         mod_name = cls.__module__
@@ -58,6 +57,21 @@ class CaseMixin(object):
                 (cls.__name__, self._testMethodName,
                  path,
                  mod_name, cls.__name__, self._testMethodName))
+
+    @contextmanager
+    def changeAttr(self, obj, name, value):
+        """
+        Context manager to temporarily change the value of an attribute.
+
+        This is useful for testing __eq__() by modifying one attribute
+        at a time.
+        """
+        initial_value = getattr(obj, name)
+        setattr(obj, name, value)
+        try:
+            yield
+        finally:
+            setattr(obj, name, initial_value)
 
     def assertStartsWith(self, text, initial):
         self.assertEqual(text[:len(initial)], initial,

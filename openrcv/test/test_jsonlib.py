@@ -12,7 +12,6 @@ class JsonSample(JsonableMixin):
 
     data_attrs = (Attribute('bar'),
                   Attribute('foo'))
-    attrs = data_attrs
 
     def __init__(self, bar=None, foo=None):
         self.bar = bar
@@ -25,7 +24,6 @@ class JsonSample(JsonableMixin):
 class ComplexJsonSample(JsonableMixin):
 
     data_attrs = (Attribute('simple', JsonSample), )
-    attrs = data_attrs
 
     def __init__(self, simple=None):
         self.simple = simple

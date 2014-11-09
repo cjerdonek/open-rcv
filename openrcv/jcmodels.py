@@ -39,6 +39,9 @@ class JsonCaseBallot(JsonableMixin):
     the form: "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
     """
 
+    data_attrs = (Attribute('choices'),
+                  Attribute('weight'))
+
     def __init__(self, choices=None, weight=1):
         if choices is None:
             choices = ()
@@ -111,7 +114,6 @@ class JsonBallot(JsonableMixin):
 
     data_attrs = (Attribute('choices'),
                   Attribute('weight'))
-    attrs = data_attrs
 
     def __init__(self, choices=None, weight=1):
         if choices is None:
@@ -156,7 +158,6 @@ class JsonContest(JsonableMixin):
                   Attribute('notes'))
     data_attrs = (Attribute('ballots', cls=JsonBallot),
                   Attribute('candidate_count'))
-    attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self, candidate_count=None, ballots=None, id_=None, notes=None):
         """
@@ -196,7 +197,6 @@ class JsonContestFile(JsonableMixin):
 
     meta_attrs = (Attribute('version'), )
     data_attrs = (Attribute('contests', cls=JsonContest), )
-    attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self, contests=None, version=None):
         """
@@ -217,7 +217,6 @@ class JsonRoundResults(RoundResults, JsonableMixin):
     """
 
     data_attrs = (Attribute('totals'), )
-    attrs = data_attrs
 
     def __init__(self, totals=None):
         self.totals = totals
@@ -227,7 +226,6 @@ class JsonTestCaseInput(JsonableMixin):
 
     meta_attrs = ()
     data_attrs = (Attribute('contest', cls=JsonContest), )
-    attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self):
         self.contest = None
@@ -237,7 +235,6 @@ class JsonTestCaseOutput(JsonableMixin):
 
     meta_attrs = ()
     data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
-    attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     @classmethod
     def from_contest_results(cls, results):
@@ -268,7 +265,6 @@ class JsonTestCase(JsonableMixin):
                   Attribute('contest_id'), )
     data_attrs = (Attribute('input', cls=JsonTestCaseInput),
                   Attribute('output', cls=JsonTestCaseOutput), )
-    attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self):
         self.id = None
@@ -286,7 +282,6 @@ class JsonTestCaseFile(JsonableMixin):
     meta_attrs = (Attribute('version'),
                   Attribute('rule_set'), )
     data_attrs = (Attribute('test_cases', cls=JsonTestCase), )
-    attrs = tuple(list(data_attrs) + list(meta_attrs))
 
     def __init__(self):
         self.rule_set = None

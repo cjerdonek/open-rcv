@@ -154,17 +154,19 @@ class Attribute(object):
 
 class JsonableMixin(ReprMixin):
 
-    __no_attribute__ = object()  # used in __eq__()
-
     meta_attrs = ()
 
+    @classmethod
+    def attrs(cls):
+        return list(cls.meta_attrs) + list(cls.data_attrs)
+
+    # TODO: add an "assert" variant that says how the objects differ.
     def __eq__(self, other):
         if type(self) != type(other):
             return False
-        for attr in self.attrs:
+        for attr in self.attrs():
             name = attr.name
-            if (getattr(self, name, self.__no_attribute__) !=
-                getattr(other, name, other.__no_attribute__)):
+            if (getattr(self, name) != getattr(other, name)):
                 return False
         return True
 
@@ -244,7 +246,7 @@ class JsonableMixin(ReprMixin):
             self._attrs_from_jsdict(self.meta_attrs, meta_dict)
         keys |= set(jsobj.keys())
         keys -= set(('_meta', ))
-        extra_keys = set((attr.name for attr in self.attrs)) - keys
+        extra_keys = set((attr.name for attr in self.attrs())) - keys
         if extra_keys:
             log.warning("JSON object has unserializable keys: %r" % (", ".join(extra_keys)))
         self._attrs_from_jsdict(self.data_attrs, jsobj)

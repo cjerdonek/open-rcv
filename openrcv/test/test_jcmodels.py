@@ -1,5 +1,4 @@
 
-from contextlib import contextmanager
 from textwrap import dedent
 
 from openrcv.jsonlib import JsonObjError, JS_NULL
@@ -9,27 +8,52 @@ from openrcv.utils import StreamInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
-@contextmanager
-def change_attr(obj, name, value):
-    """Context manager to temporarily change the value of an attribute.
-
-    This is useful for testing __eq__() by modifying one attribute
-    at a time.
-
-    """
-    initial_value = getattr(obj, name)
-    setattr(obj, name, value)
-    yield
-    setattr(obj, name, initial_value)
-
-
 # TODO: move/convert tests from JsonBallotTest to JsonCaseBallotTest.
 class JsonCaseBallotTest(UnitCase):
 
     def test_init(self):
-        ballot = JsonBallot(choices=[1, 2], weight=3)
+        ballot = JsonCaseBallot(choices=(1, 2), weight=3)
         self.assertEqual(ballot.choices, (1, 2))
         self.assertEqual(ballot.weight, 3)
+
+    def test_init__defaults(self):
+        ballot = JsonCaseBallot()
+        self.assertEqual(ballot.choices, ())
+        self.assertEqual(ballot.weight, 1)
+
+    def test_init__tuple(self):
+        """Check that choices are converted to tuples."""
+        ballot = JsonCaseBallot(choices=[])
+        self.assertEqual(ballot.choices, ())
+        ballot = JsonCaseBallot(choices=[1, 2])
+        self.assertEqual(ballot.choices, (1, 2))
+
+    def test_repr_desc(self):
+        cases = [
+            (3, (1, 2), "weight=3 choices=(1, 2)"),
+            (None, None, "weight=None choices=None"),
+        ]
+        for weight, choices, expected in cases:
+            with self.subTest(weight=weight, choices=choices, expected=expected):
+                ballot = JsonCaseBallot()
+                ballot.choices = choices
+                ballot.weight = weight
+                self.assertEqual(ballot.repr_desc(), expected)
+
+    def test_repr(self):
+        ballot = JsonCaseBallot(choices=(1, 2), weight=3)
+        expected = "<JsonCaseBallot: [weight=3 choices=(1, 2)] %s>" % hex(id(ballot))
+        self.assertEqual(repr(ballot), expected)
+
+    def test_eq(self):
+        ballot1 = JsonCaseBallot(choices=(1, 2), weight=3)
+        ballot2 = JsonCaseBallot(choices=(1, 2), weight=3)
+        self.assertEqual(ballot1, ballot2)
+        with self.changeAttr(ballot2, "choices", [1]):
+            self.assertNotEqual(ballot1, ballot2)
+        with self.changeAttr(ballot2, "weight", 100):
+            self.assertNotEqual(ballot1, ballot2)
+        self.assertEqual(ballot1, ballot2)  # sanity check
 
     # TODO
     def _test_from_object(self):
@@ -43,45 +67,6 @@ class JsonBallotTest(UnitCase):
 
     def make_ballot(self):
         return JsonBallot(choices=[1, 2], weight=3)
-
-    def test_init__defaults(self):
-        ballot = JsonBallot()
-        self.assertEqual(ballot.choices, ())
-        self.assertEqual(ballot.weight, 1)
-
-    def test_init__tuple(self):
-        """Check that JsonBallot converts lists to tuples."""
-        ballot = JsonBallot(choices=[])
-        self.assertEqual(ballot.choices, ())
-        ballot = JsonBallot(choices=[1, 2])
-        self.assertEqual(ballot.choices, (1, 2))
-
-    def test_repr_desc(self):
-        cases = [
-            (3, (1, 2), "weight=3 choices=(1, 2)"),
-            (None, None, "weight=None choices=None"),
-        ]
-        for weight, choices, expected in cases:
-            with self.subTest(weight=weight, choices=choices, expected=expected):
-                ballot = JsonBallot()
-                ballot.choices = choices
-                ballot.weight = weight
-                self.assertEqual(ballot.repr_desc(), expected)
-
-    def test_repr(self):
-        ballot = self.make_ballot()
-        expected = "<JsonBallot: [weight=3 choices=(1, 2)] %s>" % hex(id(ballot))
-        self.assertEqual(repr(ballot), expected)
-
-    def test_eq(self):
-        ballot1 = self.make_ballot()
-        ballot2 = self.make_ballot()
-        self.assertEqual(ballot1, ballot2)
-        with change_attr(ballot2, "choices", [1]):
-            self.assertNotEqual(ballot1, ballot2)
-        with change_attr(ballot2, "weight", 100):
-            self.assertNotEqual(ballot1, ballot2)
-        self.assertEqual(ballot1, ballot2)  # sanity check
 
     def test_to_jsobj(self):
         ballot = JsonBallot(choices=[1, 2], weight=3)
@@ -196,7 +181,7 @@ class JsonContestTest(UnitCase):
         ]
         for attr, value in cases:
             with self.subTest(attr=attr, value=value):
-                with change_attr(contest2, attr, value):
+                with self.changeAttr(contest2, attr, value):
                     self.assertNotEqual(contest1, contest2)
         self.assertEqual(contest1, contest2)  # sanity check
 

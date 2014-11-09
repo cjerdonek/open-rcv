@@ -96,7 +96,7 @@ class _IterableResource(object):
 
     @contextmanager
     def __call__(self):
-        yield self.iterable
+        yield iter(self.iterable)
 
 
 def pipe_resource(resource, pipe_func):

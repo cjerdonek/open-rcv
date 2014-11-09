@@ -5,7 +5,7 @@ Support for parsing and writing JSON test cases.
 """
 
 from openrcv.formats.common import FormatWriter
-from openrcv.jsmodels import JsonCaseBallot
+from openrcv.jcmodels import JsonCaseBallot
 
 class JsonCaseOutput(FormatWriter):
 

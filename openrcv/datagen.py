@@ -8,8 +8,8 @@ in the open-rcv-tests repo.
 """
 
 from random import randint, random, sample
-import openrcv.jsmodels as models
-from openrcv.jsmodels import JsonBallot, JsonContest, JsonContestFile
+import openrcv.jcmodels as models
+from openrcv.jcmodels import JsonBallot, JsonContest, JsonContestFile
 from openrcv import utils
 from openrcv.utils import PathInfo
 

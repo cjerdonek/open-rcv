@@ -15,7 +15,7 @@ from openrcv import counting
 from openrcv.datagen import (random_contest, BallotGenerator,
                              UniqueBallotGenerator)
 from openrcv.formats.blt import BLTOutput
-from openrcv.jsmodels import JsonTestCaseOutput
+from openrcv.jcmodels import JsonTestCaseOutput
 from openrcv.models import BallotStreamResource, ContestInput
 from openrcv.parsing import parse_internal_ballot
 from openrcv.utils import logged_open, PathInfo, PermanentFileInfo, StringInfo

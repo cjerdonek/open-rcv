@@ -1,18 +1,17 @@
 
-# TODO: move the non-JsonCase parts of this documentation to jsonlib
-#   (since there can be other jsmodels).
-# TODO: rename this module to jcmodels.py.
 """
 Contains classes that support serialization to JSON test cases.
 
 Terminology
 -----------
 
-The model class names in this module have the form "JsonCase*".  This is
-partly to avoid confusion with unittest.TestCase classes.  We also
-frequently follow the convention of using variables of the form `jc_*`
-to represent instances of JSON test case classes (because it matches
-the "JsonCase*" form of the class name).
+The model class names in this module have the form `JsonCase*` (as
+opposed to `JsonTestCase*`).  This is partly to avoid confusion with
+`unittest.TestCase` classes.  We also frequently follow the convention
+of using variables of the form `jc_*` (e.g. `jc_ballot`) to represent
+instances of JsonCase classes -- especially when needed to distinguish
+from other types of ballot objects (e.g. `Ballot` objects and ballot
+JSON objects).
 
 Warning
 -------
@@ -32,7 +31,6 @@ from openrcv.models import make_candidates, BallotsResourceBase, RoundResults
 from openrcv.parsing import parse_internal_ballot
 from openrcv.utils import StringInfo
 
-# TODO: rename this module to jcmodels.py (for JSON case models).
 
 class JsonCaseBallot(JsonableMixin):
 

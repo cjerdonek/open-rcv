@@ -11,10 +11,10 @@ import sys
 
 from openrcv.counting import count_irv_contest, InternalBallotsNormalizer
 from openrcv.datagen import create_json_tests
-import openrcv.jsmodels as models
-from openrcv.jsmodels import JsonBallot
+import openrcv.jcmodels as models
+from openrcv.jcmodels import JsonBallot
 from openrcv.jsonlib import from_jsobj, read_json_path, to_json, write_json
-from openrcv.jsmodels import (JsonContestFile, JsonRoundResults, JsonTestCase,
+from openrcv.jcmodels import (JsonContestFile, JsonRoundResults, JsonTestCase,
                               JsonTestCaseOutput, JsonTestCaseFile)
 from openrcv.scripts.run import main
 from openrcv import utils

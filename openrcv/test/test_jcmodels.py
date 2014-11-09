@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from textwrap import dedent
 
 from openrcv.jsonlib import JsonObjError, JS_NULL
-from openrcv.jsmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonContest,
+from openrcv.jcmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonContest,
                               JsonRoundResults, JsonTestCaseOutput)
 from openrcv.utils import StreamInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase

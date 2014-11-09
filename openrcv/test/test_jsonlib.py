@@ -77,3 +77,14 @@ class JsonableMixinTest(UnitCase):
         self.assertNotEqual(sample1, sample2)
         sample1.foo = "abc"
         self.assertEqual(sample1, sample2)
+
+    def test_assert_equal(self):
+        sample1 = JsonSample()
+        sample2 = JsonSample()
+        sample1.assert_equal(sample2)
+        sample1.foo = "abc"
+        with self.assertRaises(AssertionError) as cm:
+            sample1.assert_equal(sample2)
+        # Check the exception text.
+        err = cm.exception
+        self.assertEndsWith(str(err), "'foo' attribute not equal: 'abc' != None")

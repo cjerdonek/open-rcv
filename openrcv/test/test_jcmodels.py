@@ -49,24 +49,21 @@ class JsonCaseBallotTest(UnitCase):
         ballot1 = JsonCaseBallot(choices=(1, 2), weight=3)
         ballot2 = JsonCaseBallot(choices=(1, 2), weight=3)
         self.assertEqual(ballot1, ballot2)
-        with self.changeAttr(ballot2, "choices", [1]):
+        with self.changeAttr(ballot2, "choices", (1, 3)):
             self.assertNotEqual(ballot1, ballot2)
         with self.changeAttr(ballot2, "weight", 100):
             self.assertNotEqual(ballot1, ballot2)
         self.assertEqual(ballot1, ballot2)  # sanity check
 
-    # TODO
-    def _test_from_object(self):
+    def test_from_object(self):
         ballot = (2, (3, 1))
         jc_ballot = JsonCaseBallot.from_object(ballot)
-        self.assertEqual(jc_ballot, "foo")
+        expected = JsonCaseBallot(choices=(3, 1), weight=2)
+        jc_ballot.assert_equal(expected)
 
 
 # TODO: remove this case after moving the tests.
 class JsonBallotTest(UnitCase):
-
-    def make_ballot(self):
-        return JsonBallot(choices=[1, 2], weight=3)
 
     def test_to_jsobj(self):
         ballot = JsonBallot(choices=[1, 2], weight=3)

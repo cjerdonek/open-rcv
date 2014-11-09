@@ -73,9 +73,18 @@ class CaseMixin(object):
         finally:
             setattr(obj, name, initial_value)
 
+    def _assertStringMessage(self, text, initial, verb):
+        return ('Details: The string """\\\n%s"""\ndoes not %s with: %r' %
+                (text, verb, initial))
+
     def assertStartsWith(self, text, initial):
-        self.assertEqual(text[:len(initial)], initial,
-            msg='The string ...\n"""%s"""\ndoes not start with: %r' % (text, initial))
+        msg = self._assertStringMessage(text, initial, "start")
+        self.assertEqual(text[:len(initial)], initial, msg=msg)
+
+    def assertEndsWith(self, text, initial):
+        index = -1 * len(initial)
+        msg = self._assertStringMessage(text, initial, "end")
+        self.assertEqual(text[index:], initial, msg=msg)
 
 
 # This is for convenience to reduce typing.

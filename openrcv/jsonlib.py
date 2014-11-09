@@ -160,15 +160,34 @@ class JsonableMixin(ReprMixin):
     def attrs(cls):
         return list(cls.meta_attrs) + list(cls.data_attrs)
 
-    # TODO: add an "assert" variant that says how the objects differ.
-    def __eq__(self, other):
+    def return_false(self, *args):
+        return False
+
+    def raise_not_equal(self, other, value_desc, self_value, other_value):
+        raise AssertionError("{!r} != {!r}: {!s} not equal: {!r} != {!r}".
+                             format(self, other, value_desc, self_value, other_value))
+
+    # TODO: recursively call self._check_eq().
+    def _check_eq(self, other, not_equal_func):
         if type(self) != type(other):
-            return False
+            return not_equal_func(other, "types", type(self), type(other))
         for attr in self.attrs():
             name = attr.name
             if (getattr(self, name) != getattr(other, name)):
-                return False
+                return not_equal_func(other, "{!r} attribute".format(name), getattr(self, name),
+                                      getattr(other, name))
         return True
+
+    def assert_equal(self, other):
+        """
+        Raise an informative AssertionError if self and other differ.
+
+        This is useful for debugging and unit testing.
+        """
+        return self._check_eq(other, self.raise_not_equal)
+
+    def __eq__(self, other):
+        return self._check_eq(other, self.return_false)
 
     # From the Python documentation:
     #

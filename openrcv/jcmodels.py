@@ -49,7 +49,6 @@ class JsonCaseBallot(JsonableMixin):
         self.weight = weight
 
     def repr_desc(self):
-        """Return additional info for __repr__()."""
         return "weight=%r choices=%r" % (self.weight, self.choices)
 
     def load_object(self, ballot):

@@ -20,3 +20,21 @@ class UnitCaseTest(UnitCase):
         except ValueError:
             pass
         self.assertEqual(obj.foo, 1)
+
+    def test_assert_starts_with(self):
+        self.assertStartsWith("abc", "a")
+        with self.assertRaises(AssertionError) as cm:
+            self.assertStartsWith("abc", "x")
+        # Check the exception text.
+        err = cm.exception
+        ending = 'The string """\\\nabc"""\ndoes not start with: \'x\''
+        self.assertTrue(str(err).endswith(ending), msg="full error text: %r" % str(err))
+
+    def test_assert_ends_with(self):
+        self.assertEndsWith("abc", "c")
+        with self.assertRaises(AssertionError) as cm:
+            self.assertEndsWith("abc", "x")
+        # Check the exception text.
+        err = cm.exception
+        ending = 'The string """\\\nabc"""\ndoes not end with: \'x\''
+        self.assertTrue(str(err).endswith(ending), msg="full error text: %r" % str(err))

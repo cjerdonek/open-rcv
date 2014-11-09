@@ -81,6 +81,7 @@ class _IteratorTracker(object):
             yield item
 
 
+# TODO: add test that you can't mutate the iterable.
 def iter_resource(iterable):
     """Wrap an iterable in an iterator resource."""
     return _IterableResource(iterable)

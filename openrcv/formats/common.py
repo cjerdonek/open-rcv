@@ -13,6 +13,12 @@ class FormatWriter(object):
         self.stdout = stdout
 
     def make_output_info(self, info_funcs):
+        """
+        Arguments:
+          info_funcs: a single function or an iterable of functions (one
+            for each file that needs to be written).  Each function should
+            return a 2-tuple of strings: (output_path, file_encoding).
+        """
         try:
             iter(info_funcs)
         except TypeError:

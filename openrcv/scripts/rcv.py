@@ -36,6 +36,7 @@ OpenRCV command-line tool.
 """
 
 OPTION_HELP = Option(('-h', '--help'))
+OPTION_OUTPUT_DIR_METAVAR = "OUTPUT_DIR"
 
 OUTPUT_FORMAT_BLT = 'blt'
 OUTPUT_FORMAT_INTERNAL = 'internal'
@@ -87,18 +88,18 @@ def add_command_randcontest(builder):
     desc = dedent("""\
     Create a random sample contest.
 
-    If the contest is written to files instead of stdout, then the
-    output file paths are written to stdout instead.
-    """)
+    This command writes the contest information to stdout.  If {output_dir}
+    is provided, then only the paths to the output files are written to stdout.
+    """.format(output_dir=OPTION_OUTPUT_DIR_METAVAR))
     parser = subparsers.add_parser('randcontest', help=help, description=desc,
                                    add_help=False)
     parser.add_argument('-b', '--ballots', metavar='N', type=int,
                        help='number of ballots.')
     parser.add_argument('-c', '--candidates', metavar='N', type=int, default=6,
                         help='number of candidates.')
-    parser.add_argument('-o', '--output-dir', metavar='OUTPUT_DIR',
-        help=("directory to write output files to, or write to stdout "
-              "if the empty string.  Defaults to the empty string."))
+    parser.add_argument('-o', '--output-dir', metavar=OPTION_OUTPUT_DIR_METAVAR,
+        help=("directory to write output files to.  If the empty string, "
+              "writes to stdout.  Defaults to the empty string."))
     # The output formats.
     labels = sorted(formats)
     list_desc = ", ".join((str(formats[label]) for label in labels))

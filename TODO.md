@@ -1,7 +1,7 @@
 TODO
 ====
 
-* Finish implementing and testing JsonCaseBallot.
+* Implement and test `JsonCaseContestInput.from_object()`.
 * Work on ballot writer for "internal" and "JSON test" formats.
 * Work on outputting JSON test for rand_contest.
 * Flesh out rest of `rand_contest` command (number of ballots, etc).

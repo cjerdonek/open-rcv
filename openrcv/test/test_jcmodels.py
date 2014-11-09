@@ -2,8 +2,10 @@
 from textwrap import dedent
 
 from openrcv.jsonlib import JsonableError, JsonDeserializeError, JS_NULL
-from openrcv.jcmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonContest,
-                              JsonRoundResults, JsonTestCaseOutput)
+from openrcv.jcmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonCaseContestInput,
+                              JsonContest, JsonRoundResults, JsonTestCaseOutput)
+from openrcv.models import ContestInput
+from openrcv.resource import iter_resource
 from openrcv.utils import StreamInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
@@ -85,17 +87,6 @@ class JsonCaseBallotTest(UnitCase):
 # TODO: remove this case after moving the tests.
 class JsonBallotTest(UnitCase):
 
-    def test_to_jsobj(self):
-        ballot = JsonBallot(choices=[1, 2], weight=3)
-        jsobj = ballot.to_jsobj()
-        self.assertEqual(jsobj, "3 1 2")
-
-    def test_to_jsobj__choices_tuple(self):
-        """Check using a tuple for choices."""
-        ballot = JsonBallot(choices=(1, 2), weight=3)
-        jsobj = ballot.to_jsobj()
-        self.assertEqual(jsobj, "3 1 2")
-
     def test_to_jsobj__undervote(self):
         ballot = JsonBallot(weight=3)
         jsobj = ballot.to_jsobj()
@@ -135,6 +126,26 @@ class JsonBallotTest(UnitCase):
         expected = [JsonBallot(weight=2),
                     JsonBallot(weight=3, choices=(1, 2))]
         self.assertEqual(ballots, expected)
+
+
+class JsonCaseContestTest(UnitCase):
+
+    def test_from_object(self):
+        contest = ContestInput()
+        ballots = [(2, (3, 1))]
+        contest.ballots_resource = iter_resource(ballots)
+        jc_contest = JsonCaseContestInput.from_object(contest)
+        expected = JsonCaseContestInput()
+        expected.ballots = [JsonCaseBallot(weight=2, choices=(3, 1))]
+        jc_contest.assert_equal(expected)
+
+    def test_to_jsobj(self):
+        jc_ballots = [
+            JsonCaseBallot(choices=(1, 2), weight=3),
+        ]
+        jc_contest = JsonCaseContestInput(ballots=jc_ballots)
+        expected = {'ballots': ['3 1 2']}
+        self.assertEqual(jc_contest.to_jsobj(), expected)
 
 
 class JsonContestTest(UnitCase):

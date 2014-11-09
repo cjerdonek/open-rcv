@@ -155,6 +155,58 @@ class JsonBallot(JsonableMixin):
         return to_internal_ballot(ballot)
 
 
+class JsonCaseContestInput(JsonableMixin):
+
+    """
+    Represents a contest for a JSON test case.
+    """
+
+    meta_attrs = (Attribute('id'),
+                  Attribute('notes'))
+    data_attrs = (Attribute('ballots', cls=JsonCaseBallot),
+                  Attribute('candidate_count'))
+
+    def __init__(self, candidate_count=None, ballots=None, id_=None, notes=None):
+        """
+        Arguments:
+          candidate_count: integer number of candidates
+        """
+        self.ballots = ballots
+        self.candidate_count = candidate_count
+        self.id = id_
+        self.notes = notes
+
+    def repr_desc(self):
+        return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
+
+    def load_object(self, contest):
+        """
+        Arguments:
+          contest: a ContestInput object.
+        """
+        with contest.ballots_resource() as ballots:
+            ballots = [JsonCaseBallot.from_object(b) for b in ballots]
+        self.__init__(ballots=ballots)
+
+    #
+    # def to_object(self):
+    #     """
+    #     Arguments:
+    #       ballot: a Ballot object.
+    #     """
+    #     return self.weight, self.choices
+    #
+    # def load_jsobj(self, jsobj):
+    #     """Read a JSON object, and set attributes to match."""
+    #     try:
+    #         weight, choices = parse_internal_ballot(jsobj)
+    #     except ValueError:
+    #         # Can happen with "1 2 abc", for example.
+    #         # ValueError: invalid literal for int() with base 10: 'abc'
+    #         raise JsonDeserializeError("error parsing: %r" % jsobj)
+    #     self.__init__(choices=choices, weight=weight)
+
+
 class JsonContest(JsonableMixin):
 
     """

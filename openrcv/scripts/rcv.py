@@ -93,10 +93,13 @@ def add_command_randcontest(builder):
     """.format(output_dir=OPTION_OUTPUT_DIR_METAVAR))
     parser = subparsers.add_parser('randcontest', help=help, description=desc,
                                    add_help=False)
-    parser.add_argument('-b', '--ballots', metavar='N', type=int,
-                       help='number of ballots.')
-    parser.add_argument('-c', '--candidates', metavar='N', type=int, default=6,
-                        help='number of candidates.')
+    default_ballots = 20
+    parser.add_argument('-b', '--ballots', dest='ballot_count', metavar='N', type=int,
+                       help='number of ballots.  Defaults to {:d}.'.format(default_ballots))
+    default_candidates = 6
+    parser.add_argument('-c', '--candidates', dest='candidate_count', metavar='N',
+                        type=int, default=default_candidates,
+                        help='number of candidates.  Defaults to {:d}.'.format(default_candidates))
     parser.add_argument('-o', '--output-dir', metavar=OPTION_OUTPUT_DIR_METAVAR,
         help=("directory to write output files to.  If the empty string, "
               "writes to stdout.  Defaults to the empty string."))

@@ -25,7 +25,7 @@ all at once.
 """
 
 from openrcv.counting import InternalBallotsNormalizer
-from openrcv.formats.internal import format_ballot
+from openrcv.formats.internal import to_internal_ballot
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin,
                              JsonDeserializeError)
 from openrcv.models import make_candidates, BallotsResourceBase, RoundResults
@@ -79,7 +79,8 @@ class JsonCaseBallot(JsonableMixin):
 
     def to_jsobj(self):
         """Return a JSON object."""
-        return self.to_internal_ballot()
+        ballot = self.to_object()
+        return to_internal_ballot(ballot)
 
 
 # TODO: remove this class in favor of new pattern.
@@ -89,15 +90,17 @@ class JsonBallot(JsonableMixin):
     Represents a ballot for a JSON test case.
     """
 
+    # TODO: remove this method.
     @staticmethod
-    def to_ballot_stream(ballots):
+    def to_ballot_stream(json_ballots):
         """
         Convert an iterable of ballots into a StreamInfo object.
 
         The StreamInfo represents the ballots in internal ballot file format.
         """
-        lines = (b.to_internal_ballot(final="\n") for b in ballots)
-        ballots_string = "".join(lines)
+
+        lines = (to_internal_ballot((b.weight, b.choices)) for b in json_ballots)
+        ballots_string = "\n".join(lines) + "\n"
         return StringInfo(ballots_string)
 
     @classmethod
@@ -148,11 +151,8 @@ class JsonBallot(JsonableMixin):
 
     def to_jsobj(self):
         """Return the ballot as a JSON object."""
-        return self.to_internal_ballot()
-
-    def to_internal_ballot(self, final=''):
-        """Return the ballot as an internal ballot string."""
-        return format_ballot(self.weight, self.choices, final=final)
+        ballot = self.weight, self.choices
+        return to_internal_ballot(ballot)
 
 
 class JsonContest(JsonableMixin):

@@ -7,19 +7,22 @@ Support for parsing and writing files in OpenRCV's internal format.
 import os
 
 from openrcv.formats.common import FormatWriter
-from openrcv.utils import FileWriter
+from openrcv.utils import join_values, FileWriter
 
 
 # ASCII makes reading and parsing the file faster.
 ENCODING_BALLOT_FILE = 'ascii'
 
 
-def format_values(values):
-    return " ".join((str(v) for v in values))
+def to_internal_ballot(ballot):
+    """Return the ballot as an internal ballot string."""
+    # There is no terminal 0 like in the BLT format.
+    weight, choices = ballot
+    return join_values([weight] + list(choices))
 
 
 # TODO: remove the `final` argument.
-def format_ballot(weight, choices, final=''):
+def format_ballot(ballot, final=''):
     """
     Return the internal format representation of a ballot.
 
@@ -27,8 +30,7 @@ def format_ballot(weight, choices, final=''):
       choices: an iterable of choices.
 
     """
-    # There is no terminal 0 like in the BLT format.
-    text = format_values([weight] + list(choices))
+    text = to_internal_ballot(ballot)
     if final:
         text += final
     return text
@@ -56,7 +58,7 @@ class InternalBallotsWriter(FileWriter):
     def _write_ballots(self, contest):
         with contest.ballots_resource() as ballots:
             for ballot in ballots:
-                self.writeln(format_ballot(*ballot))
+                self.writeln(to_internal_ballot(*ballot))
 
     def write_ballots(self, contest):
         """

@@ -2,11 +2,10 @@
 import logging
 import os
 
-from openrcv.formats.internal import format_ballot
+from openrcv.formats.internal import to_internal_ballot
 from openrcv.models import ContestInput
 from openrcv import utils
 from openrcv.utils import time_it, FILE_ENCODING
-
 
 log = logging.getLogger(__name__)
 
@@ -136,9 +135,9 @@ class BLTParser(Parser):
             weight = ints[0]
             if weight == 0:
                 break
+            ballot = weight, tuple(ints[1:-1])
             ballot_count += 1
-            # Leave off the initial weight and terminal 0 for choices.
-            new_line = format_ballot(weight, ints[1:-1])
+            new_line = to_internal_ballot(ballot)
             f.write(new_line + "\n")
         return ballot_count
 

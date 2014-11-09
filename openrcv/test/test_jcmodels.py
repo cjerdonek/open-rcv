@@ -76,6 +76,12 @@ class JsonCaseBallotTest(UnitCase):
         with self.assertRaises(JsonDeserializeError):
             jc_ballot = JsonCaseBallot.from_jsobj("2 a 4")
 
+    def test_to_jsobj(self):
+        jc_ballot = JsonCaseBallot(choices=(1, 2), weight=3)
+        expected = "3 1 2"
+        self.assertEqual(jc_ballot.to_jsobj(), expected)
+
+
 # TODO: remove this case after moving the tests.
 class JsonBallotTest(UnitCase):
 

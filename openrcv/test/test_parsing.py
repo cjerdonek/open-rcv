@@ -4,7 +4,6 @@ import os
 from textwrap import dedent
 import unittest
 
-from openrcv.formats.internal import format_ballot
 from openrcv.models import ContestInput
 from openrcv.parsing import parse_internal_ballot, BLTParser, ParsingError
 from openrcv.utils import PathInfo, StringInfo
@@ -12,15 +11,6 @@ from openrcv.utiltest.helpers import UnitCase
 
 
 class ModuleTest(UnitCase):
-
-    def test_format_ballot(self):
-        self.assertEqual(format_ballot(1, (2, )), "1 2")
-        self.assertEqual(format_ballot(1, (2, 3)), "1 2 3")
-        self.assertEqual(format_ballot(1, ()), "1")
-        # Check the final-character argument.
-        self.assertEqual(format_ballot(1, (2, ), "\n"), "1 2\n")
-        # Check the final-character argument with empty choices.
-        self.assertEqual(format_ballot(1, (), "\n"), "1\n")
 
     def test_parse_internal_ballot(self):
         cases = [

@@ -22,6 +22,11 @@ FILE_ENCODING = "utf-8"
 log = logging.getLogger(__name__)
 
 
+def join_values(values):
+    """Return the values as a space-delimited string."""
+    return " ".join((str(v) for v in values))
+
+
 def log_create_dir(path):
     log.info("creating dir: %s" % path)
 

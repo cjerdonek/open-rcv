@@ -285,19 +285,19 @@ class JsonableMixin(ReprMixin):
     def from_object(cls, obj):
         """
         Create an instance of the current class from a model object.
-
-        Arguments:
-          obj: an instance of a business object, for example a Contest
-            object.
         """
         jsonable = cls()
         jsonable.load_object(obj)
         return jsonable
 
-    # This is just a convenience method.
     @classmethod
     def from_jsobj(cls, jsobj):
-        return from_jsobj(jsobj, cls=cls)
+        """
+        Create an instance of the current class from a JSON object.
+        """
+        jsonable = cls()
+        jsonable.load_jsobj(jsobj)
+        return jsonable
 
     def to_jsobj(self):
         """

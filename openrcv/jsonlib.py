@@ -2,6 +2,24 @@
 """
 Supporting code for JSON serialization.
 
+For the purposes of this project, "JSON object" (abbreviated in code as
+`js_obj`) means a Python object composed of instances of built-in types
+like lists, dicts, strings, ints, etc.  These objects can be converted
+to JSON using the json module with no extra configuration.
+
+TODO: clean up the documentation below.
+
+Instances of most models in this module (those inheriting from JsonableMixin)
+can be converted to a JSON object by calling a to_jsobj() method on the
+instance.  Similarly, calling to_json() on the object returns JSON.  We
+call these objects "jsonable."
+
+We use the convention that "None" attribute values do not get converted
+to JSON, and JSON null values correspond to the JS_NULL object.
+This decision is based on the thinking that having "null" appear in the
+JSON should be a deliberate decision (and in the Python world, None
+is the usual default value).
+
 """
 
 import json
@@ -58,6 +76,7 @@ def write_json(obj, stream_info=None, path=None):
         return call_json(json.dump, jsobj, f)
 
 
+# TODO: choose a less ambiguous name.
 def from_jsobj(jsobj, cls=None):
     """
     Convert a JSON object to a Python object, and return it.
@@ -235,6 +254,19 @@ class JsonableMixin(ReprMixin):
         meta = {}
         self._attrs_to_jsdict(self.meta_attrs, meta)
         return meta
+
+    @classmethod
+    def from_object(cls, obj):
+        """
+        Create an instance of the current class from a model object.
+
+        Arguments:
+          obj: an instance of a business object, for example a Contest
+            object.
+        """
+        jsonable = cls()
+        jsonable.load_object(obj)
+        return jsonable
 
     # This is just a convenience method.
     @classmethod

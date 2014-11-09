@@ -6,7 +6,7 @@ from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 
 
 # TODO: add a test for good args.
-class ModuleTestCase(UnitCase):
+class ModuleTest(UnitCase):
 
     @skipIfTravis()
     def test_parse_log_level(self):

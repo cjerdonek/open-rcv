@@ -2,6 +2,13 @@
 """
 Internal models that do not require JSON serialization.
 
+Ballot Model
+------------
+
+For now, the "Ballot" object is not represented by a class.  It is
+simply a `(weight, choices)` 2-tuple, where `weight` is a number and
+choices is a tuple of integer choice ID's.
+
 """
 
 from contextlib import contextmanager
@@ -13,7 +20,6 @@ from openrcv.utils import ReprMixin
 def make_candidates(candidate_count):
     """
     Return an iterable of candidate numbers.
-
     """
     return range(1, candidate_count + 1)
 
@@ -128,14 +134,12 @@ class RoundResults(object):
 
     """
     Represents contest results.
-
     """
 
     def __init__(self, totals):
         """
         Arguments:
           totals: dict of candidate number to vote total.
-
         """
         self.totals = totals
 
@@ -144,7 +148,6 @@ class ContestResults(ReprMixin):
 
     """
     Represents contest results.
-
     """
 
     def __init__(self, rounds=None):

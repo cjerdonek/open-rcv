@@ -18,7 +18,7 @@ def format_values(values):
     return " ".join((str(v) for v in values))
 
 
-# TODO: remove the "final" argument.g
+# TODO: remove the `final` argument.
 def format_ballot(weight, choices, final=''):
     """
     Return the internal format representation of a ballot.

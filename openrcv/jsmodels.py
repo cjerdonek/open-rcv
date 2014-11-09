@@ -1,30 +1,28 @@
 
+# TODO: move the non-JsonCase parts of this documentation to jsonlib
+#   (since there can be other jsmodels).
+# TODO: rename this module to jcmodels.py.
 """
-Contains models that support JSON serialization.
+Contains classes that support serialization to JSON test cases.
 
-For the purposes of this project, "JSON object" (abbreviated in code
-as "jsobj") means a Python object with a natural conversion to JSON.
-These are objects composed of built-in type instances like Python
-lists, dicts, strings, ints, etc.
+Terminology
+-----------
 
-Instances of most models in this module (those inheriting from JsonableMixin)
-can be converted to a JSON object by calling a to_jsobj() method on the
-instance.  Similarly, calling to_json() on the object returns JSON.  We
-call these objects "jsonable."
-
-We use the convention that "None" attribute values do not get converted
-to JSON, and JSON null values correspond to the JS_NULL object.
-This decision is based on the thinking that having "null" appear in the
-JSON should be a deliberate decision (and in the Python world, None
-is the usual default value).
+The model class names in this module have the form "JsonCase*".  This is
+partly to avoid confusion with unittest.TestCase classes.  We also
+frequently follow the convention of using variables of the form `jc_*`
+to represent instances of JSON test case classes (because it matches
+the "JsonCase*" form of the class name).
 
 Warning
 -------
 
-This module should be used only for small sets of ballots (e.g. those
-that arise in JSON test cases).  For large numbers of ballots, ballot
-data should be backed by a file and ballots read and processed one
-at a time -- as opposed to having to load them into memory all at once.
+The classes in this module should be used only for small sets of ballots
+(e.g. those that arise in JSON test cases).  For large numbers of ballots,
+ballot data should be backed by a concrete file and ballots read and
+processed one at a time -- as opposed to having to load them into memory
+all at once.
+
 """
 
 from openrcv.counting import InternalBallotsNormalizer
@@ -34,7 +32,47 @@ from openrcv.models import make_candidates, BallotsResourceBase, RoundResults
 from openrcv.parsing import parse_internal_ballot
 from openrcv.utils import StringInfo
 
-# TODO: rename this module to jscasemod.py (for JSON case models).
+# TODO: rename this module to jcmodels.py (for JSON case models).
+
+class JsonCaseBallot(JsonableMixin):
+
+    """
+    The serialization format is a space-delimited string of integers of
+    the form: "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
+    """
+
+    def __init__(self, choices=None, weight=1):
+        if choices is None:
+            choices = ()
+        self.choices = tuple(choices)
+        self.weight = weight
+
+    def repr_desc(self):
+        """Return additional info for __repr__()."""
+        return "weight=%r choices=%r" % (self.weight, self.choices)
+
+    def load_object(self, ballot):
+        """
+        Arguments:
+          ballot: a Ballot object.
+        """
+        weight, choices = ballot
+        self.__init__(choices=choices, weight=weight)
+
+    def load_jsobj(self, jsobj):
+        """Read a JSON object, and set attributes to match."""
+        try:
+            weight, choices = parse_internal_ballot(jsobj)
+        except ValueError:
+            # Can happen with "1 2 abc", for example.
+            # ValueError: invalid literal for int() with base 10: 'abc'
+            raise JsonObjError("error parsing: %r" % jsobj)
+        self.__init__(choices=choices, weight=weight)
+
+    def to_jsobj(self):
+        """Return a JSON object."""
+        return self.to_internal_ballot()
+
 
 # TODO: remove this class in favor of new pattern.
 class JsonBallot(JsonableMixin):

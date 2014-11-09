@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from textwrap import dedent
 
 from openrcv.jsonlib import JsonObjError, JS_NULL
-from openrcv.jsmodels import (from_jsobj, JsonBallot, JsonContest,
+from openrcv.jsmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonContest,
                               JsonRoundResults, JsonTestCaseOutput)
 from openrcv.utils import StreamInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase
@@ -23,15 +23,26 @@ def change_attr(obj, name, value):
     setattr(obj, name, initial_value)
 
 
+# TODO: move/convert tests from JsonBallotTest to JsonCaseBallotTest.
+class JsonCaseBallotTest(UnitCase):
+
+    def test_init(self):
+        ballot = JsonBallot(choices=[1, 2], weight=3)
+        self.assertEqual(ballot.choices, (1, 2))
+        self.assertEqual(ballot.weight, 3)
+
+    # TODO
+    def _test_from_object(self):
+        ballot = (2, (3, 1))
+        jc_ballot = JsonCaseBallot.from_object(ballot)
+        self.assertEqual(jc_ballot, "foo")
+
+
+# TODO: remove this case after moving the tests.
 class JsonBallotTest(UnitCase):
 
     def make_ballot(self):
         return JsonBallot(choices=[1, 2], weight=3)
-
-    def test_init(self):
-        ballot = self.make_ballot()
-        self.assertEqual(ballot.choices, (1, 2))
-        self.assertEqual(ballot.weight, 3)
 
     def test_init__defaults(self):
         ballot = JsonBallot()

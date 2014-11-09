@@ -113,7 +113,6 @@ def add_command_randcontest(builder):
 def create_argparser(prog="rcv"):
     """
     Return an ArgumentParser object.
-
     """
     parser = RcvArgumentParser(prog=prog, description=DESCRIPTION, add_help=False,
                                formatter_class=RawDescriptionHelpFormatter)
@@ -197,7 +196,6 @@ class RcvArgumentParser(ArgParser):
 
         Arguments:
           error_level: the log level that should be used if a UsageException occurs.
-
         """
         if error_level is None:
             error_level = LOG_LEVEL_USAGE_ERROR

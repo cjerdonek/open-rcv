@@ -11,7 +11,7 @@ from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 VALID_COMMAND = ['count', 'path.py']
 
 
-class SafeGetLogLevelTestCase(UnitCase):
+class SafeGetLogLevelTest(UnitCase):
 
     """Test the ArgumentParser's safe_get_log_level() method."""
 
@@ -75,7 +75,7 @@ class SafeGetLogLevelTestCase(UnitCase):
             actual = parser.safe_get_log_level([], error_level=42)
 
 
-class ArgumentParserTestCase(UnitCase):
+class ArgumentParserTest(UnitCase):
 
     """Test the ArgumentParser object returned by create_argparser()."""
 

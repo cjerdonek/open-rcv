@@ -37,7 +37,7 @@ class MakeUsageErrorTest(UnitCase):
         self.assertStartsWith(actual, "Command-line usage error:")
 
 # TODO: add more tests for this.
-class NonExitingMainTests(UnitCase):
+class NonExitingMainTest(UnitCase):
 
     """Tests non_exiting_main()."""
 

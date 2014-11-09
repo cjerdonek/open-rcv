@@ -102,6 +102,21 @@ Viewing Docs
     $ python setup.py build_html
 
 
+Coding Guidelines
+-----------------
+
+This section contains some of our coding guidelines (e.g. coding style, etc).
+
+
+### Tests
+
+Test case classes should inherit from `UnitCase` in the module
+`openrcv.utiltest.helpers`.  Test class names should end in "Test."
+For example--
+
+    class JsonCaseBallotTest(UnitCase):
+
+
 [doc-design]: design.md
 [doc-readme]: ../README.md
 [doc-releasing]: releasing.md

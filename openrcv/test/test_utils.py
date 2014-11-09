@@ -23,7 +23,7 @@ class ReprMixinTest(UnitCase):
         self.assertEqual(repr(obj), expected)
 
 
-class ObjectExtensionTests(UnitCase):
+class ObjectExtensionTest(UnitCase):
 
     class Foo(object):
         def value(self):
@@ -54,7 +54,7 @@ class ObjectExtensionTests(UnitCase):
         self.assertEqual(ext.value(), 4)
 
 
-class UncloseableFileTests(UnitCase):
+class UncloseableFileTest(UnitCase):
 
     def test_standard_stream(self):
         """Test that closing a standard stream doesn't do anything when wrapped."""

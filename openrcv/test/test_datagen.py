@@ -26,7 +26,7 @@ class BallotGeneratorMixin(object):
                      side_effect=values)
 
 
-class BallotGeneratorTests(UnitCase, BallotGeneratorMixin):
+class BallotGeneratorTest(UnitCase, BallotGeneratorMixin):
 
     def patch_random(self, return_value):
         return patch('openrcv.datagen.random', return_value=return_value)
@@ -86,7 +86,7 @@ class BallotGeneratorTests(UnitCase, BallotGeneratorMixin):
                     self.assertEqual(actual[0], expected)
 
 
-class UniqueBallotGeneratorTests(UnitCase, BallotGeneratorMixin):
+class UniqueBallotGeneratorTest(UnitCase, BallotGeneratorMixin):
 
     def test_make_ballot(self):
         maker = UniqueBallotGenerator((1, 2, 3), undervote=0)

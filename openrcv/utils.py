@@ -195,20 +195,7 @@ class StreamInfo(ReprMixin):
                 raise type(exc)("with open stream: %r" % self)
 
 
-class PermanentFileInfo(StreamInfo):
-
-    def __init__(self, file_):
-        self.file = file_
-
-    def repr_desc(self):
-        return "stream=%r" % self.file
-
-    def open_object(self, mode):
-        # We call closing() to return a context manager.
-        return closing(UncloseableFile(self.file))
-
-
-# TODO: replace with FileStreamResource.
+# TODO: replace with FileResource.
 class PathInfo(StreamInfo):
 
     """A wrapped file path that opens to become a file object."""

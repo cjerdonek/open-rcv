@@ -95,6 +95,7 @@ class BallotStreamResource(BallotsResourceBase):
                 yield ballots
 
 
+# TODO: add id and notes.
 class ContestInput(ReprMixin):
 
     """
@@ -109,22 +110,24 @@ class ContestInput(ReprMixin):
 
     ballot_count = 0
 
-    def __init__(self, seat_count=None, name=None):
+    def __init__(self, id_=None, seat_count=None, name=None):
         if seat_count is None:
             seat_count = 1
         if name is None:
             name = "Election Contest"
 
         self.ballots_resource = None
-        self.candidates = []
-        self.name = name
+        self.candidates = None
+        self.notes = None
 
+        self.id = id_
+        self.name = name
         self.seat_count = seat_count
 
     def repr_desc(self):
         return "name=%r, candidates=%d" % (self.name, len(self.candidates))
 
-    # TODO: give this method or more accurate name.
+    # TODO: give this method a more accurate name.
     def get_candidates(self):
         """Return an iterable of the candidate numbers."""
         return make_candidates(len(self.candidates))

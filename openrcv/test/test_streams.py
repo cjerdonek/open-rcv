@@ -37,61 +37,78 @@ class StreamResourceTestMixin(object):
 
     """Base mixin for StreamResource tests."""
 
-    def test_open_read(self):
+    def test_reading(self):
         with self.resource() as resource:
-            with resource.open_read() as stream:
+            with resource.reading() as stream:
                 items = tuple(stream)
             self.assertEqual(items, ("a\n", "b\n"))
             # Check that you can read again.
-            with resource.open_read() as stream:
+            with resource.reading() as stream:
                 items = tuple(stream)
             self.assertEqual(items, ("a\n", "b\n"))
 
-    def test_open_read__exhausts(self):
+    def test_reading__exhausts(self):
         """
         Check that iterating through the stream exhausts it, i.e.
         that stream is an iterator object.
         """
         with self.resource() as resource:
-            with resource.open_read() as stream:
+            with resource.reading() as stream:
                 items1 = tuple(stream)
                 items2 = tuple(stream)
             self.assertEqual(items1, ("a\n", "b\n"))
             self.assertEqual(items2, ())
 
-    # TODO: enable this test.
-    def _test_open_read__error(self):
+    def test_reading__error(self):
         """
         Check that an error while reading shows the line number.
         """
-        with self.resource() as resource:
-            with resource.open_read() as stream:
-                item = next(stream)
-                self.assertEqual(item, "a\n")
-                raise Exception()
+        with self.assertRaises(ValueError) as cm:
+            with self.resource() as resource:
+                with resource.reading() as stream:
+                    item = next(stream)
+                    self.assertEqual(item, "a\n")
+                    raise ValueError()
+        # Check the exception text.
+        err = cm.exception
+        self.assertStartsWith(str(err), "during item number 1")
 
-    def test_open_write(self):
+    def test_writing(self):
         with self.resource() as resource:
-            with resource.open_write() as stream:
+            with resource.writing() as stream:
                 stream.write('c\n')
                 stream.write('d\n')
-            with resource.open_read() as stream:
+            with resource.reading() as stream:
                 items = tuple(stream)
             self.assertEqual(items, ('c\n', 'd\n'))
 
-    def test_writing_deletes(self):
+    def test_writing__deletes(self):
         """
-        Check that open_write() deletes the current data.
+        Check that writing() deletes the current data.
         """
         with self.resource() as resource:
-            with resource.open_read() as stream:
+            with resource.reading() as stream:
                 items = tuple(stream)
             self.assertEqual(items, ("a\n", "b\n"))
-            with resource.open_write() as stream:
+            with resource.writing() as stream:
                 pass
-            with resource.open_read() as stream:
+            with resource.reading() as stream:
                 items = tuple(stream)
             self.assertEqual(items, ())
+
+    def test_writing__error(self):
+        """
+        Check that an error while writing shows the line number.
+        """
+        with self.assertRaises(ValueError) as cm:
+            with self.resource() as resource:
+                with resource.writing() as stream:
+                    stream.write('c\n')
+                    stream.write('d\n')
+                    raise ValueError('foo')
+        # Check the exception text.
+        err = cm.exception
+        self.assertStartsWith(str(err), "during item number 2")
 
 
 class ListStreamResourceTest(StreamResourceTestMixin, UnitCase):

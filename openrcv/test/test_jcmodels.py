@@ -128,14 +128,16 @@ class JsonBallotTest(UnitCase):
         self.assertEqual(ballots, expected)
 
 
-class JsonCaseContestTest(UnitCase):
+class JsonCaseContestInputTest(UnitCase):
 
     def test_from_object(self):
         contest = ContestInput()
+        contest.candidates = ['Ann', 'Bob']
         ballots = [(2, (3, 1))]
         contest.ballots_resource = iter_resource(ballots)
         jc_contest = JsonCaseContestInput.from_object(contest)
-        expected = JsonCaseContestInput()
+
+        expected = JsonCaseContestInput(candidate_count=2)
         expected.ballots = [JsonCaseBallot(weight=2, choices=(3, 1))]
         jc_contest.assert_equal(expected)
 

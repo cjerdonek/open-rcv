@@ -18,6 +18,7 @@ current item and item number).
 '''
 
 from contextlib import contextmanager
+from io import StringIO
 
 from openrcv.utils import logged_open
 
@@ -113,7 +114,7 @@ class StreamResourceBase(object):
                 yield tracked
 
 
-class ListStreamResource(StreamResourceBase):
+class ListResource(StreamResourceBase):
 
     """A stream resource backed by a list."""
 
@@ -138,7 +139,7 @@ class ListStreamResource(StreamResourceBase):
         yield WriteableListStream(self.seq)
 
 
-class FileStreamResource(StreamResourceBase):
+class FileResource(StreamResourceBase):
 
     """A stream resource backed by a file."""
 
@@ -161,12 +162,15 @@ class FileStreamResource(StreamResourceBase):
         return self._open("w")
 
 
-class StandardStreamResource(StreamResourceBase):
+class StandardResource(StreamResourceBase):
 
     """A stream resource backed by a file."""
 
     def __init__(self, file_):
         self.file = file_
+
+    # def repr_desc(self):
+    #     return "stream=%r" % self.file
 
     @contextmanager
     def _open(self):
@@ -177,3 +181,40 @@ class StandardStreamResource(StreamResourceBase):
 
     def open_write(self):
         return self._open()
+
+
+class StringResource(StreamResourceBase):
+
+    """
+    A stream resource backed by an in-memory text stream.
+
+    This class allows functions that accept a PathInfo object to be called
+    using strings.  In particular, writing to disk and creating temporary
+    files isn't necessary.  This is especially convenient for testing.
+    """
+
+    def __init__(self, contents=None):
+        self.contents = contents
+
+    # TODO: include the length in characters.
+    # def repr_desc(self):
+    #     return "contents=%s" % (self.get_display_value(10), )
+    #
+    # def get_display_value(self, limit=None):
+    #     """
+    #     Return the first `limit` characters plus "...".
+    #     """
+    #     value = self.value
+    #     if limit is None or not value or len(value) <= limit:
+    #         return value
+    #     return repr(value[:limit]) + "..."
+
+    @contextmanager
+    def open_read(self):
+        yield StringIO(self.contents)
+
+    @contextmanager
+    def open_write(self):
+        with StringIO() as f:
+            yield f
+            self.contents = f.getvalue()

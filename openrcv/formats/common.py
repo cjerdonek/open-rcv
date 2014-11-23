@@ -1,7 +1,7 @@
 
 import sys
 
-from openrcv.utils import FileWriter, PathInfo, PermanentFileInfo
+from openrcv.streams import FileStreamResource, StandardStreamResource
 
 
 class FormatWriter(object):
@@ -24,22 +24,22 @@ class FormatWriter(object):
         except TypeError:
             info_funcs = (info_funcs, )
         output_dir = self.output_dir
-        stream_infos = []
+        stream_resources = []
         output_paths = []
         for func in info_funcs:
             if not output_dir:
-                stream_info = self.stdout_info()
+                stream_resource = self.stdout_info()
             else:
                 output_path, encoding = func()
-                stream_info = PathInfo(output_path, encoding=encoding)
+                stream_resource = FileStreamResource(output_path, encoding=encoding)
                 # Only add an output path when not writing to stdout.
                 output_paths.append(output_path)
-            stream_infos.append(stream_info)
-        return stream_infos, output_paths
+            stream_resources.append(stream_resource)
+        return stream_resources, output_paths
 
     def stdout_info(self):
         """Return a StreamInfo object for stdout."""
-        return PermanentFileInfo(self.stdout)
+        return StandardStreamResource(self.stdout)
 
     # TODO: get all the FormatWriter classes using this method.
     def write_output(self, info_func, *args, **kwargs):
@@ -48,7 +48,7 @@ class FormatWriter(object):
           info_func: TODO.
         """
         file_funcs, write_func = info_func()
-        stream_infos, output_paths = self.make_output_info(file_funcs)
-        args = list(stream_infos) + list(args)
+        stream_resources, output_paths = self.make_output_info(file_funcs)
+        args = list(stream_resources) + list(args)
         write_func(*args)
         return output_paths

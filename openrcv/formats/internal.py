@@ -21,21 +21,6 @@ def to_internal_ballot(ballot):
     return join_values([weight] + list(choices))
 
 
-# TODO: remove the `final` argument.
-def format_ballot(ballot, final=''):
-    """
-    Return the internal format representation of a ballot.
-
-    Arguments:
-      choices: an iterable of choices.
-
-    """
-    text = to_internal_ballot(ballot)
-    if final:
-        text += final
-    return text
-
-
 class InternalOutput(FormatWriter):
 
     def get_ballot_info(self):
@@ -58,7 +43,7 @@ class InternalBallotsWriter(FileWriter):
     def _write_ballots(self, contest):
         with contest.ballots_resource() as ballots:
             for ballot in ballots:
-                self.writeln(to_internal_ballot(*ballot))
+                self.writeln(to_internal_ballot(ballot))
 
     def write_ballots(self, contest):
         """

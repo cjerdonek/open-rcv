@@ -22,16 +22,13 @@ from contextlib import contextmanager
 from openrcv.utils import logged_open
 
 
-# TODO: add tests.
+# TODO: add tests?
 class TrackingStream(object):
 
     def __init__(self, stream):
         self.item_number = 0
         self.item = None
         self.stream = stream
-
-    def reset(self):
-        pass
 
     def __iter__(self):
         for item in self.stream:
@@ -56,6 +53,7 @@ class WriteableListStream(object):
         self.seq.append(obj)
 
 
+# TODO: should this inherit from ReprMixin?
 class StreamResourceBase(object):
 
     """
@@ -161,3 +159,21 @@ class FileStreamResource(StreamResourceBase):
 
     def open_write(self):
         return self._open("w")
+
+
+class StandardStreamResource(StreamResourceBase):
+
+    """A stream resource backed by a file."""
+
+    def __init__(self, file_):
+        self.file = file_
+
+    @contextmanager
+    def _open(self):
+        yield self.file
+
+    def open_read(self):
+        return self._open()
+
+    def open_write(self):
+        return self._open()

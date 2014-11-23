@@ -208,7 +208,7 @@ class PermanentFileInfo(StreamInfo):
         return closing(UncloseableFile(self.file))
 
 
-# TODO: default to ASCII.
+# TODO: replace with FileStreamResource.
 class PathInfo(StreamInfo):
 
     """A wrapped file path that opens to become a file object."""
@@ -225,6 +225,7 @@ class PathInfo(StreamInfo):
         return logged_open(self.path, mode, *self.args, **self.kwargs)
 
 
+# TODO: reimplement as a StreamResourceBase.
 class StringInfo(StreamInfo):
 
     """
@@ -268,15 +269,18 @@ class StringInfo(StreamInfo):
         yield self._stream
 
 
-# TODO: compare implementation with wineds-converter.
 class FileWriter(object):
 
-    def __init__(self, stream_info):
-        self.stream_info = stream_info
+    def __init__(self, resource):
+        """
+        Arguments:
+          resource: a StreamResourceBase object.
+        """
+        self.resource = resource
 
     @contextmanager
     def open(self):
-        with self.stream_info.open("w") as f:
+        with self.resource.writing() as f:
             self.file = f
             yield
 

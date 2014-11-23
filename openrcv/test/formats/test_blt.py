@@ -3,7 +3,7 @@ from textwrap import dedent
 
 from openrcv.formats.blt import BLTFileWriter
 from openrcv.models import BallotsResource, ContestInput
-from openrcv.utils import StringInfo
+from openrcv.streams import StringResource
 from openrcv.utiltest.helpers import UnitCase
 
 
@@ -19,8 +19,8 @@ class BLTFileWriterTest(UnitCase):
             (1, (2, )),
         ]
         contest.ballots_resource = BallotsResource(ballots)
-        stream_info = StringInfo()
-        writer = BLTFileWriter(stream_info)
+        resource = StringResource()
+        writer = BLTFileWriter(resource)
         writer.write_contest(contest)
         expected = dedent("""\
         3 1
@@ -32,4 +32,4 @@ class BLTFileWriterTest(UnitCase):
         "C"
         "Foo\"
         """)
-        self.assertEqual(stream_info.value, expected)
+        self.assertEqual(resource.contents, expected)

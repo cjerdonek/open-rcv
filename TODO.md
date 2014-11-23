@@ -1,7 +1,7 @@
 TODO
 ====
 
-* Implement and test `JsonCaseContestInput.from_object()`.
+* Get all the ballot writers using the write_output() pattern.
 * Work on ballot writer for "internal" and "JSON test" formats.
 * Work on outputting JSON test for rand_contest.
 * Flesh out rest of `rand_contest` command (number of ballots, etc).

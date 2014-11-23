@@ -59,10 +59,10 @@ def read_json_path(path):
     return jsobj
 
 
-def write_json(obj, stream_info=None, path=None):
+def write_json(obj, resource=None, path=None):
     """
     Arguments:
-      stream_info: a StreamInfo object.
+      resource: a stream resource object.
 
     """
     try:
@@ -70,9 +70,9 @@ def write_json(obj, stream_info=None, path=None):
     except AttributeError:
         jsobj = obj
     if path is not None:
-        assert stream_info is None
-        stream_info = JsonPathInfo(path)
-    with stream_info.open("w") as f:
+        assert resource is None
+        resource = JsonPathInfo(path)
+    with resource.open_write() as f:
         return call_json(json.dump, jsobj, f)
 
 

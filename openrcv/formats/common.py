@@ -12,8 +12,10 @@ class FormatWriter(object):
         self.output_dir = output_dir
         self.stdout = stdout
 
-    def make_output_info(self, info_funcs):
+    def _make_output_info(self, info_funcs):
         """
+        Return stream resources and output paths for the given functions.
+
         Arguments:
           info_funcs: a single function or an iterable of functions (one
             for each file that needs to be written).  Each function should
@@ -24,18 +26,18 @@ class FormatWriter(object):
         except TypeError:
             info_funcs = (info_funcs, )
         output_dir = self.output_dir
-        stream_resources = []
+        resources = []
         output_paths = []
         for func in info_funcs:
             if not output_dir:
-                stream_resource = self.stdout_info()
+                resource = self.stdout_info()
             else:
                 output_path, encoding = func()
-                stream_resource = FileResource(output_path, encoding=encoding)
+                resource = FileResource(output_path, encoding=encoding)
                 # Only add an output path when not writing to stdout.
                 output_paths.append(output_path)
-            stream_resources.append(stream_resource)
-        return stream_resources, output_paths
+            resources.append(resource)
+        return resources, output_paths
 
     def stdout_info(self):
         """Return a StreamInfo object for stdout."""
@@ -48,7 +50,7 @@ class FormatWriter(object):
           info_func: TODO.
         """
         file_funcs, write_func = info_func()
-        stream_resources, output_paths = self.make_output_info(file_funcs)
-        args = list(stream_resources) + list(args)
+        resources, output_paths = self._make_output_info(file_funcs)
+        args = list(resources) + list(args)
         write_func(*args)
         return output_paths

@@ -149,6 +149,7 @@ class UncloseableFile(ObjectExtension):
         pass
 
 
+# TODO: remove this but preserve the good parts of the docstring.
 class StreamInfo(ReprMixin):
 
     """
@@ -212,7 +213,7 @@ class PathInfo(StreamInfo):
         return logged_open(self.path, mode, *self.args, **self.kwargs)
 
 
-# TODO: reimplement as a StreamResourceBase.
+# TODO: switch to using StringResource.
 class StringInfo(StreamInfo):
 
     """

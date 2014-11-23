@@ -170,11 +170,13 @@ class ArgParserBuilder(object):
         self.subparsers = subparsers
 
     def writer_type(self, label):
+        formats = self.formats
         try:
-            format = self.formats[label]
+            format = formats[label]
         except KeyError:
-            raise argparse.ArgumentTypeError("\ninvalid argument choice: %r\n"
-                "Choose from: %s" % (label, ", ".join(OUTPUT_FORMATS)))
+            labels = sorted(formats.keys())
+            raise argparse.ArgumentTypeError("\ninvalid argument choice: %r "
+                "(choose from: %s)" % (label, ", ".join(labels)))
         return format.cls
 
     def add_command(self, add_func):

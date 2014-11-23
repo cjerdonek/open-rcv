@@ -13,8 +13,8 @@ It is distributed for free on [PyPI][openrcv-pypi] and the source code
 is hosted on [GitHub][openrcv-github].  It is licensed under a permissive
 open source license.  See the [License](#license) section for license details.
 
-**Note: this project is not yet usable, but we are actively working on it
-(as of November 2014).**
+**November 2014 Note: This project is not yet usable, but we are actively
+working on it.**
 
 
 Features

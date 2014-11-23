@@ -3,7 +3,7 @@ from openrcv.resource import iter_resource, tracking
 from openrcv.utiltest.helpers import skipIfTravis, UnitCase
 
 
-class IterResource(UnitCase):
+class IterResourceTest(UnitCase):
 
     """Tests for iter_resource()."""
 

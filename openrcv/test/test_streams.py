@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import os
 from tempfile import TemporaryDirectory
 
-from openrcv.streams import (ListStream, ListStreamResource, FileStreamResource,
+from openrcv.streams import (ListStreamResource, FileStreamResource,
                              TrackingStream)
 from openrcv.utiltest.helpers import UnitCase
 
@@ -15,7 +15,7 @@ class TrackingStreamTest(UnitCase):
         self.assertEqual(tracking.item_number, number)
 
     def test_init(self):
-        stream = ListStream([1, 2, 3])
+        stream = [1, 2, 3]
         tracking = TrackingStream(stream)
         self.assert_state(tracking, None, 0)
 

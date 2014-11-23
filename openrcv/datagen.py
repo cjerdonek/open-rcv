@@ -8,6 +8,7 @@ in the open-rcv-tests repo.
 """
 
 from random import randint, random, sample
+# TODO: this module should not import from openrcv.jcmodels.
 import openrcv.jcmodels as models
 from openrcv.jcmodels import JsonBallot, JsonContest, JsonContestFile
 from openrcv import utils
@@ -43,6 +44,8 @@ def gen_random_list(choices, max_length=None):
 
 
 # TODO: add a method to write `n` ballots to a StreamInfo object.
+# TODO: the API should accept a ballot store object of some kind (e.g.
+#   can be an iterable or file).
 class BallotGenerator(object):
 
     """
@@ -114,6 +117,7 @@ class UniqueBallotGenerator(BallotGenerator):
         choices.remove(choice)
 
 
+# TODO: this should create a file-backed ballots resource.
 def gen_random_ballot_list(choices, ballot_count, max_length=None):
     """
     Arguments:

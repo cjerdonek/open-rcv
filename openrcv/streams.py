@@ -19,6 +19,8 @@ current item and item number).
 
 from contextlib import contextmanager
 
+from openrcv.utils import logged_open
+
 
 # TODO: add tests.
 class TrackingStream(object):
@@ -43,19 +45,6 @@ class TrackingStream(object):
     def write(self, item):
         self.increment(item)
         self.stream.write(item)
-
-
-# TODO: remove this.
-class ListStream(object):
-
-    def __init__(self, seq):
-        self.seq = seq
-
-    def write(self, obj):
-        self.seq.append(obj)
-
-    def __iter__(self):
-        return iter(self.seq)
 
 
 class WriteableListStream(object):
@@ -164,8 +153,7 @@ class FileStreamResource(StreamResourceBase):
 
     @contextmanager
     def _open(self, mode):
-        # TODO: use logged_open()?
-        with open(self.path, mode, encoding=self.encoding, **self.kwargs) as f:
+        with logged_open(self.path, mode, encoding=self.encoding, **self.kwargs) as f:
             yield f
 
     def open_read(self):

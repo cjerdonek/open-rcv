@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import os
 from tempfile import TemporaryDirectory
 
-from openrcv.streams import (ListStreamResource, FileStreamResource,
+from openrcv.streams import (ListResource, FileResource, StringResource,
                              TrackingStream)
 from openrcv.utiltest.helpers import UnitCase
 
@@ -111,18 +111,18 @@ class StreamResourceTestMixin(object):
         self.assertStartsWith(str(err), "during item number 2")
 
 
-class ListStreamResourceTest(StreamResourceTestMixin, UnitCase):
+class ListResourceTest(StreamResourceTestMixin, UnitCase):
 
-    """ListStreamResource tests."""
+    """ListResource tests."""
 
     @contextmanager
     def resource(self):
-        yield ListStreamResource(["a\n", "b\n"])
+        yield ListResource(["a\n", "b\n"])
 
 
-class FileStreamResourceTest(StreamResourceTestMixin, UnitCase):
+class FileResourceTest(StreamResourceTestMixin, UnitCase):
 
-    """FileStreamResource tests."""
+    """FileResource tests."""
 
     @contextmanager
     def resource(self):
@@ -130,4 +130,14 @@ class FileStreamResourceTest(StreamResourceTestMixin, UnitCase):
             path = os.path.join(dirname, 'temp.txt')
             with open(path, 'w') as f:
                 f.write('a\nb\n')
-            yield FileStreamResource(path)
+            yield FileResource(path)
+
+# TODO: add StandardResource tests.
+
+class StringResourceTest(StreamResourceTestMixin, UnitCase):
+
+    """StringResource tests."""
+
+    @contextmanager
+    def resource(self):
+        yield StringResource('a\nb\n')

@@ -13,7 +13,7 @@ from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
                                       HelpRequested, Option, UsageException)
 from openrcv.formats.blt import BLTOutput
 from openrcv.formats.internal import InternalOutput
-from openrcv.formats.jscase import JsonCaseOutput
+from openrcv.formats.jscase import JsonCaseFormat
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
 
@@ -56,7 +56,7 @@ def make_output_formats():
                      desc="BLT format"),
         OutputFormat(OUTPUT_FORMAT_INTERNAL, cls=InternalOutput,
                      desc="internal OpenRCV format"),
-        OutputFormat(OUTPUT_FORMAT_TEST, cls=JsonCaseOutput,
+        OutputFormat(OUTPUT_FORMAT_TEST, cls=JsonCaseFormat,
                      desc="JSON test case"),
     )
     mapping = {format.label: format for format in formats}

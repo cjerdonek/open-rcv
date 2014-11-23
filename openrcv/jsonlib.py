@@ -59,6 +59,7 @@ def read_json_path(path):
     return jsobj
 
 
+# TODO: remove the path argument?
 def write_json(obj, resource=None, path=None):
     """
     Arguments:

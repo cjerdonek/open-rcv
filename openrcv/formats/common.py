@@ -2,6 +2,17 @@
 import sys
 
 from openrcv.streams import FileResource, StandardResource
+from openrcv.utils import NotImplemented
+
+
+class Format(object):
+
+    def write_contest(self, contest):
+        """
+        Arguments:
+          contest: a ContestInput object.
+        """
+        raise NotImplemented(self)
 
 
 class FormatWriter(object):
@@ -12,7 +23,11 @@ class FormatWriter(object):
         self.output_dir = output_dir
         self.stdout = stdout
 
-    def _make_output_info(self, info_funcs):
+    @property
+    def file_info_funcs(self):
+        raise NotImplemented(self)
+
+    def _make_output_info(self):
         """
         Return stream resources and output paths for the given functions.
 
@@ -21,14 +36,10 @@ class FormatWriter(object):
             for each file that needs to be written).  Each function should
             return a 2-tuple of strings: (output_path, file_encoding).
         """
-        try:
-            iter(info_funcs)
-        except TypeError:
-            info_funcs = (info_funcs, )
         output_dir = self.output_dir
         resources = []
         output_paths = []
-        for func in info_funcs:
+        for func in self.file_info_funcs:
             if not output_dir:
                 resource = self.stdout_info()
             else:
@@ -44,13 +55,12 @@ class FormatWriter(object):
         return StandardResource(self.stdout)
 
     # TODO: get all the FormatWriter classes using this method.
-    def write_output(self, info_func, *args, **kwargs):
+    def write_output(self, *args, **kwargs):
         """
         Arguments:
           info_func: TODO.
         """
-        file_funcs, write_func = info_func()
-        resources, output_paths = self._make_output_info(file_funcs)
+        resources, output_paths = self._make_output_info()
         args = list(resources) + list(args)
-        write_func(*args)
+        self.resource_write(*args)
         return output_paths

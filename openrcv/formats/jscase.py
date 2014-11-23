@@ -6,27 +6,33 @@ Support for parsing and writing JSON test cases.
 
 import os
 
-from openrcv.formats.common import FormatWriter
+from openrcv.formats.common import Format, FormatWriter
 from openrcv.jsonlib import write_json
 from openrcv.jcmodels import JsonCaseContestInput
 
+
 ENCODING_JSON = 'utf-8'
 
-class JsonCaseOutput(FormatWriter):
+class JsonCaseFormat(Format):
 
-    def get_file_info(self):
-        return os.path.join(self.output_dir, "contest.json"), ENCODING_JSON
-
-    def write_contest_stream(self, resource, contest):
-        jc_contest = JsonCaseContestInput.from_object(contest)
-        write_json(jc_contest, resource=resource, path=None)
-
-    def contest_info(self):
-        return self.get_file_info, self.write_contest_stream
-
-    def write_contest(self, contest):
+    def write_contest(self, contest, output_dir=None, stdout=None):
         """
         Arguments:
           contest: a ContestInput object.
         """
-        return self.write_output(self.contest_info, contest)
+        writer = JsonCaseContestWriter(output_dir=output_dir, stdout=stdout)
+        return writer.write_output(contest)
+
+
+class JsonCaseContestWriter(FormatWriter):
+
+    @property
+    def file_info_funcs(self):
+        return (self.get_output_info, )
+
+    def get_output_info(self, output_dir):
+        return os.path.join(output_dir, "contest.json"), ENCODING_JSON
+
+    def resource_write(self, resource, contest):
+        jc_contest = JsonCaseContestInput.from_object(contest)
+        write_json(jc_contest, resource=resource)

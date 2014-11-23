@@ -44,7 +44,7 @@ def rand_contest(ns, stdout=None):
     if stdout is None:
         stdout = sys.stdout
     output_dir = ns.output_dir
-    writer_class = ns.output_format
+    format_cls = ns.output_format
 
     contest = ContestInput(id_=0)
     contest.candidates = ['A', 'B', 'C']
@@ -56,8 +56,8 @@ def rand_contest(ns, stdout=None):
     ballots_resource = BallotStreamResource(ballot_stream_info, parse=parse_internal_ballot)
     contest.ballots_resource = ballots_resource
 
-    writer = writer_class(output_dir=output_dir, stdout=stdout)
-    output_paths = writer.write_contest(contest)
+    format = format_cls()
+    output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
     return "\n".join(output_paths) + "\n" if output_paths else None
 
     choices = list(range(ns.candidates))

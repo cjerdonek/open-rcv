@@ -116,6 +116,20 @@ def time_it(description):
     log.info("done: %s: %.4f seconds" % (description, elapsed))
 
 
+class NotImplemented(NotImplementedError):
+
+    """A NotImplementedError exception that provides more info."""
+
+    def __init__(self, obj):
+        """
+        Arguments:
+          obj: the object that doesn't implement the method.
+        """
+        self.obj = obj
+
+    def __str__(self):
+        return "by object: %r" % self.obj
+
 class ReprMixin(object):
 
     # TODO: look up the proper return type.

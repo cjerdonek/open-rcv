@@ -282,12 +282,12 @@ class JsonableMixin(ReprMixin):
         return meta
 
     @classmethod
-    def from_object(cls, obj):
+    def from_object(cls, model_obj):
         """
         Create an instance of the current class from a model object.
         """
         jsonable = cls()
-        jsonable.load_object(obj)
+        jsonable.load_object(model_obj)
         return jsonable
 
     @classmethod

@@ -31,16 +31,17 @@ class TrackingStream(object):
     def reset(self):
         pass
 
-    # TODO: add increment method.
     def __iter__(self):
         for item in self.stream:
-            self.item = item
-            self.item_number += 1
+            self.increment(item)
             yield item
 
-    def write(self, item):
-        self.item_number += 1
+    def increment(self, item):
         self.item = item
+        self.item_number += 1
+
+    def write(self, item):
+        self.increment(item)
         self.stream.write(item)
 
 
@@ -81,25 +82,51 @@ class StreamResourceBase(object):
 
     @contextmanager
     def open_read(self):
-        """
-        Return a readable stream, which is an iterator object over the
-        elements of the backing store.
-        """
         raise NotImplementedError()
 
     @contextmanager
     def open_write(self):
+        raise NotImplementedError()
+
+    @contextmanager
+    def tracking(self, stream):
+        tracked = TrackingStream(stream)
+        try:
+            yield tracked
+        except Exception as exc:
+            # TODO: find a way of including additional information in the
+            # stack trace that doesn't involve raising a new exception
+            # (and unnecessarily lengthening the stack trace).
+            raise type(exc)("during item number %d of %r: %r" % (tracked.item_number, self, tracked.item))
+
+    @contextmanager
+    def reading(self):
         """
+        Return a context manager that yields a readable stream.
+
+        Here, "readable stream" means an iterator object over the elements
+        of the backing store.
+        """
+        with self.open_read() as f:
+            with self.tracking(f) as tracked:
+                yield iter(tracked)
+
+    @contextmanager
+    def writing(self):
+        """
+        Return a context manager that yields a writeable stream.
+
         Return a writeable stream.
 
         Calling this method clears the contents of the backing store
         before returning a stream that writes to the store.
         """
-        raise NotImplementedError()
+        with self.open_write() as f:
+            with self.tracking(f) as tracked:
+                yield tracked
 
 
-# TODO: add error handling that reports the current item and item number.
-class ListStreamResource(object):
+class ListStreamResource(StreamResourceBase):
 
     """A stream resource backed by a list."""
 
@@ -124,8 +151,7 @@ class ListStreamResource(object):
         yield WriteableListStream(self.seq)
 
 
-# TODO: add error handling that reports the current item and item number.
-class FileStreamResource(object):
+class FileStreamResource(StreamResourceBase):
 
     """A stream resource backed by a file."""
 

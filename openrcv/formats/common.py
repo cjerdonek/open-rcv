@@ -1,7 +1,7 @@
 
 import sys
 
-from openrcv.streams import FileStreamResource, StandardStreamResource
+from openrcv.streams import FileResource, StandardResource
 
 
 class FormatWriter(object):
@@ -31,7 +31,7 @@ class FormatWriter(object):
                 stream_resource = self.stdout_info()
             else:
                 output_path, encoding = func()
-                stream_resource = FileStreamResource(output_path, encoding=encoding)
+                stream_resource = FileResource(output_path, encoding=encoding)
                 # Only add an output path when not writing to stdout.
                 output_paths.append(output_path)
             stream_resources.append(stream_resource)
@@ -39,7 +39,7 @@ class FormatWriter(object):
 
     def stdout_info(self):
         """Return a StreamInfo object for stdout."""
-        return StandardStreamResource(self.stdout)
+        return StandardResource(self.stdout)
 
     # TODO: get all the FormatWriter classes using this method.
     def write_output(self, info_func, *args, **kwargs):

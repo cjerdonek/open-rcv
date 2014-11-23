@@ -18,7 +18,7 @@ from openrcv.formats.blt import BLTOutput
 from openrcv.jcmodels import JsonTestCaseOutput
 from openrcv.models import BallotStreamResource, ContestInput
 from openrcv.parsing import parse_internal_ballot
-from openrcv.utils import logged_open, PathInfo, PermanentFileInfo, StringInfo
+from openrcv.utils import logged_open, PathInfo, StringInfo
 
 
 log = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ def rand_contest(ns, stdout=None):
     output_dir = ns.output_dir
     writer_class = ns.output_format
 
-    contest = ContestInput()
+    contest = ContestInput(id_=0)
     contest.candidates = ['A', 'B', 'C']
     contest.seat_count = 1
     ballot_stream_info = StringInfo(dedent("""\

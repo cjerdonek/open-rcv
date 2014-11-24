@@ -163,7 +163,7 @@ class ListResource(StreamResourceBase):
 
 
 # TODO: add more to the repr and test.
-class FileResource(StreamResourceBase):
+class FilePathResource(StreamResourceBase):
 
     """A stream resource backed by a file."""
 
@@ -186,7 +186,32 @@ class FileResource(StreamResourceBase):
         return self._open("w")
 
 
+class ReadWriteFileResource(StreamResourceBase):
+
+    """A stream resource backed by a readable-writeable file.
+
+    To support reading and writing to the same stream, this class never
+    closes the underlying file.  Thus, closing the file is the responsible
+    of the caller.
+    """
+
+    def __init__(self, file_):
+        self.file = file_
+
+    @contextmanager
+    def open_read(self):
+        self.file.seek(0)
+        yield self.file
+
+    @contextmanager
+    def open_write(self):
+        self.file.seek(0)
+        self.file.truncate()
+        yield self.file
+
+
 # TODO: add more to the repr and test.
+# TODO: give a better name and test edge cases.
 class StandardResource(StreamResourceBase):
 
     """A stream resource backed by a file."""

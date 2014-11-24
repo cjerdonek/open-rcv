@@ -40,20 +40,29 @@ def count(ns, stdout=None):
 
 
 def rand_contest(ns, stdout=None):
+    # contest = ContestInput(id_=0)
+    # contest.candidates = ['A', 'B', 'C']
+    # contest.seat_count = 1
+    # ballot_stream_info = StringInfo(dedent("""\
+    # 2 1 1
+    # 3 5 1
+    # """))
+    # ballots_resource = BallotStreamResource(ballot_stream_info, parse=parse_internal_ballot)
+    # contest.ballots_resource = ballots_resource
+    #
+    # choices = list(range(ns.candidates))
+    # generator = NonUniqueBallotGenerator()
+    # print(repr(generator.generate(choices)))
+    # generator = UniqueBallotGenerator()
+    # print(repr(generator.generate(choices)))
+    #print(contest)
+
     if stdout is None:
         stdout = sys.stdout
     output_dir = ns.output_dir
     format_cls = ns.output_format
 
-    contest = ContestInput(id_=0)
-    contest.candidates = ['A', 'B', 'C']
-    contest.seat_count = 1
-    ballot_stream_info = StringInfo(dedent("""\
-    2 1 1
-    3 5 1
-    """))
-    ballots_resource = BallotStreamResource(ballot_stream_info, parse=parse_internal_ballot)
-    contest.ballots_resource = ballots_resource
+    contest = random_contest()
 
     format = format_cls()
     try:
@@ -62,10 +71,3 @@ def rand_contest(ns, stdout=None):
         raise type(exc)("with format object: %r" % format)
 
     return "\n".join(output_paths) + "\n" if output_paths else None
-
-    choices = list(range(ns.candidates))
-    generator = NonUniqueBallotGenerator()
-    print(repr(generator.generate(choices)))
-    generator = UniqueBallotGenerator()
-    print(repr(generator.generate(choices)))
-    #print(contest)

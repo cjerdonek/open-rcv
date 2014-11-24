@@ -1,10 +1,16 @@
 
 from contextlib import contextmanager
 import os
+import tempfile
 from tempfile import TemporaryDirectory
 
-from openrcv.streams import (ListResource, FileResource, ReadableTrackedStream, StringResource)
+from openrcv.streams import (ListResource, FilePathResource, ReadableTrackedStream,
+                             ReadWriteFileResource, StringResource)
 from openrcv.utiltest.helpers import UnitCase
+
+
+class FooException(Exception):
+    pass
 
 
 class ReadableTrackedStreamTest(UnitCase):
@@ -36,6 +42,8 @@ class StreamResourceTestMixin(object):
 
     """Base mixin for StreamResource tests."""
 
+    expected_label = "line"
+
     def test_reading(self):
         with self.resource() as resource:
             with resource.reading() as stream:
@@ -62,12 +70,12 @@ class StreamResourceTestMixin(object):
         """
         Check that an error while reading shows the line number.
         """
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(FooException) as cm:
             with self.resource() as resource:
                 with resource.reading() as stream:
                     item = next(stream)
                     self.assertEqual(item, "a\n")
-                    raise ValueError()
+                    raise FooException()
         # Check the exception text.
         err = cm.exception
         self.assertStartsWith(str(err), "last read %s of <%s:" %
@@ -126,12 +134,11 @@ class ListResourceTest(StreamResourceTestMixin, UnitCase):
         yield ListResource(["a\n", "b\n"])
 
 
-class FileResourceTest(StreamResourceTestMixin, UnitCase):
+class FilePathResourceTest(StreamResourceTestMixin, UnitCase):
 
-    """FileResource tests."""
+    """FilePathResource tests."""
 
-    class_name = "FileResource"
-    expected_label = "line"
+    class_name = "FilePathResource"
 
     @contextmanager
     def resource(self):
@@ -139,7 +146,35 @@ class FileResourceTest(StreamResourceTestMixin, UnitCase):
             path = os.path.join(dirname, 'temp.txt')
             with open(path, 'w') as f:
                 f.write('a\nb\n')
-            yield FileResource(path)
+            yield FilePathResource(path)
+
+
+class ReadWriteFileResourceTest(StreamResourceTestMixin, UnitCase):
+
+    """ReadWriteFileResource tests."""
+
+    class_name = "ReadWriteFileResource"
+
+    @contextmanager
+    def resource(self):
+        with tempfile.TemporaryFile(mode='w+t', encoding='ascii') as f:
+            f.write('a\nb\n')
+            yield ReadWriteFileResource(f)
+
+
+# TODO: Spooled...
+class ReadWriteFileResourceTest(StreamResourceTestMixin, UnitCase):
+
+    """ReadWriteFileResource tests."""
+
+    class_name = "ReadWriteFileResource"
+
+    @contextmanager
+    def resource(self):
+        with tempfile.TemporaryFile(mode='w+t', encoding='ascii') as f:
+            f.write('a\nb\n')
+            yield ReadWriteFileResource(f)
+
 
 # TODO: add StandardResource tests.
 
@@ -148,7 +183,6 @@ class StringResourceTest(StreamResourceTestMixin, UnitCase):
     """StringResource tests."""
 
     class_name = "StringResource"
-    expected_label = "line"
 
     @contextmanager
     def resource(self):

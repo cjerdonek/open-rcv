@@ -129,7 +129,7 @@ def time_it(description):
     log.info("done: %s: %.4f seconds" % (description, elapsed))
 
 
-class NotImplemented(NotImplementedError):
+class NoImplementation(NotImplementedError):
 
     """A NotImplementedError exception that provides more info."""
 
@@ -223,7 +223,7 @@ class StreamInfo(ReprMixin):
                 raise type(exc)("with open stream: %r" % self)
 
 
-# TODO: replace with FileResource.
+# TODO: replace with FilePathResource.
 class PathInfo(StreamInfo):
 
     """A wrapped file path that opens to become a file object."""

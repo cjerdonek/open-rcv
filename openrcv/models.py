@@ -17,6 +17,10 @@ from openrcv.resource import tracking
 from openrcv.utils import ReprMixin
 
 
+
+def temp_ballots_resource():
+    pass
+
 def make_candidates(candidate_count):
     """
     Return an iterable of candidate numbers.
@@ -99,10 +103,10 @@ class BallotStreamResource(BallotsResourceBase):
 # TODO: add id and notes.
 class ContestInput(ReprMixin):
 
-    # TODO: fix the description of ballots_resource.
+    # TODO: fix the description of ballots.
     """
     Attributes:
-      ballots_resource: a context manager factory function that yields an
+      ballots: a context manager factory function that yields an
         iterable of ballots (e.g. a BallotsResourceBase object).
       candidates: an iterable of the names of all candidates, in numeric
         order of their ballot ID.
@@ -112,14 +116,19 @@ class ContestInput(ReprMixin):
 
     ballot_count = 0
 
-    def __init__(self, id_=None, seat_count=None, name=None):
+    def __init__(self, id_=None, name=None, candidates=None, seat_count=None,
+                 ballots=None):
+        if ballots is None:
+            pass
+        if candidates is None:
+            candidates = []
         if seat_count is None:
             seat_count = 1
         if name is None:
             name = "Election Contest"
 
         self.ballots_resource = None
-        self.candidates = None
+        self.candidates = candidates
         self.notes = None
 
         self.id = id_

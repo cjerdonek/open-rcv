@@ -9,7 +9,7 @@ import os
 
 from openrcv.formats.common import Format, FormatWriter
 from openrcv.streams import StreamResourceBase
-from openrcv.utils import join_values, parse_integer_line, FileWriter
+from openrcv.utils import join_values, parse_integer_line, FileWriter, NoImplementation
 
 
 # ASCII makes reading and parsing the file faster.
@@ -42,6 +42,43 @@ def parse_internal_ballot(line):
     return weight, choices
 
 
+class _WriteableBallotsBase(object):
+
+    def __init__(self, resource, stream):
+        self.resource = resource
+        self.stream = stream
+
+    def write(self, ballot):
+        line = to_internal_ballot(ballot)
+        self.stream.write(line + "\n")
+
+
+class BallotsResourceBase(object):
+
+    def read_convert(self, item):
+        raise NoImplementation(self)
+
+    def write_convert(self, item):
+        raise NoImplementation(self)
+
+    def __init__(self, resource):
+        """
+        Arguments:
+          resource: backing store for the ballots.
+        """
+        self.resource = resource
+
+    @contextmanager
+    def reading(self):
+        with self.resource.reading() as stream:
+            yield map(self.read_convert, stream)
+
+    @contextmanager
+    def writing(self):
+        with self.resource.writing() as stream:
+            yield _WriteableBallotStream(stream)
+
+
 class _WriteableBallotStream(object):
 
     def __init__(self, stream):
@@ -52,6 +89,7 @@ class _WriteableBallotStream(object):
         self.stream.write(line + "\n")
 
 
+# TODO: get this inheriting from BallotsResourceBase.
 class InternalBallotsResource(object):
 
     def __init__(self, resource):

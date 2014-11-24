@@ -1,8 +1,8 @@
 
 import sys
 
-from openrcv.streams import FileResource, StandardResource
-from openrcv.utils import NotImplemented
+from openrcv.streams import FilePathResource, StandardResource
+from openrcv.utils import NoImplementation
 
 
 class Format(object):
@@ -27,7 +27,7 @@ class FormatWriter(object):
 
     @property
     def file_info_funcs(self):
-        raise NotImplemented(self)
+        raise NoImplementation(self)
 
     def _make_output_info(self):
         """
@@ -46,7 +46,7 @@ class FormatWriter(object):
                 resource = self.stdout_info()
             else:
                 output_path, encoding = func()
-                resource = FileResource(output_path, encoding=encoding)
+                resource = FilePathResource(output_path, encoding=encoding)
                 # Only add an output path when not writing to stdout.
                 output_paths.append(output_path)
             resources.append(resource)

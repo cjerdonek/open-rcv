@@ -1,9 +1,7 @@
 TODO
 ====
 
-* Define a read/write interface for BallotStreamResource.
-  - Make it easy to define ballot stream resources backed by different
-    formats and backing stores, etc.
+* Define a BLT ballot stream resource that shares code with the internal one.
 * Flesh out rest of `rand_contest` command (number of ballots, etc).
 * Work on outputting JSON test for rand_contest.
 * Add random_contest() function with flexible args.

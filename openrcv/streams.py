@@ -1,4 +1,6 @@
 
+# TODO: explain what stream resources are and document the API.
+#   Note that they do not need to inherit from StreamResourceBase.
 '''
 This module is **experimental**.
 
@@ -59,6 +61,11 @@ class WriteableListStream(object):
         self.seq.append(obj)
 
 
+# TODO: rename to something that doesn't seem to imply that all
+#   stream resources need to inherit from this class.
+# TODO: consider simplifying the stream resource hierarchy, so that the
+#   various backed stream resources possibly don't need a base class
+#   and separate out the tracking part using a lighter-weight pattern.
 class StreamResourceBase(ReprMixin):
 
     """
@@ -128,6 +135,7 @@ class StreamResourceBase(ReprMixin):
                 yield tracked
 
 
+# TODO: add more to the repr and test.
 class ListResource(StreamResourceBase):
 
     """A stream resource backed by a list."""
@@ -154,6 +162,7 @@ class ListResource(StreamResourceBase):
         yield WriteableListStream(self.seq)
 
 
+# TODO: add more to the repr and test.
 class FileResource(StreamResourceBase):
 
     """A stream resource backed by a file."""
@@ -177,6 +186,7 @@ class FileResource(StreamResourceBase):
         return self._open("w")
 
 
+# TODO: add more to the repr and test.
 class StandardResource(StreamResourceBase):
 
     """A stream resource backed by a file."""
@@ -198,6 +208,7 @@ class StandardResource(StreamResourceBase):
         return self._open()
 
 
+# TODO: add more to the repr and test.
 class StringResource(StreamResourceBase):
 
     """
@@ -212,6 +223,8 @@ class StringResource(StreamResourceBase):
         self.contents = contents
 
     # TODO: include the length in characters.
+    # TODO: include the initial content in the repr.
+
     # def repr_desc(self):
     #     return "contents=%s" % (self.get_display_value(10), )
     #

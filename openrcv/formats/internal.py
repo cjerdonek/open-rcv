@@ -52,9 +52,7 @@ class _WriteableBallotStream(object):
         self.stream.write(line + "\n")
 
 
-class InternalBallotsResource(StreamResourceBase):
-
-    label = "ballot"
+class InternalBallotsResource(object):
 
     def __init__(self, resource):
         """
@@ -63,15 +61,13 @@ class InternalBallotsResource(StreamResourceBase):
         """
         self.resource = resource
 
-    # TODO: add a test that the ballot and line numbers are tracked.
     @contextmanager
-    def open_read(self):
-        """Return an iterator object."""
+    def reading(self):
         with self.resource.reading() as stream:
             yield map(parse_internal_ballot, stream)
 
     @contextmanager
-    def open_write(self):
+    def writing(self):
         with self.resource.writing() as stream:
             yield _WriteableBallotStream(stream)
 

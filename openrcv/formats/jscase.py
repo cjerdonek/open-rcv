@@ -13,15 +13,12 @@ from openrcv.jcmodels import JsonCaseContestInput
 
 ENCODING_JSON = 'utf-8'
 
+
 class JsonCaseFormat(Format):
 
-    def write_contest(self, contest, output_dir=None, stdout=None):
-        """
-        Arguments:
-          contest: a ContestInput object.
-        """
-        writer = JsonCaseContestWriter(output_dir=output_dir, stdout=stdout)
-        return writer.write_output(contest)
+    @property
+    def contest_writer_cls(self):
+        return JsonCaseContestWriter
 
 
 class JsonCaseContestWriter(FormatWriter):

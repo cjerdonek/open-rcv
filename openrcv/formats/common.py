@@ -7,12 +7,14 @@ from openrcv.utils import NotImplemented
 
 class Format(object):
 
-    def write_contest(self, contest):
+    def write_contest(self, contest, output_dir=None, stdout=None):
         """
         Arguments:
           contest: a ContestInput object.
         """
-        raise NotImplemented(self)
+        writer_cls = self.contest_writer_cls
+        writer = writer_cls(output_dir=output_dir, stdout=stdout)
+        return writer.write_output(contest)
 
 
 class FormatWriter(object):

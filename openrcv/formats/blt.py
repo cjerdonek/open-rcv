@@ -23,7 +23,7 @@ Here is an example BLT file (taken from: https://code.google.com/p/droop/wiki/Bl
 
 import os
 
-from openrcv.formats.common import FormatWriter
+from openrcv.formats.common import Format, FormatWriter
 from openrcv.utils import FileWriter
 
 
@@ -31,28 +31,28 @@ BLT_ENCODING = 'utf-8'
 
 # TODO: move the code to parse BLT files here.
 
-class BLTOutput(FormatWriter):
+class BLTFormat(Format):
 
-    def get_file_info(self):
+    @property
+    def contest_writer_cls(self):
+        return BLTContestWriter
+
+
+class BLTContestWriter(FormatWriter):
+
+    @property
+    def file_info_funcs(self):
+        return (self.get_output_info, )
+
+    def get_output_info(self, output_dir):
         return os.path.join(self.output_dir, "output.blt"), BLT_ENCODING
 
-    def write_contest(self, contest):
-        """
-        Arguments:
-          contest: a ContestInput object.
-        """
-        stream_infos, output_paths = self.make_output_info(self.get_file_info)
-        stream_info = stream_infos[0]
-        file_writer = BLTFileWriter(stream_info)
-        file_writer.write_contest(contest)
-        return output_paths
+    def resource_write(self, resource, contest):
+        writer = BLTFileWriter(resource)
+        writer.write_contest(contest)
 
 
 class BLTFileWriter(FileWriter):
-
-    @classmethod
-    def make_path_info(cls, path):
-        return PathInfo(path, encoding=BLT_ENCODING)
 
     def write_text(self, text):
         self.writeln('"%s"' % text)

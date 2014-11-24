@@ -4,9 +4,11 @@ Support for parsing and writing files in OpenRCV's internal format.
 
 """
 
+from contextlib import contextmanager
 import os
 
-from openrcv.formats.common import FormatWriter
+from openrcv.formats.common import Format, FormatWriter
+from openrcv.streams import StreamResourceBase
 from openrcv.utils import join_values, FileWriter
 
 
@@ -21,21 +23,47 @@ def to_internal_ballot(ballot):
     return join_values([weight] + list(choices))
 
 
-class InternalOutput(FormatWriter):
+class InternalBallotsResource(StreamResourceBase):
 
-    def get_ballot_info(self):
-        return os.path.join(self.output_dir, "ballots.txt"), ENCODING_BALLOT_FILE
-
-    def write_contest(self, contest):
+    def __init__(self, resource):
         """
         Arguments:
-          contest: a ContestInput object.
+          resource: backing store for the resource.
         """
-        stream_infos, output_paths = self.make_output_info(self.get_ballot_info)
-        stream_info = stream_infos[0]
-        file_writer = InternalBallotsWriter(stream_info)
-        file_writer.write_ballots(contest)
-        return output_paths
+        self.resource = resource
+
+    @contextmanager
+    def open_read(self):
+        """Return an iterator object."""
+        yield iter(self.seq)
+
+    @contextmanager
+    def open_write(self):
+        # Delete the contents of the list (analogous to deleting a file).
+        self.seq.clear()
+        yield WriteableListStream(self.seq)
+
+
+class InternalFormat(Format):
+
+    @property
+    def contest_writer_cls(self):
+        return InternalContestWriter
+
+
+# TODO: DRY up with BLTContestWriter.
+class InternalContestWriter(FormatWriter):
+
+    @property
+    def file_info_funcs(self):
+        return (self.get_output_info, )
+
+    def get_output_info(self, output_dir):
+        return os.path.join(self.output_dir, "ballots.txt"), ENCODING_BALLOT_FILE
+
+    def resource_write(self, resource, contest):
+        writer = InternalBallotsWriter(resource)
+        writer.write_ballots(contest)
 
 
 class InternalBallotsWriter(FileWriter):

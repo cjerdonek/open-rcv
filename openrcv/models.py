@@ -72,6 +72,7 @@ class BallotsResource(BallotsResourceBase):
         yield self.ballots
 
 
+# TODO: define a read-write interface for this class.
 # TODO: use the same class as BallotsResource.
 class BallotStreamResource(BallotsResourceBase):
 
@@ -98,6 +99,7 @@ class BallotStreamResource(BallotsResourceBase):
 # TODO: add id and notes.
 class ContestInput(ReprMixin):
 
+    # TODO: fix the description of ballots_resource.
     """
     Attributes:
       ballots_resource: a context manager factory function that yields an

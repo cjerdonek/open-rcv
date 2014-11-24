@@ -38,6 +38,7 @@ class BLTFormat(Format):
         return BLTContestWriter
 
 
+# TODO: DRY up with InternalContestWriter.
 class BLTContestWriter(FormatWriter):
 
     @property

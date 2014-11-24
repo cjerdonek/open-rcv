@@ -9,7 +9,7 @@ import os
 
 from openrcv.formats.common import Format, FormatWriter
 from openrcv.streams import StreamResourceBase
-from openrcv.utils import join_values, FileWriter
+from openrcv.utils import join_values, parse_integer_line, FileWriter
 
 
 # ASCII makes reading and parsing the file faster.
@@ -21,6 +21,25 @@ def to_internal_ballot(ballot):
     # There is no terminal 0 like in the BLT format.
     weight, choices = ballot
     return join_values([weight] + list(choices))
+
+
+def parse_internal_ballot(line):
+    """
+    Parse an internal ballot line (with or without a trailing newline).
+
+    This function allows leading and trailing spaces.  ValueError is
+    raised if one of the values does not parse to an integer.
+
+    An internal ballot line is a space-delimited string of integers of the
+    form--
+
+    "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
+
+    """
+    ints = parse_integer_line(line)
+    weight = next(ints)
+    choices = tuple(ints)
+    return weight, choices
 
 
 class _WriteableBallotStream(object):
@@ -44,10 +63,12 @@ class InternalBallotsResource(StreamResourceBase):
         """
         self.resource = resource
 
+    # TODO: add a test that the ballot and line numbers are tracked.
     @contextmanager
     def open_read(self):
         """Return an iterator object."""
-        yield iter(self.seq)
+        with self.resource.reading() as stream:
+            yield map(parse_internal_ballot, stream)
 
     @contextmanager
     def open_write(self):

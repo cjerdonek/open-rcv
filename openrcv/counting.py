@@ -15,11 +15,11 @@ import string
 # and not depend on serialization, etc.  Serialization is supplemental
 # to any counting and not a prerequisite.
 
-from openrcv.formats.internal import to_internal_ballot
+from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
 from openrcv.models import ContestResults, RoundResults
-from openrcv.parsing import (parse_integer_line, parse_internal_ballot, BLTParser, Parser)
+from openrcv.parsing import BLTParser, Parser
 from openrcv import utils
-from openrcv.utils import PathInfo, ENCODING_INTERNAL_BALLOTS
+from openrcv.utils import parse_integer_line, PathInfo, ENCODING_INTERNAL_BALLOTS
 
 
 log = logging.getLogger(__name__)

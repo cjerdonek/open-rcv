@@ -5,28 +5,9 @@ from textwrap import dedent
 import unittest
 
 from openrcv.models import ContestInput
-from openrcv.parsing import parse_internal_ballot, BLTParser, ParsingError
+from openrcv.parsing import BLTParser, ParsingError
 from openrcv.utils import PathInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase
-
-
-class ModuleTest(UnitCase):
-
-    def test_parse_internal_ballot(self):
-        cases = [
-            ("1 2", (1, (2, ))),
-            ("1", (1, ())),
-            # Leading and trailing space are okay
-            (" 1 2", (1, (2, ))),
-            ("1 2 \n", (1, (2, ))),
-        ]
-        for line, expected in cases:
-            with self.subTest(line=line, expected=expected):
-                self.assertEqual(parse_internal_ballot(line), expected)
-
-    def test_parse_internal_ballot__non_integer(self):
-        with self.assertRaises(ValueError):
-            parse_internal_ballot("f 2 \n")
 
 
 class BLTParserTest(UnitCase):

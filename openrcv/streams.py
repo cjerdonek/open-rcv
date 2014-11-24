@@ -20,25 +20,30 @@ current item and item number).
 from contextlib import contextmanager
 from io import StringIO
 
-from openrcv.utils import logged_open
+from openrcv.utils import logged_open, ReprMixin
 
 
-# TODO: add tests?
-class TrackingStream(object):
+class TrackedStreamBase(object):
 
     def __init__(self, stream):
         self.item_number = 0
         self.item = None
         self.stream = stream
 
+    def increment(self, item):
+        self.item = item
+        self.item_number += 1
+
+
+class ReadableTrackedStream(TrackedStreamBase):
+
     def __iter__(self):
         for item in self.stream:
             self.increment(item)
             yield item
 
-    def increment(self, item):
-        self.item = item
-        self.item_number += 1
+
+class WriteableTrackedStream(TrackedStreamBase):
 
     def write(self, item):
         self.increment(item)
@@ -54,8 +59,7 @@ class WriteableListStream(object):
         self.seq.append(obj)
 
 
-# TODO: should this inherit from ReprMixin?
-class StreamResourceBase(object):
+class StreamResourceBase(ReprMixin):
 
     """
     Abstract base class for stream resources.
@@ -72,6 +76,7 @@ class StreamResourceBase(object):
 
     @contextmanager
     def open_read(self):
+        """Return an iterator object."""
         raise NotImplementedError()
 
     @contextmanager
@@ -79,16 +84,22 @@ class StreamResourceBase(object):
         raise NotImplementedError()
 
     @contextmanager
-    def tracking(self, stream):
-        tracked = TrackingStream(stream)
+    def track_reading(self, stream):
+        tracked = ReadableTrackedStream(stream)
         try:
             yield tracked
         except Exception as exc:
-            # TODO: find a way of including additional information in the
-            # stack trace that doesn't involve raising a new exception
-            # (and unnecessarily lengthening the stack trace).
-            raise type(exc)("during %s number %d of %r: %r" %
-                            (self.label, tracked.item_number, self, tracked.item))
+            raise type(exc)("last read %s of %r: number=%d, %r" %
+                            (self.label, self, tracked.item_number, tracked.item))
+
+    @contextmanager
+    def track_writing(self, stream):
+        tracked = WriteableTrackedStream(stream)
+        try:
+            yield tracked
+        except Exception as exc:
+            raise type(exc)("last written %s of %r: number=%d, %r" %
+                            (self.label, self, tracked.item_number, tracked.item))
 
     @contextmanager
     def reading(self):
@@ -99,7 +110,7 @@ class StreamResourceBase(object):
         of the backing store.
         """
         with self.open_read() as f:
-            with self.tracking(f) as tracked:
+            with self.track_reading(f) as tracked:
                 yield iter(tracked)
 
     @contextmanager
@@ -113,7 +124,7 @@ class StreamResourceBase(object):
         before returning a stream that writes to the store.
         """
         with self.open_write() as f:
-            with self.tracking(f) as tracked:
+            with self.track_writing(f) as tracked:
                 yield tracked
 
 
@@ -134,7 +145,6 @@ class ListResource(StreamResourceBase):
 
     @contextmanager
     def open_read(self):
-        """Return an iterator object."""
         yield iter(self.seq)
 
     @contextmanager

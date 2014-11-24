@@ -3,12 +3,11 @@ from contextlib import contextmanager
 import os
 from tempfile import TemporaryDirectory
 
-from openrcv.streams import (ListResource, FileResource, StringResource,
-                             TrackingStream)
+from openrcv.streams import (ListResource, FileResource, ReadableTrackedStream, StringResource)
 from openrcv.utiltest.helpers import UnitCase
 
 
-class TrackingStreamTest(UnitCase):
+class ReadableTrackedStreamTest(UnitCase):
 
     def assert_state(self, tracking, item, number):
         self.assertEqual(tracking.item, item)
@@ -16,13 +15,13 @@ class TrackingStreamTest(UnitCase):
 
     def test_init(self):
         stream = [1, 2, 3]
-        tracking = TrackingStream(stream)
+        tracking = ReadableTrackedStream(stream)
         self.assert_state(tracking, None, 0)
 
     # TODO: enable this test.
     def _test_iter(self):
         stream = ListStream(['a', 'b', 'c'])
-        tracking = TrackingStream(stream)
+        tracking = ReadableTrackedStream(stream)
         items = iter(tracking)
         self.assert_state(tracking, None, 0)
         item = next(items)
@@ -71,7 +70,9 @@ class StreamResourceTestMixin(object):
                     raise ValueError()
         # Check the exception text.
         err = cm.exception
-        self.assertStartsWith(str(err), "during %s number 1" % self.expected_label)
+        self.assertStartsWith(str(err), "last read %s of <%s:" %
+                              (self.expected_label, self.class_name))
+        self.assertEndsWith(str(err), ": number=1, 'a\\n'")
 
     def test_writing(self):
         with self.resource() as resource:
@@ -108,13 +109,16 @@ class StreamResourceTestMixin(object):
                     raise ValueError('foo')
         # Check the exception text.
         err = cm.exception
-        self.assertStartsWith(str(err), "during %s number 2" % self.expected_label)
+        self.assertStartsWith(str(err), "last written %s of <%s:" %
+                              (self.expected_label, self.class_name))
+        self.assertEndsWith(str(err), ": number=2, 'd\\n'")
 
 
 class ListResourceTest(StreamResourceTestMixin, UnitCase):
 
     """ListResource tests."""
 
+    class_name = "ListResource"
     expected_label = "item"
 
     @contextmanager
@@ -126,6 +130,7 @@ class FileResourceTest(StreamResourceTestMixin, UnitCase):
 
     """FileResource tests."""
 
+    class_name = "FileResource"
     expected_label = "line"
 
     @contextmanager
@@ -142,6 +147,7 @@ class StringResourceTest(StreamResourceTestMixin, UnitCase):
 
     """StringResource tests."""
 
+    class_name = "StringResource"
     expected_label = "line"
 
     @contextmanager

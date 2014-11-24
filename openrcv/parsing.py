@@ -5,41 +5,9 @@ import os
 from openrcv.formats.internal import to_internal_ballot
 from openrcv.models import ContestInput
 from openrcv import utils
-from openrcv.utils import time_it, FILE_ENCODING
+from openrcv.utils import parse_integer_line, time_it, FILE_ENCODING
 
 log = logging.getLogger(__name__)
-
-
-def parse_integer_line(line):
-    """
-    Parse a string of integers (with or without a trailing newline).
-
-    Returns an iterator object of integers.
-
-    This function allows leading and trailing spaces.  ValueError is
-    raised if one of the values does not parse to an integer.
-
-    """
-    return (int(s) for s in line.split())
-
-
-def parse_internal_ballot(line):
-    """
-    Parse an internal ballot line (with or without a trailing newline).
-
-    This function allows leading and trailing spaces.  ValueError is
-    raised if one of the values does not parse to an integer.
-
-    An internal ballot line is a space-delimited string of integers of the
-    form--
-
-    "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
-
-    """
-    ints = parse_integer_line(line)
-    weight = next(ints)
-    choices = tuple(ints)
-    return weight, choices
 
 
 # TODO: add the line number, etc. as attributes.

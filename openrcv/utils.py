@@ -27,6 +27,19 @@ def join_values(values):
     return " ".join((str(v) for v in values))
 
 
+def parse_integer_line(line):
+    """
+    Parse a string of integers (with or without a trailing newline).
+
+    Returns an iterator object of integers.
+
+    This function allows leading and trailing spaces.  ValueError is
+    raised if one of the values does not parse to an integer.
+
+    """
+    return (int(s) for s in line.split())
+
+
 def log_create_dir(path):
     log.info("creating dir: %s" % path)
 

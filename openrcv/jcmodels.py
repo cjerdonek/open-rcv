@@ -25,11 +25,10 @@ all at once.
 """
 
 from openrcv.counting import InternalBallotsNormalizer
-from openrcv.formats.internal import to_internal_ballot
+from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin,
                              JsonDeserializeError)
 from openrcv.models import make_candidates, BallotsResourceBase, RoundResults
-from openrcv.parsing import parse_internal_ballot
 from openrcv.utils import StringInfo
 
 

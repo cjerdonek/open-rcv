@@ -71,7 +71,7 @@ class StreamResourceTestMixin(object):
                     raise ValueError()
         # Check the exception text.
         err = cm.exception
-        self.assertStartsWith(str(err), "during item number 1")
+        self.assertStartsWith(str(err), "during %s number 1" % self.expected_label)
 
     def test_writing(self):
         with self.resource() as resource:
@@ -108,12 +108,14 @@ class StreamResourceTestMixin(object):
                     raise ValueError('foo')
         # Check the exception text.
         err = cm.exception
-        self.assertStartsWith(str(err), "during item number 2")
+        self.assertStartsWith(str(err), "during %s number 2" % self.expected_label)
 
 
 class ListResourceTest(StreamResourceTestMixin, UnitCase):
 
     """ListResource tests."""
+
+    expected_label = "item"
 
     @contextmanager
     def resource(self):
@@ -123,6 +125,8 @@ class ListResourceTest(StreamResourceTestMixin, UnitCase):
 class FileResourceTest(StreamResourceTestMixin, UnitCase):
 
     """FileResource tests."""
+
+    expected_label = "line"
 
     @contextmanager
     def resource(self):
@@ -137,6 +141,8 @@ class FileResourceTest(StreamResourceTestMixin, UnitCase):
 class StringResourceTest(StreamResourceTestMixin, UnitCase):
 
     """StringResource tests."""
+
+    expected_label = "line"
 
     @contextmanager
     def resource(self):

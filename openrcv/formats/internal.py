@@ -25,6 +25,8 @@ def to_internal_ballot(ballot):
 
 class InternalBallotsResource(StreamResourceBase):
 
+    label = "ballot"
+
     def __init__(self, resource):
         """
         Arguments:
@@ -39,9 +41,9 @@ class InternalBallotsResource(StreamResourceBase):
 
     @contextmanager
     def open_write(self):
-        # Delete the contents of the list (analogous to deleting a file).
-        self.seq.clear()
-        yield WriteableListStream(self.seq)
+        # TODO: wrap the stream with something that converts the ballot to a string.
+        with self.resource.writing() as stream:
+            yield stream
 
 
 class InternalFormat(Format):

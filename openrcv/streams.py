@@ -68,6 +68,8 @@ class StreamResourceBase(object):
     backing store.
     """
 
+    label = "line"
+
     @contextmanager
     def open_read(self):
         raise NotImplementedError()
@@ -85,7 +87,8 @@ class StreamResourceBase(object):
             # TODO: find a way of including additional information in the
             # stack trace that doesn't involve raising a new exception
             # (and unnecessarily lengthening the stack trace).
-            raise type(exc)("during item number %d of %r: %r" % (tracked.item_number, self, tracked.item))
+            raise type(exc)("during %s number %d of %r: %r" %
+                            (self.label, tracked.item_number, self, tracked.item))
 
     @contextmanager
     def reading(self):
@@ -117,6 +120,8 @@ class StreamResourceBase(object):
 class ListResource(StreamResourceBase):
 
     """A stream resource backed by a list."""
+
+    label = "item"
 
     def __init__(self, seq=None):
         """

@@ -12,11 +12,11 @@ class InternalBallotsResourceTest(UnitCase):
             (2, (3, 1)),
         ]
         resource = StringResource()
-        raise Exception()
-
-        for ballot, expected in cases:
-            with self.subTest(ballot=ballot, expected=expected):
-                self.assertEqual(to_internal_ballot(ballot), expected)
+        ballots_resource = InternalBallotsResource(resource)
+        with ballots_resource.writing() as stream:
+            for ballot in ballots:
+                stream.write(ballot)
+        self.assertEqual(resource.contents, "foo")
 
 class InternalModuleTest(UnitCase):
 

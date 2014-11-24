@@ -1,6 +1,6 @@
 
 from openrcv.resource import iter_resource, tracking
-from openrcv.utiltest.helpers import skipIfTravis, UnitCase
+from openrcv.utiltest.helpers import UnitCase
 
 
 class IterResourceTest(UnitCase):

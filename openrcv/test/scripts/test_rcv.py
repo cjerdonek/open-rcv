@@ -4,7 +4,7 @@ import os
 
 from openrcv.scripts.argparse import HelpRequested, UsageException
 from openrcv.scripts.rcv import create_argparser, RcvArgumentParser
-from openrcv.utiltest.helpers import skipIfTravis, UnitCase
+from openrcv.utiltest.helpers import UnitCase
 
 
 # Sample valid command syntax.
@@ -32,7 +32,6 @@ class SafeGetLogLevelTest(UnitCase):
         args = self._get_valid_args(level)
         return parser.safe_get_log_level(args)
 
-    @skipIfTravis()
     def test_safe_get_log_level__valid_string(self):
         actual = self.call_safe_get_log_level('DEBUG')
         self.assertEqual(actual, 10)
@@ -128,7 +127,6 @@ class ArgumentParserTest(UnitCase):
         ns = self.parse_args(args)
         return ns.log_level
 
-    @skipIfTravis()
     def test_log_level(self):
         # Test the default.
         self.assertEqual(self.parse_log_level([]), 20)

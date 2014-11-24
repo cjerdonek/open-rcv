@@ -2,13 +2,12 @@
 from argparse import ArgumentTypeError
 
 from openrcv.scripts.argparse import parse_log_level
-from openrcv.utiltest.helpers import skipIfTravis, UnitCase
+from openrcv.utiltest.helpers import UnitCase
 
 
 # TODO: add a test for good args.
 class ModuleTest(UnitCase):
 
-    @skipIfTravis()
     def test_parse_log_level(self):
         self.assertEqual(parse_log_level('INFO'), 20)
         self.assertEqual(parse_log_level('DEBUG'), 10)

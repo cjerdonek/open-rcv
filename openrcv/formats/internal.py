@@ -23,6 +23,16 @@ def to_internal_ballot(ballot):
     return join_values([weight] + list(choices))
 
 
+class _WriteableBallotStream(object):
+
+    def __init__(self, stream):
+        self.stream = stream
+
+    def write(self, ballot):
+        line = to_internal_ballot(ballot)
+        self.stream.write(line + "\n")
+
+
 class InternalBallotsResource(StreamResourceBase):
 
     label = "ballot"
@@ -41,9 +51,8 @@ class InternalBallotsResource(StreamResourceBase):
 
     @contextmanager
     def open_write(self):
-        # TODO: wrap the stream with something that converts the ballot to a string.
         with self.resource.writing() as stream:
-            yield stream
+            yield _WriteableBallotStream(stream)
 
 
 class InternalFormat(Format):

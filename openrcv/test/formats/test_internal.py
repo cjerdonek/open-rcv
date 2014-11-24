@@ -6,7 +6,7 @@ from openrcv.utiltest.helpers import UnitCase
 
 class InternalBallotsResourceTest(UnitCase):
 
-    def test(self):
+    def test_writing(self):
         ballots = [
             (1, (2, )),
             (2, (3, 1)),
@@ -16,7 +16,7 @@ class InternalBallotsResourceTest(UnitCase):
         with ballots_resource.writing() as stream:
             for ballot in ballots:
                 stream.write(ballot)
-        self.assertEqual(resource.contents, "foo")
+        self.assertEqual(resource.contents, "1 2\n2 3 1\n")
 
 class InternalModuleTest(UnitCase):
 

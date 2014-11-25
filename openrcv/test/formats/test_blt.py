@@ -2,8 +2,8 @@
 from textwrap import dedent
 
 from openrcv.formats.blt import BLTFileWriter
-from openrcv.models import BallotsResource, ContestInput
-from openrcv.streams import StringResource
+from openrcv.models import ContestInput
+from openrcv.streams import ListResource, StringResource
 from openrcv.utiltest.helpers import UnitCase
 
 
@@ -18,7 +18,7 @@ class BLTFileWriterTest(UnitCase):
             (2, (2, 1)),
             (1, (2, )),
         ]
-        contest.ballots_resource = BallotsResource(ballots)
+        contest.ballots_resource = ListResource(ballots)
         resource = StringResource()
         writer = BLTFileWriter(resource)
         writer.write_contest(contest)

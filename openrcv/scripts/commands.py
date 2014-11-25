@@ -12,11 +12,10 @@ import sys
 import yaml
 
 from openrcv import counting
-from openrcv.datagen import (create_random_contest, temp_ballots_resource, BallotGenerator,
-                             UniqueBallotGenerator)
+from openrcv.datagen import create_random_contest, BallotGenerator, UniqueBallotGenerator
 from openrcv.formats.internal import parse_internal_ballot
 from openrcv.jcmodels import JsonTestCaseOutput
-from openrcv.models import BallotStreamResource, ContestInput
+from openrcv.models import temp_ballots_resource, BallotStreamResource, ContestInput
 from openrcv.utils import logged_open, PathInfo, StringInfo
 
 

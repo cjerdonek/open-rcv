@@ -16,7 +16,7 @@ import tempfile
 
 from openrcv.formats.internal import InternalBallotsResource
 from openrcv.resource import tracking
-from openrcv.streams import NullStreamResource
+from openrcv.streams import NullStreamResource, ReadWriteFileResource
 from openrcv.utils import ReprMixin
 
 
@@ -25,6 +25,14 @@ def make_candidates(candidate_count):
     Return an iterable of candidate numbers.
     """
     return range(1, candidate_count + 1)
+
+
+@contextmanager
+def temp_ballots_resource():
+    with tempfile.SpooledTemporaryFile(mode='w+t', encoding='ascii') as f:
+        backing_resource = ReadWriteFileResource(f)
+        ballots_resource = InternalBallotsResource(backing_resource)
+        yield ballots_resource
 
 
 class BallotsResourceBase(object):

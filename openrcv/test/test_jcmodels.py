@@ -5,7 +5,7 @@ from openrcv.jsonlib import JsonableError, JsonDeserializeError, JS_NULL
 from openrcv.jcmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonCaseContestInput,
                               JsonContest, JsonRoundResults, JsonTestCaseOutput)
 from openrcv.models import ContestInput
-from openrcv.resource import iter_resource
+from openrcv.streams import ListResource
 from openrcv.utils import StreamInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
@@ -134,7 +134,7 @@ class JsonCaseContestInputTest(UnitCase):
         contest = ContestInput()
         contest.candidates = ['Ann', 'Bob']
         ballots = [(2, (3, 1))]
-        contest.ballots_resource = iter_resource(ballots)
+        contest.ballots_resource = ListResource(ballots)
         jc_contest = JsonCaseContestInput.from_object(contest)
 
         expected = JsonCaseContestInput(candidate_count=2)

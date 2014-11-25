@@ -171,6 +171,8 @@ class JsonCaseContestInput(JsonableMixin):
           ballots: an iterable of JsonCaseBallot objects.
           candidate_count: integer number of candidates.
         """
+        if id_ is None:
+            id_ = 0
         self.ballots = ballots
         self.candidate_count = candidate_count
         self.id = id_

@@ -7,9 +7,8 @@ in the open-rcv-tests repo.
 
 """
 
-from contextlib import contextmanager
 import logging
-from random import randint, random, sample
+from random import random, sample
 
 from openrcv.models import ContestInput
 from openrcv import utils
@@ -36,14 +35,6 @@ Leo
 log = logging.getLogger(__name__)
 
 
-# TODO: add a method to write `n` ballots to a StreamInfo object.
-# TODO: the API should accept a ballot store object of some kind (e.g.
-#   can be an iterable or file).
-# choices = list(range(ns.candidates))
-# generator = NonUniqueBallotGenerator()
-# print(repr(generator.generate(choices)))
-# generator = UniqueBallotGenerator()
-# print(repr(generator.generate(choices)))
 class BallotGenerator(object):
 
     """Generates random ballots (allowing duplicates)."""

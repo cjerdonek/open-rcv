@@ -3,8 +3,7 @@ from copy import copy
 from unittest.mock import patch, MagicMock
 
 from openrcv import datagen
-from openrcv.datagen import (gen_random_list, add_random_ballots,
-                             BallotGenerator, UniqueBallotGenerator, STOP_CHOICE)
+from openrcv.datagen import BallotGenerator, UniqueBallotGenerator, STOP_CHOICE
 from openrcv.utiltest.helpers import UnitCase
 
 
@@ -47,29 +46,29 @@ class BallotGeneratorTest(UnitCase, BallotGeneratorMixin):
         maker = BallotGenerator((1, 2, 3))
         self.assertEqual(maker.choose([1]), 1)
 
-    def test_make_ballot__undervote(self):
+    def test_make_choices__undervote(self):
         maker = BallotGenerator((1, 2, 3), undervote=0.5)
         with self.patch_random(0.49):
-            self.assertEqual(maker.make_ballot(), [])
+            self.assertEqual(maker.make_choices(), [])
         with self.patch_random(0.5):
-            ballot = maker.make_ballot()
+            ballot = maker.make_choices()
             self.assertTrue(len(ballot) > 0)
         with self.patch_random(0.51):
-            ballot = maker.make_ballot()
+            ballot = maker.make_choices()
             self.assertTrue(len(ballot) > 0)
 
-    def test_make_ballot__undervote__zero(self):
+    def test_make_choices__undervote__zero(self):
         """Check the zero edge case."""
         # Zero chance of an undervote.
         maker = BallotGenerator((1, 2, 3), undervote=0)
         with self.patch_random(0):
-            ballot = maker.make_ballot()
+            ballot = maker.make_choices()
             self.assertTrue(len(ballot) > 0)
 
-    def test_make_ballot(self):
+    def test_make_choices(self):
         maker = BallotGenerator((1, 2, 3), undervote=0)
         with self.patch_sample_one((1, 1, STOP_CHOICE)) as mock_sample:
-            self.assertEqual(maker.make_ballot(), [1, 1])
+            self.assertEqual(maker.make_choices(), [1, 1])
             self.assertEqual(mock_sample.call_count, 3)
             # Also check that random.sample() is being called with the
             # right args each time.
@@ -85,13 +84,26 @@ class BallotGeneratorTest(UnitCase, BallotGeneratorMixin):
                     # The 0-th element is the positional args.
                     self.assertEqual(actual[0], expected)
 
+    def test_add_random_ballots(self):
+        cases = (
+            # args=(choices, ballot_count, max_length=None),
+            #   randint_vals, expected_choices
+            (([1, 2], 2), [0, 2, 1, 2], ((1, ), (2, ))),
+        )
+        for args, randint_vals, expected in cases:
+            with self.subTest(args=args, expected=expected, randint_vals=randint_vals):
+                with self.patch_randint(randint_vals):
+                    ballots = add_random_ballots(*args)
+                    actual = tuple((b.choices for b in ballots))
+                    self.assertEqual(actual, expected)
+
 
 class UniqueBallotGeneratorTest(UnitCase, BallotGeneratorMixin):
 
-    def test_make_ballot(self):
+    def test_make_choices(self):
         maker = UniqueBallotGenerator((1, 2, 3), undervote=0)
         with self.patch_sample_one((1, 2, STOP_CHOICE)) as mock_sample:
-            self.assertEqual(maker.make_ballot(), [1, 2])
+            self.assertEqual(maker.make_choices(), [1, 2])
             self.assertEqual(mock_sample.call_count, 3)
             # Also check that random.sample() is being called with the
             # right args each time (which is where UniqueBallotGenerator
@@ -125,34 +137,3 @@ class ModuleTest(UnitCase):
         randint = self.make_randint(randint_vals)
         return patch('openrcv.datagen.randint', randint)
 
-    def test_gen_random_list(self):
-        # args=(choices, max_length=None), randint_vals, expected
-        cases = (
-            # Normal case.
-            (([1, 2], ), [0, 1], [1, 2]),
-            # Check terminating the list early.
-            (([1, 2], ), [2], []),
-            # Check that duplications are allowed.
-            (([1, 2], ), [0, 0], [1, 1]),
-            # Check that max_length defaults to the number of choices.
-            (([1, 2], ), [0, 0, 0, 0], [1, 1]),
-            # Check that max_length is respected.
-            (([1, 2], 3), [0, 0, 0, 0], [1, 1, 1]),
-        )
-        for args, randint_vals, expected in cases:
-            with self.subTest(args=args, expected=expected, randint_vals=randint_vals):
-                with self.patch_randint(randint_vals):
-                    self.assertEqual(gen_random_list(*args), expected)
-
-    def test_add_random_ballots(self):
-        cases = (
-            # args=(choices, ballot_count, max_length=None),
-            #   randint_vals, expected_choices
-            (([1, 2], 2), [0, 2, 1, 2], ((1, ), (2, ))),
-        )
-        for args, randint_vals, expected in cases:
-            with self.subTest(args=args, expected=expected, randint_vals=randint_vals):
-                with self.patch_randint(randint_vals):
-                    ballots = add_random_ballots(*args)
-                    actual = tuple((b.choices for b in ballots))
-                    self.assertEqual(actual, expected)

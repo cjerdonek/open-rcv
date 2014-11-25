@@ -48,7 +48,7 @@ def make_random_contest(ns, stdout=None):
 
     with temp_ballots_resource() as ballots_resource:
         contest = datagen.create_random_contest(ballots_resource,
-            candidate_count=ns.candidate_count)
+            ballot_count=ns.ballot_count, candidate_count=ns.candidate_count)
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
 
     return "\n".join(output_paths) + "\n" if output_paths else None

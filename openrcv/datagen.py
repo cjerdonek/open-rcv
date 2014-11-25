@@ -123,8 +123,10 @@ def make_candidates(count):
     return names
 
 
-def create_random_contest(ballots_resource, candidate_count=None):
-    ballot_count = 20
+def create_random_contest(ballots_resource, candidate_count=None,
+        ballot_count=None):
+    if ballot_count is None:
+        ballot_count = 20
     candidates = make_candidates(candidate_count)
 
     choices = range(1, candidate_count + 1)

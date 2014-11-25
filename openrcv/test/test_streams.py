@@ -162,16 +162,15 @@ class ReadWriteFileResourceTest(StreamResourceTestMixin, UnitCase):
             yield ReadWriteFileResource(f)
 
 
-# TODO: Spooled...
-class ReadWriteFileResourceTest(StreamResourceTestMixin, UnitCase):
+class SpooledReadWriteFileResourceTest(StreamResourceTestMixin, UnitCase):
 
-    """ReadWriteFileResource tests."""
+    """ReadWriteFileResource tests (using tempfile.SpooledTemporaryFile)."""
 
     class_name = "ReadWriteFileResource"
 
     @contextmanager
     def resource(self):
-        with tempfile.TemporaryFile(mode='w+t', encoding='ascii') as f:
+        with tempfile.SpooledTemporaryFile(mode='w+t', encoding='ascii') as f:
             f.write('a\nb\n')
             yield ReadWriteFileResource(f)
 

@@ -3,7 +3,7 @@ from copy import copy
 from unittest.mock import patch, MagicMock
 
 from openrcv import datagen
-from openrcv.datagen import (gen_random_list, gen_random_ballot_list,
+from openrcv.datagen import (gen_random_list, add_random_ballots,
                              BallotGenerator, UniqueBallotGenerator, STOP_CHOICE)
 from openrcv.utiltest.helpers import UnitCase
 
@@ -144,7 +144,7 @@ class ModuleTest(UnitCase):
                 with self.patch_randint(randint_vals):
                     self.assertEqual(gen_random_list(*args), expected)
 
-    def test_gen_random_ballot_list(self):
+    def test_add_random_ballots(self):
         cases = (
             # args=(choices, ballot_count, max_length=None),
             #   randint_vals, expected_choices
@@ -153,6 +153,6 @@ class ModuleTest(UnitCase):
         for args, randint_vals, expected in cases:
             with self.subTest(args=args, expected=expected, randint_vals=randint_vals):
                 with self.patch_randint(randint_vals):
-                    ballots = gen_random_ballot_list(*args)
+                    ballots = add_random_ballots(*args)
                     actual = tuple((b.choices for b in ballots))
                     self.assertEqual(actual, expected)

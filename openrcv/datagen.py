@@ -7,15 +7,48 @@ in the open-rcv-tests repo.
 
 """
 
+from contextlib import contextmanager
+import logging
 from random import randint, random, sample
+import tempfile
+
+from openrcv.formats.internal import InternalBallotsResource
 # TODO: this module should not import from openrcv.jcmodels.
 import openrcv.jcmodels as models
 from openrcv.jcmodels import JsonBallot, JsonContest, JsonContestFile
+from openrcv.models import ContestInput
+from openrcv.streams import ReadWriteFileResource
 from openrcv import utils
 from openrcv.utils import PathInfo
 
 
 STOP_CHOICE = object()
+
+CANDIDATE_NAMES = """\
+Ann
+Bob
+Carol
+Dave
+Ellen
+Fred
+Gwen
+Hank
+Irene
+Joe
+Katy
+Leo
+""".split()
+
+
+log = logging.getLogger(__name__)
+
+
+@contextmanager
+def temp_ballots_resource():
+    with tempfile.SpooledTemporaryFile(mode='w+t', encoding='ascii') as f:
+        backing_resource = ReadWriteFileResource(f)
+        ballots_resource = InternalBallotsResource(backing_resource)
+        yield ballots_resource
 
 
 def gen_random_list(choices, max_length=None):
@@ -117,27 +150,37 @@ class UniqueBallotGenerator(BallotGenerator):
         choices.remove(choice)
 
 
-# TODO: this should create a file-backed ballots resource.
-def gen_random_ballot_list(choices, ballot_count, max_length=None):
+def add_random_ballots(ballots_resource, choices, ballot_count, max_length=None):
     """
     Arguments:
       choices: a sequence of integers.
 
     """
     ballots = []
-    for i in range(ballot_count):
-        ballot_choices = gen_random_list(choices, max_length=max_length)
-        ballot = JsonBallot(ballot_choices)
-        ballots.append(ballot)
+    with ballots_resource.writing() as stream:
+        for i in range(ballot_count):
+            random_choices = gen_random_list(choices, max_length=max_length)
+            ballot = 1, random_choices
+            stream.write(ballot)
 
-    return ballots
+
+# TODO: test this.
+def make_candidates(count):
+    names = CANDIDATE_NAMES[:count]
+    for n in range(len(names) + 1, count + 1):
+        names.append("Candidate %d" % n)
+    return names
 
 
-# TODO: this should return a non-JSON Contest object.
-def random_contest(candidate_count):
+def random_contest(ballots_resource, candidate_count=None):
+    ballot_count = 20
+    candidates = make_candidates(candidate_count)
+
     choices = range(1, candidate_count + 1)
-    ballots = gen_random_ballot_list(choices, 5)
-    contest = JsonContest(candidate_count, ballots)
+    add_random_ballots(ballots_resource, choices, ballot_count)
+
+    contest = ContestInput(candidates=candidates, ballots_resource=ballots_resource)
+
     return contest
 
 

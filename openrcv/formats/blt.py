@@ -66,7 +66,7 @@ class BLTFileWriter(FileWriter):
         seat_count = contest.seat_count
         assert seat_count is not None
         self.write_values([len(contest.candidates), seat_count])
-        with contest.ballots_resource() as ballots:
+        with contest.ballots_resource.reading() as ballots:
             for ballot in ballots:
                 weight, choices = ballot
                 self.write_values([weight] + list(choices) + [0])

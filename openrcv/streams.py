@@ -21,8 +21,12 @@ current item and item number).
 
 from contextlib import contextmanager
 from io import StringIO
+import logging
 
 from openrcv.utils import logged_open, ReprMixin
+
+
+log = logging.getLogger(__name__)
 
 
 class TrackedStreamBase(object):
@@ -59,6 +63,19 @@ class WriteableListStream(object):
 
     def write(self, obj):
         self.seq.append(obj)
+
+
+class NullStreamResource(ReprMixin):
+
+    """A placeholder stream resource used as a default."""
+
+    @contextmanager
+    def reading(self):
+        yield iter(())
+
+    @contextmanager
+    def writing(self):
+        raise TypeError("The null stream resource does not allow writing.")
 
 
 # TODO: rename to something that doesn't seem to imply that all
@@ -191,7 +208,7 @@ class ReadWriteFileResource(StreamResourceBase):
     """A stream resource backed by a readable-writeable file.
 
     To support reading and writing to the same stream, this class never
-    closes the underlying file.  Thus, closing the file is the responsible
+    closes the underlying file.  Thus, closing the file is the responsibility
     of the caller.
     """
 

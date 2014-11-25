@@ -135,7 +135,7 @@ class InternalContestWriter(FormatWriter):
 class InternalBallotsWriter(FileWriter):
 
     def _write_ballots(self, contest):
-        with contest.ballots_resource() as ballots:
+        with contest.ballots_resource.reading() as ballots:
             for ballot in ballots:
                 self.writeln(to_internal_ballot(ballot))
 

@@ -146,7 +146,7 @@ class JsonCaseContestInputTest(UnitCase):
             JsonCaseBallot(choices=(1, 2), weight=3),
         ]
         jc_contest = JsonCaseContestInput(ballots=jc_ballots)
-        expected = {'ballots': ['3 1 2']}
+        expected = {'_meta': {'id': 0}, 'ballots': ['3 1 2']}
         self.assertEqual(jc_contest.to_jsobj(), expected)
 
 

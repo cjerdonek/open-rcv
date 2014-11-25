@@ -99,6 +99,12 @@ class InternalBallotsResource(object):
         """
         self.resource = resource
 
+    # TODO: move this to a StreamResourceMixin.
+    # TODO: add a count_ballots() method that takes weight into account.
+    def count(self):
+        with self.reading() as stream:
+            return sum(1 for item in stream)
+
     @contextmanager
     def reading(self):
         with self.resource.reading() as stream:

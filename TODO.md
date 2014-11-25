@@ -1,16 +1,14 @@
 TODO
 ====
 
+* Add "stream resource" to docs and clean up related docs.
+* Add tests for ContestInput.
+* Improve the random ballot generation by removing undervotes and
+  providing an option for not having duplicates.
 * Define a BLT ballot stream resource that shares code with the internal one.
 * Flesh out rest of `rand_contest` command (number of ballots, etc).
-* Work on outputting JSON test for rand_contest.
-* Add random_contest() function with flexible args.
-* Get all the ballot writers using the write_output() pattern.
 * Add "samplecontest" command so people can play with using it.
   - Also add "random election" command.
-  - The samples should have names:
-    ~ Ann, Bob, Carol, Dave, Ellen, Fred, Gwen, Hank, Irene, Joe, Katy, Leo,
-      Candidate 13, etc.
 * Get rid of rcvgen.
 * Allow test logging messages to show (e.g. skips).
 * Add extra command options from molt.
@@ -20,10 +18,6 @@ TODO
   - Stub out option & style docs, and update README.
   - Stub out section to describe format of test files.
     ~ mention lexicographic ordering, and grouping/weighting.
-* Improve the random ballot generation by removing undervotes and
-  providing an option for not having duplicates.
-  - Make sure we have a function to create a random contest (given
-    number of candidates, ballots, etc).
 * Incorporate submodule into tests.
 * Make an `update_test_files()` function that reindices and updates expecteds.
 * Add tie-break and add convention to docs or code comment.

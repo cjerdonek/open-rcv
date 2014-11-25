@@ -14,7 +14,7 @@ choices is a tuple of integer choice ID's.
 from contextlib import contextmanager
 import tempfile
 
-from openrcv.formats.internal import InternalBallotsResource
+from openrcv.formats import internal
 from openrcv.resource import tracking
 from openrcv.streams import NullStreamResource, ReadWriteFileResource
 from openrcv.utils import ReprMixin
@@ -31,7 +31,7 @@ def make_candidates(candidate_count):
 def temp_ballots_resource():
     with tempfile.SpooledTemporaryFile(mode='w+t', encoding='ascii') as f:
         backing_resource = ReadWriteFileResource(f)
-        ballots_resource = InternalBallotsResource(backing_resource)
+        ballots_resource = internal.InternalBallotsResource(backing_resource)
         yield ballots_resource
 
 

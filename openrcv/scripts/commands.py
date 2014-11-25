@@ -12,7 +12,7 @@ import sys
 import yaml
 
 from openrcv import counting
-from openrcv.datagen import create_random_contest, BallotGenerator, UniqueBallotGenerator
+from openrcv import datagen
 from openrcv.formats.internal import parse_internal_ballot
 from openrcv.jcmodels import JsonTestCaseOutput
 from openrcv.models import temp_ballots_resource, BallotStreamResource, ContestInput
@@ -47,7 +47,8 @@ def make_random_contest(ns, stdout=None):
     format = format_cls()
 
     with temp_ballots_resource() as ballots_resource:
-        contest = create_random_contest(ballots_resource, candidate_count=ns.candidate_count)
+        contest = datagen.create_random_contest(ballots_resource,
+            candidate_count=ns.candidate_count)
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
 
     return "\n".join(output_paths) + "\n" if output_paths else None

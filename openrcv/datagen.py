@@ -136,6 +136,7 @@ def create_random_contest(ballots_resource, candidate_count=None):
     return contest
 
 
+# TODO: consider removing this.
 def create_json_tests():
     contests = []
     for id_, candidate_count in enumerate(range(3, 6), start=1):

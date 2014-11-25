@@ -86,7 +86,7 @@ def add_command_randcontest(builder):
     formats = builder.formats
     help = 'Create a random sample contest.'
     desc = dedent("""\
-    Create a random sample contest.
+    Create a random contest.
 
     This command writes the contest information to stdout.  If {output_dir}
     is provided, then only the paths to the output files are written to stdout.
@@ -110,7 +110,7 @@ def add_command_randcontest(builder):
         type=builder.writer_type, default=OUTPUT_FORMAT_DEFAULT,
         help=("the output format.  Choose from: {!s}. Defaults to: {!r}.".
               format(list_desc, OUTPUT_FORMAT_DEFAULT)))
-    return parser, commands.rand_contest
+    return parser, commands.make_random_contest
 
 
 # TODO: unit-test print_help().

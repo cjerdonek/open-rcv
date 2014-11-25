@@ -26,7 +26,7 @@ class FormatWriter(object):
         self.stdout = stdout
 
     @property
-    def file_info_funcs(self):
+    def get_output_infos(self):
         raise NoImplementation(self)
 
     def _make_output_info(self):
@@ -41,11 +41,11 @@ class FormatWriter(object):
         output_dir = self.output_dir
         resources = []
         output_paths = []
-        for func in self.file_info_funcs:
+        for get_output_info in self.get_output_infos:
             if not output_dir:
                 resource = self.stdout_info()
             else:
-                output_path, encoding = func()
+                output_path, encoding = get_output_info(output_dir)
                 resource = FilePathResource(output_path, encoding=encoding)
                 # Only add an output path when not writing to stdout.
                 output_paths.append(output_path)

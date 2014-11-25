@@ -79,6 +79,11 @@ def gen_random_list(choices, max_length=None):
 # TODO: add a method to write `n` ballots to a StreamInfo object.
 # TODO: the API should accept a ballot store object of some kind (e.g.
 #   can be an iterable or file).
+# choices = list(range(ns.candidates))
+# generator = NonUniqueBallotGenerator()
+# print(repr(generator.generate(choices)))
+# generator = UniqueBallotGenerator()
+# print(repr(generator.generate(choices)))
 class BallotGenerator(object):
 
     """
@@ -172,7 +177,7 @@ def make_candidates(count):
     return names
 
 
-def random_contest(ballots_resource, candidate_count=None):
+def create_random_contest(ballots_resource, candidate_count=None):
     ballot_count = 20
     candidates = make_candidates(candidate_count)
 

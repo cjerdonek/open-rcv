@@ -24,7 +24,7 @@ class JsonCaseFormat(Format):
 class JsonCaseContestWriter(FormatWriter):
 
     @property
-    def file_info_funcs(self):
+    def get_output_infos(self):
         return (self.get_output_info, )
 
     def get_output_info(self, output_dir):

@@ -22,6 +22,7 @@ current item and item number).
 from contextlib import contextmanager
 from io import StringIO
 import logging
+import tempfile
 
 from openrcv.utils import logged_open, ReprMixin
 
@@ -141,6 +142,7 @@ class StreamResourceBase(ReprMixin):
         Here, "readable stream" means an iterator object over the elements
         of the backing store.
         """
+        log.debug("opening for reading: %r" % self)
         with self.open_read() as f:
             with self.track_reading(f) as tracked:
                 yield iter(tracked)
@@ -155,6 +157,7 @@ class StreamResourceBase(ReprMixin):
         Calling this method clears the contents of the backing store
         before returning a stream that writes to the store.
         """
+        log.debug("opening for writing: %r" % self)
         with self.open_write() as f:
             with self.track_writing(f) as tracked:
                 yield tracked
@@ -231,6 +234,52 @@ class ReadWriteFileResource(StreamResourceBase):
     @contextmanager
     def open_write(self):
         self.file.seek(0)
+        self.file.truncate()
+        yield self.file
+
+
+@contextmanager
+def temp_stream_resource():
+    resource = _TempFileResource()
+    try:
+        yield resource
+    finally:
+        if resource.file is not None:
+            resource.file.close()
+
+
+class _TempFileResource(StreamResourceBase):
+
+    """A stream resource for temporary use.
+
+    Unlike tempfile.SpooledTemporaryFile, this class delays opening a
+    file handle until opening the resource for reading or writing.
+    After that point, the underlying file remains open until manually
+    closed by the caller.
+    """
+
+    def __init__(self, encoding=None):
+        if encoding is None:
+            encoding = 'ascii'
+        self.encoding = encoding
+        self.file = None
+
+    def _open(self):
+        try:
+            seek = self.file.seek
+        except AttributeError:
+            self.file = tempfile.SpooledTemporaryFile(mode='w+t', encoding=self.encoding)
+            seek = self.file.seek
+        seek(0)
+
+    @contextmanager
+    def open_read(self):
+        self._open()
+        yield self.file
+
+    @contextmanager
+    def open_write(self):
+        self._open()
         self.file.truncate()
         yield self.file
 

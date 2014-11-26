@@ -1,14 +1,12 @@
 TODO
 ====
 
-* Add normalized ballots.
 * Add option to add random contest directly to JSON file.
 * Rename `repr_desc` to `repr_info`.
 * Add "stream resource" to docs and clean up related docs.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
 * Define a BLT ballot stream resource that shares code with the internal one.
-* Flesh out rest of `rand_contest` command (number of ballots, etc).
 * Add "samplecontest" command so people can play with using it.
   - Also add "random election" command.
 * Get rid of rcvgen.

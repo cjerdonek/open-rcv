@@ -12,12 +12,17 @@ choices is a tuple of integer choice ID's.
 """
 
 from contextlib import contextmanager
+import logging
 import tempfile
 
 from openrcv.formats import internal
 from openrcv.resource import tracking
+from openrcv import streams
 from openrcv.streams import NullStreamResource, ReadWriteFileResource
 from openrcv.utils import ReprMixin
+
+
+log = logging.getLogger(__name__)
 
 
 def make_candidates(candidate_count):
@@ -29,8 +34,7 @@ def make_candidates(candidate_count):
 
 @contextmanager
 def temp_ballots_resource():
-    with tempfile.SpooledTemporaryFile(mode='w+t', encoding='ascii') as f:
-        backing_resource = ReadWriteFileResource(f)
+    with streams.temp_stream_resource() as backing_resource:
         ballots_resource = internal.InternalBallotsResource(backing_resource)
         yield ballots_resource
 
@@ -60,7 +64,7 @@ def normalized_ballots(lines):
 
 
 # TODO: allow ordering and compressing to be done separately.
-def normalize_ballot(source, target):
+def normalize_ballots(source, target):
     """
     Normalize ballots by ordering and "compressing" them.
 
@@ -86,8 +90,9 @@ def normalize_ballot(source, target):
         sorted_choices = sorted(choices_dict.keys())
 
     with target.writing() as ballots:
-        for choice, weight in sorted_choices.items():
-            ballot = weight, choice
+        for choices in sorted_choices:
+            weight = choices_dict[choices]
+            ballot = weight, choices
             ballots.write(ballot)
 
 

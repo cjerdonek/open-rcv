@@ -11,6 +11,7 @@ import datetime
 import logging
 from random import random, sample
 
+from openrcv import models
 from openrcv.models import ContestInput
 from openrcv import utils
 
@@ -124,7 +125,8 @@ def make_candidates(count):
     return names
 
 
-def create_random_contest(ballots_resource, candidate_count=None, ballot_count=None):
+def create_random_contest(ballots_resource, candidate_count=None, ballot_count=None,
+                          normalize=False):
     """Create a random contest.
 
     Returns a ContestInput object.
@@ -135,7 +137,14 @@ def create_random_contest(ballots_resource, candidate_count=None, ballot_count=N
 
     choices = range(1, candidate_count + 1)
     chooser = BallotGenerator(choices=choices)
-    chooser.add_random_ballots(ballots_resource, ballot_count)
+
+    # TODO: use subclassing here instead of an if-block.
+    if normalize:
+        with models.temp_ballots_resource() as source_resource:
+            chooser.add_random_ballots(source_resource, ballot_count)
+            models.normalize_ballots(source_resource, target=ballots_resource)
+    else:
+        chooser.add_random_ballots(ballots_resource, ballot_count)
 
     name = "Random Contest"
 

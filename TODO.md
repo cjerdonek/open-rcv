@@ -1,8 +1,9 @@
 TODO
 ====
 
+* Rename `repr_desc` to `repr_info`.
+* Add auto-generated name for randcontest.
 * Add "stream resource" to docs and clean up related docs.
-* Add tests for ContestInput.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
 * Define a BLT ballot stream resource that shares code with the internal one.

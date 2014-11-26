@@ -134,8 +134,6 @@ class ContestInput(ReprMixin):
             id_ = 0
         if seat_count is None:
             seat_count = 1
-        if name is None:
-            name = "Election Contest"
 
         self.ballots_resource = ballots_resource
         self.candidates = candidates
@@ -145,7 +143,7 @@ class ContestInput(ReprMixin):
         self.seat_count = seat_count
 
     def repr_desc(self):
-        return "name=%r, candidates=%d" % (self.name, len(self.candidates))
+        return "id=%r, name=%r" % (self.id, self.name)
 
     # TODO: give this method a more accurate name.
     def get_candidates(self):

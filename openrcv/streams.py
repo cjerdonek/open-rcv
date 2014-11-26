@@ -29,6 +29,14 @@ from openrcv.utils import logged_open, ReprMixin
 log = logging.getLogger(__name__)
 
 
+class StreamResourceMixin(object):
+
+    def count(self):
+        """Return the number of elements in the stream."""
+        with self.reading() as stream:
+            return sum(1 for item in stream)
+
+
 class TrackedStreamBase(object):
 
     def __init__(self, stream):
@@ -65,7 +73,7 @@ class WriteableListStream(object):
         self.seq.append(obj)
 
 
-class NullStreamResource(ReprMixin):
+class NullStreamResource(StreamResourceMixin, ReprMixin):
 
     """A placeholder stream resource used as a default."""
 

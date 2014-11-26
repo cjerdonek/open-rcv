@@ -8,6 +8,7 @@ from contextlib import contextmanager
 import os
 
 from openrcv.formats.common import Format, FormatWriter
+from openrcv import streams
 from openrcv.streams import StreamResourceBase
 from openrcv.utils import join_values, parse_integer_line, FileWriter, NoImplementation
 
@@ -90,7 +91,8 @@ class _WriteableBallotStream(object):
 
 
 # TODO: get this inheriting from BallotsResourceBase.
-class InternalBallotsResource(object):
+# TODO: add a count_ballots() method that takes weight into account.
+class InternalBallotsResource(streams.StreamResourceMixin):
 
     def __init__(self, resource):
         """
@@ -98,12 +100,6 @@ class InternalBallotsResource(object):
           resource: backing store for the resource.
         """
         self.resource = resource
-
-    # TODO: move this to a StreamResourceMixin.
-    # TODO: add a count_ballots() method that takes weight into account.
-    def count(self):
-        with self.reading() as stream:
-            return sum(1 for item in stream)
 
     @contextmanager
     def reading(self):

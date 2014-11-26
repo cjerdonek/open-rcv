@@ -36,7 +36,8 @@ OpenRCV command-line tool.
 """
 
 OPTION_HELP = Option(('-h', '--help'))
-OPTION_OUTPUT_DIR_METAVAR = "OUTPUT_DIR"
+OPTION_OUTPUT_DIR = Option(('-o', '--output-dir'), "OUTPUT_DIR")
+OPTION_OUTPUT_FORMAT = Option(('-f', '--output-format'), "OUTPUT_FORMAT")
 
 OUTPUT_FORMAT_BLT = 'blt'
 OUTPUT_FORMAT_INTERNAL = 'internal'
@@ -88,32 +89,36 @@ def add_command_randcontest(builder):
     desc = dedent("""\
     Create a random contest.
 
-    This command writes the contest information to stdout.  If {output_dir}
-    is provided, then only the paths to the output files are written to stdout.
-    """.format(output_dir=OPTION_OUTPUT_DIR_METAVAR))
+    This command creates a contest with random ballot data and writes the
+    contest to stdout in the chosen format.  If {output_dir} is provided,
+    then only the paths to the output files are written to stdout.
+    """.format(output_dir=OPTION_OUTPUT_DIR.metavar))
     parser = subparsers.add_parser('randcontest', help=help, description=desc,
                                    add_help=False)
-    default_ballots = 20
-    parser.add_argument('-b', '--ballots', dest='ballot_count', metavar='N', type=int,
-                       help='number of ballots.  Defaults to {:d}.'.format(default_ballots))
     default_candidates = 6
     parser.add_argument('-c', '--candidates', dest='candidate_count', metavar='N',
                         type=int, default=default_candidates,
                         help='number of candidates.  Defaults to {:d}.'.format(default_candidates))
-    parser.add_argument('-o', '--output-dir', metavar=OPTION_OUTPUT_DIR_METAVAR,
+    default_ballots = 20
+    parser.add_argument('-b', '--ballots', dest='ballot_count', metavar='N', type=int,
+                       help='number of ballots.  Defaults to {:d}.'.format(default_ballots))
+    parser.add_argument('-N', '--normalize', action='store_true',
+        help=("whether to normalize the list of ballots, which means "
+              "ordering them lexicographically and grouping identical "
+              "choices using weight."))
+    parser.add_argument(*OPTION_OUTPUT_DIR.flags, metavar=OPTION_OUTPUT_DIR.metavar,
         help=("directory to write output files to.  If the empty string, "
               "writes to stdout.  Defaults to the empty string."))
     # The output formats.
     labels = sorted(formats)
     list_desc = ", ".join((str(formats[label]) for label in labels))
-    parser.add_argument('-f', '--output-format', metavar='OUTPUT_FORMAT',
+    parser.add_argument(*OPTION_OUTPUT_FORMAT.flags, metavar=OPTION_OUTPUT_FORMAT.metavar,
         type=builder.writer_type, default=OUTPUT_FORMAT_DEFAULT,
-        help=("the output format.  Choose from: {!s}. Defaults to: {!r}.".
-              format(list_desc, OUTPUT_FORMAT_DEFAULT)))
-    parser.add_argument('-N', '--normalize', action='store_true',
-        help=("whether to normalize the list of ballots, which means "
-              "to order them lexicographically and group identical "
-              "selections using weight."))
+        help=('the output format.  Choose from: {!s}. Defaults to: "{!s}".'
+              .format(list_desc, OUTPUT_FORMAT_DEFAULT)))
+    parser.add_argument('-j', '--json-contests', metavar='JSON_PATH', dest='json_contests_path',
+        help=("path to a contests.json file.  If provided, also adds the contest "
+              "to the end of the given JSON file."))
     return parser, commands.make_random_contest
 
 

@@ -25,6 +25,7 @@ is the usual default value).
 import json
 import logging
 
+from openrcv import streams
 from openrcv.utils import PathInfo, ReprMixin, ENCODING_JSON
 
 
@@ -60,6 +61,7 @@ def read_json_path(path):
 
 
 # TODO: remove the path argument?
+# TODO: create a write_json_path() function?
 def write_json(obj, resource=None, path=None):
     """
     Arguments:
@@ -72,7 +74,7 @@ def write_json(obj, resource=None, path=None):
         jsobj = obj
     if path is not None:
         assert resource is None
-        resource = JsonPathInfo(path)
+        resource = streams.FilePathResource(path, encoding=ENCODING_JSON)
     with resource.open_write() as f:
         return call_json(json.dump, jsobj, f)
 

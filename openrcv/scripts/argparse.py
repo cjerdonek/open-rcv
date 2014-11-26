@@ -10,13 +10,23 @@ import argparse
 import logging
 
 
-class Option(tuple):
-    """
-    Encapsulates a command option (e.g. "-h" and "--help", or "--run-tests").
+class Option(object):
+
+    """Encapsulates a command option.
+
+    For example: "-h" and "--help", or "--run-tests".
 
     """
+
+    def __init__(self, flags, metavar=None):
+        self.flags = flags
+        self.metavar = metavar
+
+    def __getitem__(self, i):
+        return self.flags[i]
+
     def display(self, glue):
-        return glue.join(self)
+        return glue.join(self.flags)
 
 
 def parse_log_level(name_or_number):

@@ -35,19 +35,8 @@ def temp_ballots_resource():
         yield ballots_resource
 
 
+# TODO: remove this in favor of the ballots resource version.
 def normalized_ballots(lines):
-    """
-    Return an iterator object of normalized internal ballots.
-
-    Returns an iterator object that yields a sequence of internal ballots
-    equivalent to the original, but "compressed" (using the weight component)
-    and ordered lexicographically by the list of choices on each ballot.
-    The iterator returns each internal ballot as a (weight, choices) 2-tuple.
-
-    Arguments:
-      lines: an iterable of lines in an internal ballot file.
-
-    """
     parse_internal_ballot = internal.parse_internal_ballot
     # A dict mapping tuples of choices to the cumulative weight.
     choices_dict = {}
@@ -68,6 +57,38 @@ def normalized_ballots(lines):
             yield weight, choices
 
     return iterator()
+
+
+# TODO: allow ordering and compressing to be done separately.
+def normalize_ballot(source, target):
+    """
+    Normalize ballots by ordering and "compressing" them.
+
+    This function orders the ballots lexicographically by the list of
+    choices on each ballot, and also uses the weight component to "compress"
+    ballots having identical choices.
+
+    Arguments:
+      source: source ballots resource.
+      target: target ballots resource.
+
+    """
+    # A dict mapping tuples of choices to the cumulative weight.
+    choices_dict = {}
+
+    with source.reading() as ballots:
+        for weight, choices in ballots:
+            try:
+                choices_dict[choices] += weight
+            except KeyError:
+                # Then we are adding the choices for the first time.
+                choices_dict[choices] = weight
+        sorted_choices = sorted(choices_dict.keys())
+
+    with target.writing() as ballots:
+        for choice, weight in sorted_choices.items():
+            ballot = weight, choice
+            ballots.write(ballot)
 
 
 class BallotsResourceBase(object):

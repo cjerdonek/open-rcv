@@ -110,6 +110,10 @@ def add_command_randcontest(builder):
         type=builder.writer_type, default=OUTPUT_FORMAT_DEFAULT,
         help=("the output format.  Choose from: {!s}. Defaults to: {!r}.".
               format(list_desc, OUTPUT_FORMAT_DEFAULT)))
+    parser.add_argument('-N', '--normalize', action='store_true',
+        help=("whether to normalize the list of ballots, which means "
+              "to order them lexicographically and group identical "
+              "selections using weight."))
     return parser, commands.make_random_contest
 
 

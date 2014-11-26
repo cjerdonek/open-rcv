@@ -1,8 +1,9 @@
 TODO
 ====
 
+* Add normalized ballots.
+* Add option to add random contest directly to JSON file.
 * Rename `repr_desc` to `repr_info`.
-* Add auto-generated name for randcontest.
 * Add "stream resource" to docs and clean up related docs.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.

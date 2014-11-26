@@ -398,7 +398,7 @@ class StandardResource(StreamResourceBase):
     def __init__(self, file_):
         self.file = file_
 
-    # def repr_desc(self):
+    # def repr_info(self):
     #     return "stream=%r" % self.file
 
     @contextmanager
@@ -429,7 +429,7 @@ class StringResource(StreamResourceBase):
     # TODO: include the length in characters.
     # TODO: include the initial content in the repr.
 
-    # def repr_desc(self):
+    # def repr_info(self):
     #     return "contents=%s" % (self.get_display_value(10), )
     #
     # def get_display_value(self, limit=None):

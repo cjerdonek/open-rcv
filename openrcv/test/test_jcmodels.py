@@ -30,7 +30,7 @@ class JsonCaseBallotTest(UnitCase):
         ballot = JsonCaseBallot(choices=[1, 2])
         self.assertEqual(ballot.choices, (1, 2))
 
-    def test_repr_desc(self):
+    def test_repr_info(self):
         cases = [
             (3, (1, 2), "weight=3 choices=(1, 2)"),
             (None, None, "weight=None choices=None"),
@@ -40,7 +40,7 @@ class JsonCaseBallotTest(UnitCase):
                 ballot = JsonCaseBallot()
                 ballot.choices = choices
                 ballot.weight = weight
-                self.assertEqual(ballot.repr_desc(), expected)
+                self.assertEqual(ballot.repr_info(), expected)
 
     def test_repr(self):
         ballot = JsonCaseBallot(choices=(1, 2), weight=3)

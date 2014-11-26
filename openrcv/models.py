@@ -200,7 +200,7 @@ class ContestInput(ReprMixin):
         self.notes = notes
         self.seat_count = seat_count
 
-    def repr_desc(self):
+    def repr_info(self):
         return "id=%r, name=%r" % (self.id, self.name)
 
     # TODO: give this method a more accurate name.
@@ -232,5 +232,5 @@ class ContestResults(ReprMixin):
     def __init__(self, rounds=None):
         self.rounds = rounds
 
-    def repr_desc(self):
+    def repr_info(self):
         return "rounds=%s" % (len(self.rounds), )

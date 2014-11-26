@@ -1,9 +1,7 @@
 TODO
 ====
 
-* Add option to add random contest directly to JSON file.
-* Rename `repr_desc` to `repr_info`.
-* Add "stream resource" to docs and clean up related docs.
+* Remove cruft from utils.py.
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
 * Define a BLT ballot stream resource that shares code with the internal one.

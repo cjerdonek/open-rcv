@@ -9,7 +9,7 @@ class ReprMixinTest(UnitCase):
 
     class ReprSample(ReprMixin):
 
-        def repr_desc(self):
+        def repr_info(self):
             return "foo"
 
     def test_repr(self):

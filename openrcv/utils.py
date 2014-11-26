@@ -147,10 +147,10 @@ class ReprMixin(object):
 
     # TODO: look up the proper return type.
     def __repr__(self):
-        desc = self.repr_desc() or "--"
+        desc = self.repr_info() or "--"
         return "<%s: [%s] %s>" % (self.__class__.__name__, desc, hex(id(self)))
 
-    def repr_desc(self):
+    def repr_info(self):
         return None
 
 
@@ -164,7 +164,7 @@ class ObjectExtension(ReprMixin):
     def __getattr__(self, name):
         return getattr(self.object, name)
 
-    def repr_desc(self):
+    def repr_info(self):
         return "object=%r" % self.object
 
 
@@ -259,7 +259,7 @@ class StringInfo(StreamInfo):
     def value(self):
         return self._stream.getvalue()
 
-    def repr_desc(self):
+    def repr_info(self):
         return "contents=%s" % (self.get_display_value(10), )
 
     def get_display_value(self, limit=None):

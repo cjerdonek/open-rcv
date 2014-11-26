@@ -17,7 +17,7 @@ class JsonSample(JsonableMixin):
         self.bar = bar
         self.foo = foo
 
-    def repr_desc(self):
+    def repr_info(self):
         return "bar=%r foo=%r" % (self.bar, self.foo)
 
 
@@ -28,7 +28,7 @@ class ComplexJsonSample(JsonableMixin):
     def __init__(self, simple=None):
         self.simple = simple
 
-    def repr_desc(self):
+    def repr_info(self):
         return "simple=%r" % self.simple
 
 

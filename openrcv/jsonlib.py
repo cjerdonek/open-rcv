@@ -211,7 +211,7 @@ class JsonableMixin(ReprMixin):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def repr_desc(self):
+    def repr_info(self):
         """Return additional info for __repr__()."""
         return ""
 

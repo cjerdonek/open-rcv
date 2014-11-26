@@ -48,7 +48,7 @@ class JsonCaseBallot(JsonableMixin):
         self.choices = tuple(choices)
         self.weight = weight
 
-    def repr_desc(self):
+    def repr_info(self):
         return "weight=%r choices=%r" % (self.weight, self.choices)
 
     def load_object(self, ballot):
@@ -130,7 +130,7 @@ class JsonBallot(JsonableMixin):
         self.choices = tuple(choices)
         self.weight = weight
 
-    def repr_desc(self):
+    def repr_info(self):
         """Return additional info for __repr__()."""
         return "weight=%r choices=%r" % (self.weight, self.choices)
 
@@ -181,7 +181,7 @@ class JsonCaseContestInput(JsonableMixin):
         self.name = name
         self.notes = notes
 
-    def repr_desc(self):
+    def repr_info(self):
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
     def load_object(self, contest):
@@ -236,7 +236,7 @@ class JsonContest(JsonableMixin):
         self.id = id_
         self.notes = notes
 
-    def repr_desc(self):
+    def repr_info(self):
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
     def get_candidates(self):
@@ -273,7 +273,7 @@ class JsonContestFile(JsonableMixin):
         self.contests = contests
         self.version = version
 
-    def repr_desc(self):
+    def repr_info(self):
         return "version=%s contests=%d" % (self.version, len(self.contests))
 
 

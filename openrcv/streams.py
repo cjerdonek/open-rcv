@@ -1,50 +1,72 @@
 
-# TODO: explain what stream resources are and document the API.
-#   Note that they do not need to inherit from StreamResourceBase.
-"""
+"""Exposes core stream-related functionality.
 
-We support writing through a write() method and reading through iteration.
+A "stream resource" is a core concept that is used throughout this project.
+This module exposes many stream resource implementations.
 
-Notes
------
+A stream resource can be viewed as a generalization of a file path in that
+it can be opened for reading to yield a readable stream or opened for
+writing to yield a writeable stream.  It is more general because the
+stream can contain general objects and not just lines of the text.  Stream
+resources can also be backed by things other than files, like plain
+containers like lists and in-memory text streams like io.StringIO objects.
+Stream resources can also be written to transform data while being read
+from or written to the stream.  For example, a stream resource can
+automatically parse the lines of a ballot file or serialize a ballot to text.
 
-In both the list and file cases, resource.open_write() returns a
-stream object that supports a write() method.  How to make the
-resulting stream support tracking?  Answer(?): The stream object's
-write() method needs to support tracking.
+Specifically, a stream resource must implement two methods, reading() and
+writing(), that each return a with-statement context manager [1].  In both
+cases, entering the context manager opens the stream, and exiting closes
+the stream.
 
-Instantiating any stream object should reset the tracking info (i.e. the
-current item and item number).
+For the reading() method, the context manager must yield an iterator object
+for the target `as` expression, in the same way that open(path) yields
+the lines of a file.  Here is a typical example of reading from a stream
+resource named `resource`:
 
-
-Helper functions to support using iterator resources.
-
-In this project, we use the term "iterator resource" to mean a callable
-that returns a with-statement context manager [1], which in turn yields
-an iterator object for the target `as` expression.
-
-Here is a typical example of using an iterator resource `resource`:
-
-    with resource() as items:
-        for item in items:
+    with resource.reading() as stream:
+        for item in stream:
             # Do stuff.
             ...
 
-Unsurprisingly, the above resembles the pattern of opening a file and
-reading its lines.
+Similarly, for the reading() method, the context manager must yield
+a writeable stream for the target `as` expression.  Here is a typical
+example of writing to a stream resource:
 
-Iterator resources are a central concept in this package.  For example,
-for many of our APIs, we encapsulate ballots as an iterator resource
-rather than as a plain iterable.  This lets us access large sets of
-ballots as a file rather having to store them in memory.  By using an
-iterator resource, we can open and close a ballot file in our
-implementations when needed (e.g. using the convenient with statement),
-as opposed to having to open a file handle earlier in the ballot
-processing, and then passing open file objects around our APIs.
+    with resource.writing() as stream:
+        for item in items:
+            stream.write(item)
+            ...
 
-The current module provides helper functions for creating and using
-iterator resources.
+The semantics of the reading() and writing() methods closely resemble those
+of the built-in function open() (with modes "r" and "w", respectively).
 
+
+Advantages
+----------
+
+Encapsulating data as a stream resource has several advantages.
+First and foremost, it simplifies our high-level code.  Stream resources
+let us write high-level code that is independent of whether the stream is
+backed by a file on disk or in memory as an in-memory text stream
+or container.  For example, this lets us easily write unit tests that
+use in-memory structures as opposed to writing to disk.
+
+Moreover, in the case of files especially, stream resources let us write
+code that is blind to what particular serialization format is being used.
+For example, ballot-counting code can deal with ballots independent of
+how they are being stored or serialized.  The same code can be used whether
+the ballots are being read from a BLT-formatted file or a WinEDS file.
+
+In addition, stream resources let us delay the opening of streams to only
+when they are needed.  Instead of opening a stream early and passing the
+open stream into an API, a stream resource can be passed into the API, and
+the API's implementation can open the stream (e.g. using
+`with resource.reading() as stream`).  This pattern lets us iterate over
+large sets of ballots without having to store them in memory all at once.
+
+
+TODO: decide whether we need to inherit from StreamResourceBase.
 
 [1]: https://docs.python.org/3/library/contextlib.html
 """

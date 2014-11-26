@@ -16,7 +16,6 @@ import logging
 import tempfile
 
 from openrcv.formats import internal
-from openrcv.resource import tracking
 from openrcv import streams
 from openrcv.streams import NullStreamResource, ReadWriteFileResource
 from openrcv.utils import ReprMixin
@@ -123,8 +122,7 @@ class BallotsResourceBase(object):
     @contextmanager
     def __call__(self):
         with self.resource() as items:
-            with tracking(items, self.item_name) as tracked_items:
-                yield tracked_items
+            yield items
 
 
 # TODO: use the same class as BallotStreamResource.
@@ -161,11 +159,10 @@ class BallotStreamResource(BallotsResourceBase):
 
     @contextmanager
     def resource(self):
-        with self.stream_info.open() as f:
-            with tracking(f, 'line') as lines:
-                parse = self.parse
-                ballots = map(parse, lines)
-                yield ballots
+        with self.stream_info.open() as lines:
+            parse = self.parse
+            ballots = map(parse, lines)
+            yield ballots
 
 
 # TODO: add id and notes.

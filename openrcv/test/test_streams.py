@@ -50,26 +50,29 @@ class StreamResourceTestMixin(object):
                 items = tuple(stream)
             self.assertEqual(items, ("a\n", "b\n"))
             # Check that you can read again.
-            with resource.reading() as stream:
-                items = tuple(stream)
+            with resource.reading() as stream2:
+                items = tuple(stream2)
             self.assertEqual(items, ("a\n", "b\n"))
+            # Sanity-check that reading() doesn't return the same object each time.
+            self.assertIsNot(stream, stream2)
 
-    def test_reading__exhausts(self):
-        """
-        Check that iterating through the stream exhausts it, i.e.
-        that stream is an iterator object.
+    def test_reading__iterator(self):
+        """Check that reading() returns an iterator [1].
+
+        [1]: https://docs.python.org/3/glossary.html#term-iterator
         """
         with self.resource() as resource:
             with resource.reading() as stream:
-                items1 = tuple(stream)
-                items2 = tuple(stream)
-            self.assertEqual(items1, ("a\n", "b\n"))
-            self.assertEqual(items2, ())
+                # Check that __iter__() returns itself.
+                self.assertIs(iter(stream), stream)
+                # Check that the iterable exhausts after iteration.
+                items = tuple(stream)
+                with self.assertRaises(StopIteration):
+                    next(stream)
+            self.assertEqual(items, ("a\n", "b\n"))
 
     def test_reading__error(self):
-        """
-        Check that an error while reading shows the line number.
-        """
+        """Check that an error while reading shows the line number."""
         with self.assertRaises(FooException) as cm:
             with self.resource() as resource:
                 with resource.reading() as stream:
@@ -92,9 +95,7 @@ class StreamResourceTestMixin(object):
             self.assertEqual(items, ('c\n', 'd\n'))
 
     def test_writing__deletes(self):
-        """
-        Check that writing() deletes the current data.
-        """
+        """Check that writing() deletes the current data."""
         with self.resource() as resource:
             with resource.reading() as stream:
                 items = tuple(stream)
@@ -106,9 +107,7 @@ class StreamResourceTestMixin(object):
             self.assertEqual(items, ())
 
     def test_writing__error(self):
-        """
-        Check that an error while writing shows the line number.
-        """
+        """Check that an error while writing shows the line number."""
         with self.assertRaises(ValueError) as cm:
             with self.resource() as resource:
                 with resource.writing() as stream:

@@ -1,8 +1,7 @@
 
 # TODO: explain what stream resources are and document the API.
 #   Note that they do not need to inherit from StreamResourceBase.
-'''
-This module is **experimental**.
+"""
 
 We support writing through a write() method and reading through iteration.
 
@@ -17,7 +16,38 @@ write() method needs to support tracking.
 Instantiating any stream object should reset the tracking info (i.e. the
 current item and item number).
 
-'''
+
+Helper functions to support using iterator resources.
+
+In this project, we use the term "iterator resource" to mean a callable
+that returns a with-statement context manager [1], which in turn yields
+an iterator object for the target `as` expression.
+
+Here is a typical example of using an iterator resource `resource`:
+
+    with resource() as items:
+        for item in items:
+            # Do stuff.
+            ...
+
+Unsurprisingly, the above resembles the pattern of opening a file and
+reading its lines.
+
+Iterator resources are a central concept in this package.  For example,
+for many of our APIs, we encapsulate ballots as an iterator resource
+rather than as a plain iterable.  This lets us access large sets of
+ballots as a file rather having to store them in memory.  By using an
+iterator resource, we can open and close a ballot file in our
+implementations when needed (e.g. using the convenient with statement),
+as opposed to having to open a file handle earlier in the ballot
+processing, and then passing open file objects around our APIs.
+
+The current module provides helper functions for creating and using
+iterator resources.
+
+
+[1]: https://docs.python.org/3/library/contextlib.html
+"""
 
 from contextlib import contextmanager
 from io import StringIO
@@ -28,6 +58,46 @@ from openrcv.utils import logged_open, ReprMixin
 
 
 log = logging.getLogger(__name__)
+
+
+# TODO: remove this after thinking about whether it would be useful.
+def pipe_resource(resource, pipe_func):
+    """
+    Pipe a resource's iterator object through a function.
+
+    Create an iterator resource that passes the iterator object from the
+    given iterator resource through the given pipe function.
+
+    Arguments:
+      pip_func: a function that accepts an iterable and returns an
+        iterator object.
+      resource: an iterator resource.
+    """
+    return _PipedResource(resource, pipe_func)
+
+
+# TODO: remove this after thinking about whether it would be useful.
+class _PipedResource(object):
+
+    """
+    An iterator resource in which the target iterable is passed to a pipe
+    function (i.e. as a post-process).
+    """
+
+    def __init__(self, resource, pipe_func):
+        """
+        Arguments:
+          pip_func: a function that accepts an iterable and returns an
+            iterator object.
+          resource: an iterator resource.
+        """
+        self.pipe_func = pipe_func
+        self.resource = resource
+
+    @contextmanager
+    def __call__(self):
+        with self.resource() as items:
+            yield self.pipe_func(items)
 
 
 class StreamResourceMixin(object):
@@ -118,6 +188,13 @@ class StreamResourceBase(ReprMixin):
 
     @contextmanager
     def track_reading(self, stream):
+        """
+        Return a with-statement context manager for an iterable that provides
+        item-level information when an exception occurs.
+
+        The context manager yields an iterator object for the target `as`
+        expression that we call a "tracked iterator."
+        """
         tracked = ReadableTrackedStream(stream)
         try:
             yield tracked

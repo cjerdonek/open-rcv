@@ -7,6 +7,7 @@ in the open-rcv-tests repo.
 
 """
 
+import datetime
 import logging
 from random import random, sample
 
@@ -133,7 +134,15 @@ def create_random_contest(ballots_resource, candidate_count=None,
     chooser = BallotGenerator(choices=choices)
     chooser.add_random_ballots(ballots_resource, ballot_count)
 
-    contest = ContestInput(candidates=candidates, ballots_resource=ballots_resource)
+    name = "Random Contest"
+
+    now = datetime.datetime.now()
+    # We call int() to remove leading zero-padding.
+    dt_string = '{0:%B} {0:%d}, {0:%Y} {1:d}:{0:%M:%S%p}'.format(now, int(now.strftime("%I")))
+    notes = ("Created with: {0:d} candidates, {1:d} ballots on {2}."
+             .format(candidate_count, ballot_count, dt_string))
+
+    contest = ContestInput(name=name, notes=notes, candidates=candidates, ballots_resource=ballots_resource)
 
     return contest
 

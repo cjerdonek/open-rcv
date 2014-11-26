@@ -125,7 +125,7 @@ class ContestInput(ReprMixin):
 
     # TODO: test defaults -- especially properties of default ballots resource.
     def __init__(self, id_=None, name=None, candidates=None, seat_count=None,
-                 ballots_resource=None):
+                 ballots_resource=None, notes=None):
         if ballots_resource is None:
             ballots_resource = NullStreamResource()
         if candidates is None:
@@ -139,7 +139,7 @@ class ContestInput(ReprMixin):
         self.candidates = candidates
         self.id = id_
         self.name = name
-        self.notes = None
+        self.notes = notes
         self.seat_count = seat_count
 
     def repr_desc(self):

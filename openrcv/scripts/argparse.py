@@ -1,9 +1,7 @@
 
-"""
-Extensions to the argparse module.
+"""Extensions to the argparse module.
 
 This module contains generic functionality not specific to OpenRCV.
-
 """
 
 import argparse
@@ -15,7 +13,6 @@ class Option(object):
     """Encapsulates a command option.
 
     For example: "-h" and "--help", or "--run-tests".
-
     """
 
     def __init__(self, flags, metavar=None):
@@ -30,10 +27,7 @@ class Option(object):
 
 
 def parse_log_level(name_or_number):
-    """
-    Return the log level number associated to a string name or number.
-
-    """
+    """Return the log level number associated to a string name or number."""
     try:
         return int(name_or_number)
     except ValueError:
@@ -48,10 +42,7 @@ def parse_log_level(name_or_number):
 
 class UsageException(Exception):
 
-    """
-    Exception class for command-line syntax errors.
-
-    """
+    """Exception class for command-line syntax errors."""
 
     def __init__(self, *args, parser=None):
         super().__init__(*args)
@@ -87,8 +78,5 @@ class ArgParser(argparse.ArgumentParser):
     # The base class implementation prints the usage string and exits
     # with status code 2.
     def error(self, message):
-        """
-        Handle an error occurring while parsing command arguments.
-
-        """
+        """Handle an error occurring while parsing command arguments."""
         raise UsageException(message, parser=self)

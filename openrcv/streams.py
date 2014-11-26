@@ -4,20 +4,26 @@
 A "stream resource" is a core concept that is used throughout this project.
 This module exposes many stream resource implementations.
 
-A stream resource can be viewed as a generalization of a file path in that
-it can be opened for reading to yield a readable stream or opened for
-writing to yield a writeable stream.  It is more general because the
-stream can contain general objects and not just lines of the text.  Stream
-resources can also be backed by things other than files, like plain
+A stream resource can be viewed as a generalization of a file path.
+It can be opened for reading to yield a readable stream or opened for
+writing to yield a writeable stream.  It is more general than a file
+because the stream can contain any objects and not just lines of the text.
+Stream resources can also be backed by things other than files, like plain
 containers like lists and in-memory text streams like io.StringIO objects.
-Stream resources can also be written to transform data while being read
-from or written to the stream.  For example, a stream resource can
-automatically parse the lines of a ballot file or serialize a ballot to text.
 
-Specifically, a stream resource must implement two methods, reading() and
-writing(), that each return a with-statement context manager [1].  In both
-cases, entering the context manager opens the stream, and exiting closes
-the stream.
+Stream resources can also be written to transform data while reading from
+and writing to the stream.  For example, a stream resource can
+automatically parse the lines of a ballot file or serialize a ballot to text.
+In this case, the caller only interacts with the deserialized data.
+The stream resource takes care of the rest.
+
+
+API
+---
+
+A stream resource must implement two methods, reading() and writing(), that
+each return a with-statement context manager [1].  In both cases, entering
+the context manager opens the stream, and exiting closes the stream.
 
 For the reading() method, the context manager must yield an iterator object
 for the target `as` expression, in the same way that open(path) yields

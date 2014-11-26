@@ -3,31 +3,13 @@ from textwrap import dedent
 import unittest
 
 from openrcv.counting import (count_internal_ballots, get_lowest, get_majority,
-                              get_winner, normalized_ballots, InternalBallotsNormalizer)
+                              get_winner, InternalBallotsNormalizer)
 from openrcv.models import RoundResults
 from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
 class ModuleTest(UnitCase):
-
-    def test_normalized_ballots(self):
-        # This test case simultaneously checks all of (1) "compressing" (by
-        # weight), (2) lexicographically ordering by choice (and not
-        # by weight), and (3) ballots with no choices (aka undervotes).
-        lines = dedent("""\
-            1 2
-            1
-            1 3
-            2
-            4 1
-            1 2
-            """).splitlines(keepends=True)
-        normalized = normalized_ballots(lines)
-        # Check that it returns a generator iterator and not a concrete
-        # list/tuple/etc.
-        self.assertEqual(type(normalized), type((x for x in ())))
-        self.assertEqual(list(normalized), [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))])
 
     def test_count_internal_ballots(self):
         internal_ballots = dedent("""\

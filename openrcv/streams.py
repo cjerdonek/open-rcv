@@ -90,8 +90,7 @@ log = logging.getLogger(__name__)
 
 # TODO: remove this after thinking about whether it would be useful.
 def pipe_resource(resource, pipe_func):
-    """
-    Pipe a resource's iterator object through a function.
+    """Pipe a resource's iterator object through a function.
 
     Create an iterator resource that passes the iterator object from the
     given iterator resource through the given pipe function.
@@ -107,8 +106,7 @@ def pipe_resource(resource, pipe_func):
 # TODO: remove this after thinking about whether it would be useful.
 class _PipedResource(object):
 
-    """
-    An iterator resource in which the target iterable is passed to a pipe
+    """An iterator resource in which the target iterable is passed to a pipe
     function (i.e. as a post-process).
     """
 
@@ -192,8 +190,7 @@ class NullStreamResource(StreamResourceMixin, ReprMixin):
 #   and separate out the tracking part using a lighter-weight pattern.
 class StreamResourceBase(ReprMixin):
 
-    """
-    Abstract base class for stream resources.
+    """Abstract base class for stream resources.
 
     A stream resource is an object that encapsulates a stream that can
     be opened for reading or writing.  The backing store for the stream
@@ -216,8 +213,7 @@ class StreamResourceBase(ReprMixin):
 
     @contextmanager
     def track_reading(self, stream):
-        """
-        Return a with-statement context manager for an iterable that provides
+        """Return a with-statement context manager for an iterable that provides
         item-level information when an exception occurs.
 
         The context manager yields an iterator object for the target `as`
@@ -241,8 +237,7 @@ class StreamResourceBase(ReprMixin):
 
     @contextmanager
     def reading(self):
-        """
-        Return a context manager that yields a readable stream.
+        """Return a context manager that yields a readable stream.
 
         Here, "readable stream" means an iterator object over the elements
         of the backing store.
@@ -254,8 +249,7 @@ class StreamResourceBase(ReprMixin):
 
     @contextmanager
     def writing(self):
-        """
-        Return a context manager that yields a writeable stream.
+        """Return a context manager that yields a writeable stream.
 
         Return a writeable stream.
 
@@ -345,6 +339,13 @@ class ReadWriteFileResource(StreamResourceBase):
 
 @contextmanager
 def temp_stream_resource():
+    """Return a context manager for a temporary stream resource.
+
+    Entering the context manager yields a stream resource without
+    actually opening a file handle.  Rather, the file is opened lazily,
+    i.e. when the stream resource is first opened for reading or writing.
+    Exiting the context manager closes the file handle if it is open.
+    """
     resource = _TempFileResource()
     try:
         yield resource
@@ -415,8 +416,7 @@ class StandardResource(StreamResourceBase):
 # TODO: add more to the repr and test.
 class StringResource(StreamResourceBase):
 
-    """
-    A stream resource backed by an in-memory text stream.
+    """A stream resource backed by an in-memory text stream.
 
     This class allows functions that accept a PathInfo object to be called
     using strings.  In particular, writing to disk and creating temporary

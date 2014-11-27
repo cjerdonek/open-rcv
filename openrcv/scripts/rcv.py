@@ -16,6 +16,7 @@ from openrcv.formats.internal import InternalFormat
 from openrcv.formats.jscase import JsonCaseFormat
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
+from openrcv import utils
 
 
 # For better compatibility with Python 3.4.1, we rely more on the number
@@ -71,55 +72,110 @@ def add_help(parser):
         help='show this help message and exit.')
 
 
-def add_command_count(builder):
-    subparsers = builder.subparsers
-    parser = subparsers.add_parser('count', help='Tally one or more contests.',
-        description='Tally the contests specified by the contests file at INPUT_PATH.',
-        add_help=False)
-    parser.add_argument('input_path', metavar='INPUT_PATH',
-        help=("path to a contests configuration file. Supported file "
-              "formats are JSON (*.json) and YAML (*.yaml or *.yml)."))
-    return parser, commands.count
+class CommandBase(object):
+
+    def __init__(self, builder):
+        """
+        Arguments:
+          builder: an ArgParserBuilder object.
+        """
+        self.builder = builder
+
+    def add_arguments(self, parser):
+        raise utils.NoImplementation(self)
+
+    def add(self):
+        """Add the command to subparsers."""
+        subparsers = self.builder.subparsers
+        parser = subparsers.add_parser(self.name, help=self.help, description=self.desc,
+                                       add_help=False)
+        self.add_arguments(parser)
+        # The RawDescriptionHelpFormatter preserves line breaks in the
+        # description and epilog strings.
+        parser.formatter_class = RawDescriptionHelpFormatter
+        parser.set_defaults(run_command=self.func)
+        add_help(parser)
 
 
-def add_command_randcontest(builder):
-    subparsers = builder.subparsers
-    formats = builder.formats
-    help = 'Create a random sample contest.'
-    desc = dedent("""\
-    Create a random contest.
+class CountCommand(CommandBase):
 
-    This command creates a contest with random ballot data and writes the
-    contest to stdout in the chosen format.  If {output_dir} is provided,
-    then only the paths to the output files are written to stdout.
-    """.format(output_dir=OPTION_OUTPUT_DIR.metavar))
-    parser = subparsers.add_parser('randcontest', help=help, description=desc,
-                                   add_help=False)
-    default_candidates = 6
-    parser.add_argument('-c', '--candidates', dest='candidate_count', metavar='N',
-                        type=int, default=default_candidates,
-                        help='number of candidates.  Defaults to {:d}.'.format(default_candidates))
-    default_ballots = 20
-    parser.add_argument('-b', '--ballots', dest='ballot_count', metavar='N', type=int,
-                       help='number of ballots.  Defaults to {:d}.'.format(default_ballots))
-    parser.add_argument('-N', '--normalize', action='store_true',
-        help=("whether to normalize the list of ballots, which means "
-              "ordering them lexicographically and grouping identical "
-              "choices using weight."))
-    parser.add_argument(*OPTION_OUTPUT_DIR.flags, metavar=OPTION_OUTPUT_DIR.metavar,
-        help=("directory to write output files to.  If the empty string, "
-              "writes to stdout.  Defaults to the empty string."))
-    # The output formats.
-    labels = sorted(formats)
-    list_desc = ", ".join((str(formats[label]) for label in labels))
-    parser.add_argument(*OPTION_OUTPUT_FORMAT.flags, metavar=OPTION_OUTPUT_FORMAT.metavar,
-        type=builder.writer_type, default=OUTPUT_FORMAT_DEFAULT,
-        help=('the output format.  Choose from: {!s}. Defaults to: "{!s}".'
-              .format(list_desc, OUTPUT_FORMAT_DEFAULT)))
-    parser.add_argument('-j', '--json-contests', metavar='JSON_PATH', dest='json_contests_path',
-        help=("path to a contests.json file.  If provided, also adds the contest "
-              "to the end of the given JSON file."))
-    return parser, commands.make_random_contest
+    name = "count"
+    help = "Tally one or more contests."
+
+    @property
+    def func(self):
+        return commands.count
+
+    desc = "Tally the contests specified by the contests file at INPUT_PATH."
+
+    def add_arguments(self, parser):
+        parser.add_argument('input_path', metavar='INPUT_PATH',
+            help=("path to a contests configuration file. Supported file "
+                  "formats are JSON (*.json) and YAML (*.yaml or *.yml)."))
+
+
+class RandContestCommand(CommandBase):
+
+    name = "randcontest"
+    help = "Create a random sample contest."
+
+    @property
+    def func(self):
+        return commands.make_random_contest
+
+    @property
+    def desc(self):
+        return dedent("""\
+            Create a random contest.
+
+            This command creates a contest with random ballot data and writes the
+            contest to stdout in the chosen format.  If {output_dir} is provided,
+            then only the paths to the output files are written to stdout.
+            """.format(output_dir=OPTION_OUTPUT_DIR.metavar))
+
+    def add_arguments(self, parser):
+        default_candidates = 6
+        default_ballots = 20
+        builder = self.builder
+        formats = builder.formats
+        parser.add_argument('-c', '--candidates', dest='candidate_count', metavar='N',
+                            type=int, default=default_candidates,
+                            help='number of candidates.  Defaults to {:d}.'.format(default_candidates))
+        parser.add_argument('-b', '--ballots', dest='ballot_count', metavar='N', type=int,
+                           help='number of ballots.  Defaults to {:d}.'.format(default_ballots))
+        parser.add_argument('-N', '--normalize', action='store_true',
+            help=("whether to normalize the list of ballots, which means "
+                  "ordering them lexicographically and grouping identical "
+                  "choices using weight."))
+        parser.add_argument(*OPTION_OUTPUT_DIR.flags, metavar=OPTION_OUTPUT_DIR.metavar,
+            help=("directory to write output files to.  If the empty string, "
+                  "writes to stdout.  Defaults to the empty string."))
+        # The output formats.
+        labels = sorted(formats)
+        list_desc = ", ".join((str(formats[label]) for label in labels))
+        parser.add_argument(*OPTION_OUTPUT_FORMAT.flags, metavar=OPTION_OUTPUT_FORMAT.metavar,
+            type=builder.writer_type, default=OUTPUT_FORMAT_DEFAULT,
+            help=('the output format.  Choose from: {!s}. Defaults to: "{!s}".'
+                  .format(list_desc, OUTPUT_FORMAT_DEFAULT)))
+        parser.add_argument('-j', '--json-contests', metavar='JSON_PATH', dest='json_contests_path',
+            help=("path to a contests.json file.  If provided, also adds the contest "
+                  "to the end of the given JSON file."))
+
+
+class CleanContestsCommand(CommandBase):
+
+    name = "cleancontests"
+    help = "Clean and normalize a contests.json file."
+    desc = help
+
+    @property
+    def func(self):
+        return commands.clean_contests
+
+    def add_arguments(self, parser):
+        parser.add_argument('input_path', metavar='INPUT_PATH',
+            help=("path to a contests configuration file. Supported file "
+                  "formats are JSON (*.json) and YAML (*.yaml or *.yml)."))
 
 
 # TODO: unit-test print_help().
@@ -146,14 +202,16 @@ def create_argparser(prog="rcv"):
                                        description=desc)
     subparsers.formatter_class = RawDescriptionHelpFormatter
 
-    add_funcs = (
-        add_command_count,
-        add_command_randcontest,
-    )
+    command_classes = [
+        CountCommand,
+        RandContestCommand,
+        CleanContestsCommand,
+    ]
 
     builder = ArgParserBuilder(subparsers)
-    for add_func in add_funcs:
-        builder.add_command(add_func)
+    for cls in command_classes:
+        command = cls(builder)
+        command.add()
 
     return parser
 
@@ -187,16 +245,6 @@ class ArgParserBuilder(object):
             raise argparse.ArgumentTypeError("\ninvalid argument choice: %r "
                 "(choose from: %s)" % (label, ", ".join(labels)))
         return format.cls
-
-    def add_command(self, add_func):
-        parser, command_func = add_func(self)
-        # The RawDescriptionHelpFormatter preserves line breaks in the
-        # description and epilog strings.
-        parser.formatter_class = RawDescriptionHelpFormatter
-        parser.set_defaults(run_command=command_func)
-        # TODO: DRY up the fact that add_help=False needs to be added
-        # when adding each command.
-        add_help(parser)
 
 
 class RcvArgumentParser(ArgParser):

@@ -151,14 +151,16 @@ class _ContestCreatorBase(object):
 
         now = datetime.datetime.now()
         # We call int() to remove leading zero-padding.
-        dt_string = '{0:%B} {0:%d}, {0:%Y} {1:d}:{0:%M:%S%p}'.format(now, int(now.strftime("%I")))
+        dt_string = ('{0:%B} {0:%d}, {0:%Y} {1:d}:{0:%M:%S%p}'
+                     .format(now, int(now.strftime("%I"))))
         notes = [
             "Contest has {0:d} candidates and {1:d} ballots.  {2}"
             .format(candidate_count, ballot_count, self.notes),
             "Created on {0}.".format(dt_string),
         ]
 
-        contest = ContestInput(name=name, notes=notes, candidates=candidates, ballots_resource=ballots_resource)
+        contest = ContestInput(name=name, notes=notes, candidates=candidates,
+                               ballots_resource=ballots_resource)
 
         return contest
 

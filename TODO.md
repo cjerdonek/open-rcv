@@ -1,7 +1,8 @@
 TODO
 ====
 
-* Remove cruft from utils.py.
+* Work on cleancontests command.
+* Remove cruft from utils.py (specifically StreamInfo).
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
 * Define a BLT ballot stream resource that shares code with the internal one.

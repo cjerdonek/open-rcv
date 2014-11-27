@@ -46,12 +46,8 @@ def make_random_contest(ns, stdout=None):
     if stdout is None:
         stdout = sys.stdout
 
-    if ns.json_contests_path:
-        output_dir = None
-        format_cls = jscase.JsonCaseFormat
-    else:
-        output_dir = ns.output_dir
-        format_cls = ns.output_format
+    output_dir = ns.output_dir
+    format_cls = ns.output_format
 
     format = format_cls()
 
@@ -73,3 +69,8 @@ def make_random_contest(ns, stdout=None):
             jsonlib.write_json(data, path=json_path)
 
     return "\n".join(output_paths) + "\n" if output_paths else None
+
+
+def clean_contests(ns, stdout=None):
+    # TODO
+    pass

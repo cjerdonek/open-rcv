@@ -19,13 +19,12 @@ from openrcv.scripts.run import main as _main
 from openrcv import utils
 
 
-# For better compatibility with Python 3.4.1, we rely more on the number
-# than the string representation.  This is because in Python 3.4 (but
-# fixedin 3.4.2), you could not use logging.getLevelName() to get the
-# level number for a level name.  Travis CI was also uing 3.4.1 as of
-# Oct. 26, 2014.
-#  For more info, see:
-#    http://bugs.python.org/issue22386"
+# For increased compatibility (specifically with Python 3.4 <= 3.4.1),
+# we rely primarily on the log level number rather than the string name.
+# This is because in Python 3.4 (but fixed in 3.4.2), you could not use
+# logging.getLevelName() to obtain the level number from a level name.
+# Travis CI was using 3.4.1 as of Oct. 26, 2014.  For more info, see--
+#   http://bugs.python.org/issue22386"
 LOG_LEVEL_DEFAULT = 20  # corresponds to INFO.
 LOG_LEVEL_DEFAULT_NAME = logging.getLevelName(LOG_LEVEL_DEFAULT)
 # The log level that should be used if the ArgumentParser raises a UsageException.
@@ -140,9 +139,11 @@ class RandContestCommand(CommandBase):
         formats = builder.formats
         parser.add_argument('-c', '--candidates', dest='candidate_count', metavar='N',
                             type=int, default=default_candidates,
-                            help='number of candidates.  Defaults to {:d}.'.format(default_candidates))
+                            help=('number of candidates.  Defaults to {:d}.'
+                                  .format(default_candidates)))
         parser.add_argument('-b', '--ballots', dest='ballot_count', metavar='N', type=int,
-                           help='number of ballots.  Defaults to {:d}.'.format(default_ballots))
+                           help=('number of ballots.  Defaults to {:d}.'
+                                 .format(default_ballots)))
         parser.add_argument('-N', '--normalize', action='store_true',
             help=("whether to normalize the list of ballots, which means "
                   "ordering them lexicographically and grouping identical "
@@ -157,11 +158,14 @@ class RandContestCommand(CommandBase):
             type=builder.writer_type, default=OUTPUT_FORMAT_DEFAULT,
             help=('the output format.  Choose from: {!s}. Defaults to: "{!s}".'
                   .format(list_desc, OUTPUT_FORMAT_DEFAULT)))
-        parser.add_argument('-j', '--json-contests', metavar='JSON_PATH', dest='json_contests_path',
+        parser.add_argument('-j', '--json-contests', metavar='JSON_PATH',
+            dest='json_contests_path',
             help=("path to a contests.json file.  If provided, also adds the contest "
                   "to the end of the given JSON file."))
 
 
+# TODO: allow passing a contest ID to clean up just one contest.
+# TODO: accept a normalize option and default to not normalizing ballots.
 class CleanContestsCommand(CommandBase):
 
     name = "cleancontests"

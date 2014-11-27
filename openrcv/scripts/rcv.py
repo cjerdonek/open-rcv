@@ -166,16 +166,22 @@ class CleanContestsCommand(CommandBase):
 
     name = "cleancontests"
     help = "Clean and normalize a contests.json file."
-    desc = help
 
     @property
     def func(self):
         return commands.clean_contests
 
+    @property
+    def desc(self):
+        return dedent("""\
+            Clean and normalize a contests.json file.
+
+            For example, this command updates the integer contest IDs.
+            """)
+
     def add_arguments(self, parser):
-        parser.add_argument('input_path', metavar='INPUT_PATH',
-            help=("path to a contests configuration file. Supported file "
-                  "formats are JSON (*.json) and YAML (*.yaml or *.yml)."))
+        parser.add_argument('json_contests_path', metavar='JSON_PATH',
+            help=("path to a contests.json file."))
 
 
 # TODO: unit-test print_help().

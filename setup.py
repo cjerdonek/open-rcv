@@ -12,10 +12,7 @@ log = logging.getLogger(os.path.basename(__file__))
 
 
 def configure_logging():
-    """
-    Configure setup.py logging with simple settings.
-
-    """
+    """Configure setup.py logging with simple settings."""
     # Prefix the log messages to distinguish them from other text sent to
     # the error stream.
     format_string = ("%s: %%(name)s: [%%(levelname)s] %%(message)s" %

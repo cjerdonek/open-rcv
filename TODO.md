@@ -1,14 +1,12 @@
 TODO
 ====
 
-* Work on cleancontests command.
+* Work on cleancontests command (need to examine add'l JsonCase* objects).
 * Remove cruft from utils.py (specifically StreamInfo).
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
 * Define a BLT ballot stream resource that shares code with the internal one.
-* Add "samplecontest" command so people can play with using it.
-  - Also add "random election" command.
-* Get rid of rcvgen.
+* Add "samplecontest" command so people can play with using it?
 * Allow test logging messages to show (e.g. skips).
 * Add extra command options from molt.
 * Fix up remaining PyPI release instructions and commit.

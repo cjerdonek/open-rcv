@@ -5,17 +5,18 @@ A "stream resource" is a core concept used throughout this project.
 This module exposes many stream resource implementations.
 
 A stream resource can be viewed as a generalization of a file path:
-it can be opened for reading to yield a readable stream or opened for
+it can be opened for reading to yield a readable stream, or opened for
 writing to yield a writeable stream.  It is more general than a file
-because the stream can contain any objects and not just lines of the text.
-Stream resources can also be backed by things other than files, like plain
-containers like lists and in-memory text streams like io.StringIO objects.
+because the stream can contain any objects and not just lines of text.
+Also, the backing store for a stream resource can be something other
+than a file.  For example, it can be backed by a container object like
+a list or an in-memory text stream like an io.StringIO object.
 
-Stream resources can also be written to transform data while reading from
-and writing to the stream.  For example, a stream resource can
-automatically parse the lines of a ballot file or serialize a ballot to text.
-In this case, the caller only interacts with the deserialized data.
-The stream resource takes care of the rest.
+Stream resources can also be written to transform data when reading and
+writing from a stream.  For example, a stream resource can parse the lines
+of a ballot file or serialize a ballot to text.  In this case, the caller
+only interacts with the deserialized data.  The stream resource takes
+care of the rest.
 
 
 API
@@ -26,16 +27,16 @@ each return a with-statement context manager [1].  In both cases, entering
 the context manager opens the stream, and exiting closes the stream.
 
 For the reading() method, the context manager must yield an iterator object
-for the target `as` expression, in the same way that open(path) yields
-an iterator object over the lines of a file.  Here is a typical example
-of reading from a stream resource named `resource`:
+for the target `as` expression, in the same way that calling the built-in
+function `open(path)` yields an iterator object over the lines of a file.
+Here is a typical example of reading from a stream resource named `resource`:
 
     with resource.reading() as stream:
         for item in stream:
             # Do stuff.
             ...
 
-Similarly, for the reading() method, the context manager must yield
+Similarly, for the writing() method, the context manager must yield
 a writeable stream for the target `as` expression.  Here is a typical
 example of writing to a stream resource:
 

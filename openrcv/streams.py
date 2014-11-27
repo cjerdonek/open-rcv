@@ -1,11 +1,11 @@
 
 """Exposes core stream-related functionality.
 
-A "stream resource" is a core concept that is used throughout this project.
+A "stream resource" is a core concept used throughout this project.
 This module exposes many stream resource implementations.
 
-A stream resource can be viewed as a generalization of a file path.
-It can be opened for reading to yield a readable stream or opened for
+A stream resource can be viewed as a generalization of a file path:
+it can be opened for reading to yield a readable stream or opened for
 writing to yield a writeable stream.  It is more general than a file
 because the stream can contain any objects and not just lines of the text.
 Stream resources can also be backed by things other than files, like plain
@@ -27,8 +27,8 @@ the context manager opens the stream, and exiting closes the stream.
 
 For the reading() method, the context manager must yield an iterator object
 for the target `as` expression, in the same way that open(path) yields
-the lines of a file.  Here is a typical example of reading from a stream
-resource named `resource`:
+an iterator object over the lines of a file.  Here is a typical example
+of reading from a stream resource named `resource`:
 
     with resource.reading() as stream:
         for item in stream:

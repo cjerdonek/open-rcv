@@ -55,10 +55,12 @@ def make_random_contest(ns, stdout=None):
 
     format = format_cls()
 
+    creator_cls = (datagen.NormalizedContestCreator if ns.normalize else
+                   datagen.ContestCreator)
+    creator = creator_cls()
     with models.temp_ballots_resource() as ballots_resource:
-        contest = datagen.create_random_contest(ballots_resource,
-            ballot_count=ns.ballot_count, candidate_count=ns.candidate_count,
-            normalize=ns.normalize)
+        contest = creator.create_random(ballots_resource, ballot_count=ns.ballot_count,
+            candidate_count=ns.candidate_count)
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
 
         # TODO: refactor this out.

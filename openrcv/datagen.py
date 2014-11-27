@@ -7,6 +7,7 @@ in the open-rcv-tests repo.
 
 """
 
+from contextlib import contextmanager
 import datetime
 import logging
 from random import random, sample
@@ -125,41 +126,65 @@ def make_candidates(count):
     return names
 
 
-def create_random_contest(ballots_resource, candidate_count=None, ballot_count=None,
-                          normalize=False):
-    """Create a random contest.
+class _ContestCreatorBase(object):
 
-    Returns a ContestInput object.
-    """
-    if ballot_count is None:
-        ballot_count = 20
-    candidates = make_candidates(candidate_count)
+    @contextmanager
+    def adding_ballots(self, target_resource):
+        raise utils.NoImplementation(self)
 
-    choices = range(1, candidate_count + 1)
-    chooser = BallotGenerator(choices=choices)
+    def create_random(self, ballots_resource, candidate_count=None, ballot_count=None):
+        """Create a random contest.
 
-    # TODO: use subclassing here instead of an if-block.
-    if normalize:
+        Returns a ContestInput object.
+        """
+        if ballot_count is None:
+            ballot_count = 20
+        candidates = make_candidates(candidate_count)
+
+        choices = range(1, candidate_count + 1)
+        chooser = BallotGenerator(choices=choices)
+
+        with self.adding_ballots(ballots_resource) as initial_resource:
+            chooser.add_random_ballots(initial_resource, ballot_count)
+
+        name = "Random Contest"
+
+        now = datetime.datetime.now()
+        # We call int() to remove leading zero-padding.
+        dt_string = '{0:%B} {0:%d}, {0:%Y} {1:d}:{0:%M:%S%p}'.format(now, int(now.strftime("%I")))
+        notes = [
+            "Contest has {0:d} candidates and {1:d} ballots.  {2}"
+            .format(candidate_count, ballot_count, self.notes),
+            "Created on {0}.".format(dt_string),
+        ]
+
+        contest = ContestInput(name=name, notes=notes, candidates=candidates, ballots_resource=ballots_resource)
+
+        return contest
+
+
+class ContestCreator(_ContestCreatorBase):
+
+    """Creates random contest without normalizing ballots."""
+
+    notes = ""
+
+    @contextmanager
+    def adding_ballots(self, target_resource):
+        yield target_resource
+
+
+class NormalizedContestCreator(_ContestCreatorBase):
+
+    """Creates random contest with normalized ballots."""
+
+    notes = "Ballots are normalized.  "
+
+    @contextmanager
+    def adding_ballots(self, target_resource):
         with models.temp_ballots_resource() as source_resource:
-            chooser.add_random_ballots(source_resource, ballot_count)
-            models.normalize_ballots(source_resource, target=ballots_resource)
-    else:
-        chooser.add_random_ballots(ballots_resource, ballot_count)
-
-    name = "Random Contest"
-
-    now = datetime.datetime.now()
-    # We call int() to remove leading zero-padding.
-    dt_string = '{0:%B} {0:%d}, {0:%Y} {1:d}:{0:%M:%S%p}'.format(now, int(now.strftime("%I")))
-    notes = [
-        "Contest has {0:d} candidates and {1:d} ballots.  {2}".format(candidate_count,
-            ballot_count, "Ballots are normalized.  " if normalize else ""),
-        "Created on {0}.".format(dt_string),
-    ]
-
-    contest = ContestInput(name=name, notes=notes, candidates=candidates, ballots_resource=ballots_resource)
-
-    return contest
+            yield source_resource
+            models.normalize_ballots(source_resource, target=target_resource)
 
 
 # TODO: consider removing this.

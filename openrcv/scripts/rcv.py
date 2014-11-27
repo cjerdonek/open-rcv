@@ -1,8 +1,5 @@
 
-"""
-Supports the "rcv" command-line command (aka console_script).
-
-"""
+"""Supports the "rcv" command-line command (aka console_script)."""
 
 import argparse
 from argparse import RawDescriptionHelpFormatter
@@ -116,7 +113,7 @@ class CountCommand(CommandBase):
 class RandContestCommand(CommandBase):
 
     name = "randcontest"
-    help = "Create a random sample contest."
+    help = "Make a random contest."
 
     @property
     def func(self):
@@ -188,11 +185,24 @@ class CleanContestsCommand(CommandBase):
             help=("path to a contests.json file."))
 
 
+class GenExpectedCommand(CommandBase):
+
+    name = "genexpected"
+    help = "Generate JSON test expectations."
+    desc = help
+
+    @property
+    def func(self):
+        return commands.clean_contests
+
+    def add_arguments(self, parser):
+        parser.add_argument('json_contests_path', metavar='JSON_PATH',
+            help=("path to a contests.json file."))
+
+
 # TODO: unit-test print_help().
 def create_argparser(prog="rcv"):
-    """
-    Return an ArgumentParser object.
-    """
+    """Return an ArgumentParser object."""
     parser = RcvArgumentParser(prog=prog, description=DESCRIPTION, add_help=False,
                                formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument('--log-level', metavar='LEVEL',
@@ -216,6 +226,7 @@ def create_argparser(prog="rcv"):
         CountCommand,
         RandContestCommand,
         CleanContestsCommand,
+        GenExpectedCommand,
     ]
 
     builder = ArgParserBuilder(subparsers)
@@ -262,8 +273,7 @@ class RcvArgumentParser(ArgParser):
     option_help = OPTION_HELP
 
     def safe_get_log_level(self, args, error_level=None):
-        """
-        Get the user-requested log level without raising an exception.
+        """Get the user-requested log level without raising an exception.
 
         Returns the log level as an integer.
 

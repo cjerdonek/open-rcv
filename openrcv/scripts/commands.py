@@ -1,8 +1,5 @@
 
-"""
-The rcv command for counting ballots.
-
-"""
+"""Contains the functions for each rcv command-line command."""
 
 import logging
 import os
@@ -60,7 +57,7 @@ def make_random_contest(ns, stdout=None):
             candidate_count=ns.candidate_count)
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
 
-        # TODO: refactor this out.
+        # TODO: refactor this out into datagen.
         if ns.json_contests_path:
             json_path = ns.json_contests_path
             jc_contest = jscase.JsonCaseContestInput.from_object(contest)
@@ -72,6 +69,8 @@ def make_random_contest(ns, stdout=None):
     return "\n".join(output_paths) + "\n" if output_paths else None
 
 
+# TODO: refactor code out into datagen.
+# TODO: rename datagen to jcmanage
 def clean_contests(ns, stdout=None):
     json_path = ns.json_contests_path
     jsobj = jsonlib.read_json_path(json_path)

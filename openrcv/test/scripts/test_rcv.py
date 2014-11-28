@@ -1,5 +1,5 @@
 
-from argparse import ArgumentParser
+from argparse2.argparse import ArgumentParser
 import os
 
 from openrcv.scripts.argparse import HelpRequested, UsageException

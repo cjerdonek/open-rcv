@@ -1,5 +1,5 @@
 
-import argparse
+from argparse2 import argparse
 from contextlib import contextmanager
 import logging
 import os
@@ -144,6 +144,7 @@ def non_exiting_main(parser, argv, stdout=None, log_file=None):
     """
     args = argv[1:]
     log_level = parser.safe_get_log_level(args)
+
     if stdout is None:
         stdout = sys.stdout
     with log_config(level=log_level, file_=log_file):

@@ -57,7 +57,8 @@ setup(
     packages=find_packages(exclude=[]),
 
     install_requires=[
-        'colorlog >=2.0,<2.4'
+        'argparse2==0.5.0-alpha',
+        'colorlog >=2.0,<2.4',
     ],
 
     # To install dependencies for an extra from a source distribution,

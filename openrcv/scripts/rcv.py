@@ -1,8 +1,8 @@
 
 """Supports the "rcv" command-line command (aka console_script)."""
 
-import argparse
-from argparse import RawDescriptionHelpFormatter
+from argparse2 import argparse
+from argparse2.argparse import RawDescriptionHelpFormatter
 import logging
 from textwrap import dedent
 
@@ -70,27 +70,25 @@ def add_help(parser):
 
 class CommandBase(object):
 
-    def __init__(self, builder):
+    def __init__(self, formats):
         """
         Arguments:
-          builder: an ArgParserBuilder object.
+          formats: TODO.
         """
-        self.builder = builder
+        self.formats = formats
 
     def add_arguments(self, parser):
         raise utils.NoImplementation(self)
 
-    def add(self):
-        """Add the command to subparsers."""
-        subparsers = self.builder.subparsers
-        parser = subparsers.add_parser(self.name, help=self.help, description=self.desc,
-                                       add_help=False)
-        self.add_arguments(parser)
-        # The RawDescriptionHelpFormatter preserves line breaks in the
-        # description and epilog strings.
-        parser.formatter_class = RawDescriptionHelpFormatter
-        parser.set_defaults(run_command=self.func)
-        add_help(parser)
+    def writer_type(self, label):
+        formats = self.formats
+        try:
+            format = formats[label]
+        except KeyError:
+            labels = sorted(formats.keys())
+            raise argparse.ArgumentTypeError("\ninvalid argument choice: %r "
+                "(choose from: %s)" % (label, ", ".join(labels)))
+        return format.cls
 
 
 class CountCommand(CommandBase):
@@ -132,8 +130,7 @@ class RandContestCommand(CommandBase):
     def add_arguments(self, parser):
         default_candidates = 6
         default_ballots = 20
-        builder = self.builder
-        formats = builder.formats
+        formats = self.formats
         parser.add_argument('-c', '--candidates', dest='candidate_count', metavar='N',
                             type=int, default=default_candidates,
                             help=('number of candidates.  Defaults to {:d}.'
@@ -152,7 +149,7 @@ class RandContestCommand(CommandBase):
         labels = sorted(formats)
         list_desc = ", ".join((str(formats[label]) for label in labels))
         parser.add_argument(*OPTION_OUTPUT_FORMAT.flags, metavar=OPTION_OUTPUT_FORMAT.metavar,
-            type=builder.writer_type, default=OUTPUT_FORMAT_DEFAULT,
+            type=self.writer_type, default=OUTPUT_FORMAT_DEFAULT,
             help=('the output format.  Choose from: {!s}. Defaults to: "{!s}".'
                   .format(list_desc, OUTPUT_FORMAT_DEFAULT)))
         parser.add_argument('-j', '--json-contests', metavar='JSON_PATH',
@@ -229,10 +226,12 @@ def create_argparser(prog="rcv"):
         GenExpectedCommand,
     ]
 
+    formats = make_output_formats()
     builder = ArgParserBuilder(subparsers)
+
     for cls in command_classes:
-        command = cls(builder)
-        command.add()
+        command = cls(formats=formats)
+        builder.add_command(command)
 
     return parser
 
@@ -254,19 +253,19 @@ class ArgParserBuilder(object):
     """Support for constructing the script's argparse.ArgumentParser."""
 
     def __init__(self, subparsers):
-        self.formats = make_output_formats()
         self.subparsers = subparsers
 
-    def writer_type(self, label):
-        formats = self.formats
-        try:
-            format = formats[label]
-        except KeyError:
-            labels = sorted(formats.keys())
-            raise argparse.ArgumentTypeError("\ninvalid argument choice: %r "
-                "(choose from: %s)" % (label, ", ".join(labels)))
-        return format.cls
-
+    def add_command(self, command):
+        """Add the command to subparsers."""
+        subparsers = self.subparsers
+        parser = subparsers.add_parser(command.name, help=command.help, description=command.desc,
+                                       add_help=False)
+        command.add_arguments(parser)
+        # The RawDescriptionHelpFormatter preserves line breaks in the
+        # description and epilog strings.
+        parser.formatter_class = RawDescriptionHelpFormatter
+        parser.set_defaults(run_command=command.func)
+        add_help(parser)
 
 class RcvArgumentParser(ArgParser):
 

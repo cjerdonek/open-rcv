@@ -197,6 +197,18 @@ class GenExpectedCommand(CommandBase):
             help=("path to a contests.json file."))
 
 
+def add_command(subparsers, command):
+    """Add the command to subparsers."""
+    parser = subparsers.add_parser(command.name, help=command.help, description=command.desc,
+                                add_help=False)
+    command.add_arguments(parser)
+    # The RawDescriptionHelpFormatter preserves line breaks in the
+    # description and epilog strings.
+    parser.formatter_class = RawDescriptionHelpFormatter
+    parser.set_defaults(run_command=command.func)
+    add_help(parser)
+
+
 # TODO: unit-test print_help().
 def create_argparser(prog="rcv"):
     """Return an ArgumentParser object."""
@@ -219,19 +231,14 @@ def create_argparser(prog="rcv"):
                                        description=desc)
     subparsers.formatter_class = RawDescriptionHelpFormatter
 
-    command_classes = [
-        CountCommand,
-        RandContestCommand,
-        CleanContestsCommand,
-        GenExpectedCommand,
-    ]
-
     formats = make_output_formats()
-    builder = ArgParserBuilder(subparsers)
 
-    for cls in command_classes:
-        command = cls(formats=formats)
-        builder.add_command(command)
+    add_command(subparsers, CountCommand(formats))
+    add_command(subparsers, RandContestCommand(formats))
+
+    group = subparsers.add_parser_group("Development commands")
+    add_command(group, CleanContestsCommand(formats))
+    add_command(group, GenExpectedCommand(formats))
 
     return parser
 
@@ -247,25 +254,6 @@ class OutputFormat(object):
     def __str__(self):
         return '"{!s}" ({!s})'.format(self.label, self.desc)
 
-
-class ArgParserBuilder(object):
-
-    """Support for constructing the script's argparse.ArgumentParser."""
-
-    def __init__(self, subparsers):
-        self.subparsers = subparsers
-
-    def add_command(self, command):
-        """Add the command to subparsers."""
-        subparsers = self.subparsers
-        parser = subparsers.add_parser(command.name, help=command.help, description=command.desc,
-                                       add_help=False)
-        command.add_arguments(parser)
-        # The RawDescriptionHelpFormatter preserves line breaks in the
-        # description and epilog strings.
-        parser.formatter_class = RawDescriptionHelpFormatter
-        parser.set_defaults(run_command=command.func)
-        add_help(parser)
 
 class RcvArgumentParser(ArgParser):
 

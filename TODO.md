@@ -1,6 +1,7 @@
 TODO
 ====
 
+* Change the argparse2 imports.
 * Work on cleancontests command (need to examine add'l JsonCase* objects).
 * Remove cruft from utils.py (specifically StreamInfo).
 * Improve the random ballot generation by removing undervotes and

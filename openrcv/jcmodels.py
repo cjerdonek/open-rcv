@@ -1,6 +1,5 @@
 
-"""
-Contains classes that support serialization to JSON test cases.
+"""Contains classes that support serialization to JSON test cases.
 
 Terminology
 -----------
@@ -21,7 +20,6 @@ The classes in this module should be used only for small sets of ballots
 ballot data should be backed by a concrete file and ballots read and
 processed one at a time -- as opposed to having to load them into memory
 all at once.
-
 """
 
 from openrcv.counting import InternalBallotsNormalizer
@@ -34,8 +32,7 @@ from openrcv.utils import StringInfo
 
 class JsonCaseBallot(JsonableMixin):
 
-    """
-    The serialization format is a space-delimited string of integers of
+    """The serialization format is a space-delimited string of integers of
     the form: "WEIGHT CHOICE1 CHOICE2 CHOICE3 ...".
     """
 
@@ -85,15 +82,12 @@ class JsonCaseBallot(JsonableMixin):
 # TODO: remove this class in favor of new pattern.
 class JsonBallot(JsonableMixin):
 
-    """
-    Represents a ballot for a JSON test case.
-    """
+    """Represents a ballot for a JSON test case."""
 
     # TODO: remove this method.
     @staticmethod
     def to_ballot_stream(json_ballots):
-        """
-        Convert an iterable of ballots into a StreamInfo object.
+        """Convert an iterable of ballots into a StreamInfo object.
 
         The StreamInfo represents the ballots in internal ballot file format.
         """
@@ -104,8 +98,7 @@ class JsonBallot(JsonableMixin):
 
     @classmethod
     def from_ballot_stream(cls, ballot_stream):
-        """
-        Return an iterable of JsonBallot objects.
+        """Return an iterable of JsonBallot objects.
 
         Arguments:
           ballot_stream: a StreamInfo object of internal ballots.
@@ -156,9 +149,7 @@ class JsonBallot(JsonableMixin):
 
 class JsonCaseContestInput(JsonableMixin):
 
-    """
-    Contest input for a JSON test case.
-    """
+    """Contest input for a JSON test case."""
 
     meta_attrs = (Attribute('id'),
                   Attribute('name'),
@@ -195,6 +186,16 @@ class JsonCaseContestInput(JsonableMixin):
         self.__init__(id_=contest.id, candidate_count=candidate_count, ballots=ballots,
                       name=contest.name, notes=contest.notes)
 
+    # TODO: this should probably be on the contest object and not here.
+    def normalize(self):
+        """Modifies the current contest in place."""
+        ballot_stream = JsonBallot.to_ballot_stream(self.ballots)
+        output_stream = StringInfo()
+        parser = InternalBallotsNormalizer(output_stream)
+        parser.parse(ballot_stream)
+        new_ballots = JsonBallot.from_ballot_stream(output_stream)
+        self.ballots = new_ballots
+
     #
     # def to_object(self):
     #     """
@@ -217,9 +218,7 @@ class JsonCaseContestInput(JsonableMixin):
 # TODO: remove this class.
 class JsonContest(JsonableMixin):
 
-    """
-    Represents a contest for a JSON test case.
-    """
+    """Represents a contest for a JSON test case."""
 
     meta_attrs = (Attribute('id'),
                   Attribute('notes'))
@@ -243,24 +242,10 @@ class JsonContest(JsonableMixin):
         """Return an iterable of the candidate numbers."""
         return make_candidates(self.candidate_count)
 
-    # TODO: this should probably be on the contest object and not here.
-    def normalize(self):
-        """
-        Modifies the current contest in place.
-        """
-        ballot_stream = JsonBallot.to_ballot_stream(self.ballots)
-        output_stream = StringInfo()
-        parser = InternalBallotsNormalizer(output_stream)
-        parser.parse(ballot_stream)
-        new_ballots = JsonBallot.from_ballot_stream(output_stream)
-        self.ballots = new_ballots
 
+class JsonCaseContestsFile(JsonableMixin):
 
-class JsonContestFile(JsonableMixin):
-
-    """
-    Represents an input file for open-rcv-tests.
-    """
+    """Represents a contests.json file for open-rcv-tests."""
 
     meta_attrs = (Attribute('version'), )
     data_attrs = (Attribute('contests', cls=JsonContest), )
@@ -279,9 +264,7 @@ class JsonContestFile(JsonableMixin):
 
 class JsonRoundResults(RoundResults, JsonableMixin):
 
-    """
-    Represents the results of a round for testing purposes.
-    """
+    """Represents the results of a round for testing purposes."""
 
     data_attrs = (Attribute('totals'), )
 
@@ -324,9 +307,7 @@ class JsonTestCaseOutput(JsonableMixin):
 
 class JsonTestCase(JsonableMixin):
 
-    """
-    An RCV test case (input and expected output).
-    """
+    """An RCV test case (input and expected output)."""
 
     meta_attrs = (Attribute('id'),
                   Attribute('contest_id'), )
@@ -342,9 +323,7 @@ class JsonTestCase(JsonableMixin):
 
 class JsonTestCaseFile(JsonableMixin):
 
-    """
-    A file of test cases (input and expected output).
-    """
+    """A file of test cases (input and expected output)."""
 
     meta_attrs = (Attribute('version'),
                   Attribute('rule_set'), )

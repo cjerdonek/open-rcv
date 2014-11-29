@@ -12,10 +12,7 @@ from openrcv import counting
 from openrcv import datagen
 from openrcv.formats import jscase
 from openrcv.formats.internal import parse_internal_ballot
-from openrcv import jcmodels
-from openrcv.jcmodels import JsonTestCaseOutput
-from openrcv import jsonlib
-from openrcv import models
+from openrcv import jcmodels, jsonlib, models
 from openrcv.models import BallotStreamResource, ContestInput
 from openrcv.utils import logged_open, PathInfo, StringInfo
 
@@ -35,7 +32,7 @@ def count(ns, stdout=None):
     contest = contests[0]
     blt_path = os.path.join(base_dir, contest['file'])
     results = counting.count_irv(blt_path)
-    json_results = JsonTestCaseOutput.from_contest_results(results)
+    json_results = jcmodels.JsonTestCaseOutput.from_contest_results(results)
     print(json_results.to_json())
 
 
@@ -74,7 +71,9 @@ def make_random_contest(ns, stdout=None):
 def clean_contests(ns, stdout=None):
     json_path = ns.json_contests_path
     jsobj = jsonlib.read_json_path(json_path)
-    test_file = jcmodels.JsonContestFile.from_jsobj(jsobj)
+    test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
+    print(test_file.to_json())
+    exit()
     for id_, contest in enumerate(test_file.contests, start=1):
         contest.id = id_
         contest.normalize()

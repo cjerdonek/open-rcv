@@ -54,7 +54,29 @@ class _WriteableBallotsBase(object):
         self.stream.write(line + "\n")
 
 
+# TODO: move this to models.py.
 class BallotsResourceBase(object):
+
+    # TODO: fix this docstring and DRY up with stream resource docs.
+    """
+    An instance of this class is a context manager factory function
+    for managing the resource of an iterable of ballots.
+
+    An instance of this class could be used as follows, for example:
+
+        with ballot_resource() as ballots:
+            for ballot in ballots:
+                # Handle ballot.
+                ...
+
+    This resembles the pattern of opening a file and reading its lines.
+    One reason to encapsulate ballots as a context manager as opposed to
+    an iterable is that ballots are often stored as a file.  Thus,
+    implementations should really support the act of opening and closing
+    the ballot file when the ballots are needed (i.e. managing the file
+    resource).  This is preferable to opening a handle to a ballot
+    file earlier than needed and then keeping the file open.
+    """
 
     def read_convert(self, item):
         raise NoImplementation(self)

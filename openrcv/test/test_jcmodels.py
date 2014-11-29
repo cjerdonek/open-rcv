@@ -3,7 +3,7 @@ from textwrap import dedent
 
 from openrcv.jsonlib import JsonableError, JsonDeserializeError, JS_NULL
 from openrcv.jcmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonCaseContestInput,
-                              JsonContest, JsonRoundResults, JsonTestCaseOutput)
+                              JsonRoundResults, JsonTestCaseOutput)
 from openrcv.models import ContestInput
 from openrcv.streams import ListResource
 from openrcv.utils import StreamInfo, StringInfo
@@ -130,6 +130,42 @@ class JsonBallotTest(UnitCase):
 
 class JsonCaseContestInputTest(UnitCase):
 
+    def make_contest(self, ballots=None):
+        """Return a test contest."""
+        if ballots is None:
+            ballots = self.make_ballots()
+        contest = JsonCaseContestInput(candidate_count=2, ballots=ballots, id_=3, notes="foo")
+        return contest
+
+    def test_init(self):
+        ballots = [JsonCaseBallot(choices=[1, 2]),
+                   JsonCaseBallot(choices=[2], weight=3)]
+        contest = self.make_contest(ballots=ballots)
+        cases = [
+            ("candidate_count", 2),
+            ("ballots", ballots),
+            ("id", 3),
+            ("notes", "foo"),
+        ]
+        for attr, expected in cases:
+            with self.subTest(attr=attr, expected=expected):
+                actual = getattr(contest, attr)
+                self.assertEqual(actual, expected)
+
+    def test_init__defaults(self):
+        contest = JsonCaseContestInput()
+        cases = [
+            ("candidate_count", None),
+            ("ballots", None),
+            ("id", 0),
+            ("notes", None),
+        ]
+        # TODO: make a assertAttrsEqual method.
+        for attr, expected in cases:
+            with self.subTest(attr=attr, expected=expected):
+                actual = getattr(contest, attr)
+                self.assertEqual(actual, expected)
+
     def test_from_object(self):
         contest = ContestInput()
         contest.candidates = ['Ann', 'Bob']
@@ -150,7 +186,9 @@ class JsonCaseContestInputTest(UnitCase):
         self.assertEqual(jc_contest.to_jsobj(), expected)
 
 
-class JsonContestTest(UnitCase):
+# TODO: move the tests in here into JsonCaseContestInputTest, after
+# checking for redundancy, etc.
+class JsonCaseContestInputTest2(UnitCase):
 
     def make_ballots(self):
         ballots = [JsonBallot(choices=[1, 2]),
@@ -161,40 +199,12 @@ class JsonContestTest(UnitCase):
         """Return a test contest."""
         if ballots is None:
             ballots = self.make_ballots()
-        contest = JsonContest(candidate_count=2, ballots=ballots, id_=3, notes="foo")
+        contest = JsonCaseContestInput(candidate_count=2, ballots=ballots, id_=3, notes="foo")
         return contest
-
-    def test_init(self):
-        ballots = [JsonBallot(choices=[1, 2]),
-                   JsonBallot(choices=[2], weight=3)]
-        contest = self.make_contest(ballots=ballots)
-        cases = [
-            ("candidate_count", 2),
-            ("ballots", ballots),
-            ("id", 3),
-            ("notes", "foo"),
-        ]
-        for attr, expected in cases:
-            with self.subTest(attr=attr, expected=expected):
-                actual = getattr(contest, attr)
-                self.assertEqual(actual, expected)
-
-    def test_init__defaults(self):
-        contest = JsonContest()
-        cases = [
-            ("candidate_count", None),
-            ("ballots", None),
-            ("id", None),
-            ("notes", None),
-        ]
-        for attr, expected in cases:
-            with self.subTest(attr=attr, expected=expected):
-                actual = getattr(contest, attr)
-                self.assertEqual(actual, expected)
 
     def test_repr(self):
         contest = self.make_contest()
-        self.assertEqual(repr(contest), "<JsonContest: [id=3 candidate_count=2] %s>" %
+        self.assertEqual(repr(contest), "<JsonCaseContestInput: [id=3 candidate_count=2] %s>" %
                          hex(id(contest)))
 
     def test_eq(self):
@@ -216,7 +226,7 @@ class JsonContestTest(UnitCase):
         self.assertEqual(contest1, contest2)  # sanity check
 
     def test_load_jsobj(self):
-        contest = JsonContest()
+        contest = JsonCaseContestInput()
         self.assertEqual(contest.candidate_count, None)
         # Check loading an empty dict.
         # In particular, attributes should not get set to JS_NULL.
@@ -226,7 +236,7 @@ class JsonContestTest(UnitCase):
         # Check loading metadata.
         # Check that the id needs to be in the meta dict.
         contest.load_jsobj({"id": 5})
-        self.assertEqual(contest.id, None)
+        self.assertEqual(contest.id, 0)
         contest.load_jsobj({"_meta": {"id": 5}})
         self.assertEqual(contest.id, 5)
         # Check explicit None (to which the json module converts Javascript null).
@@ -238,7 +248,7 @@ class JsonContestTest(UnitCase):
 
     def test_load_jsobj__ballots(self):
         """Check that ballots deserialize okay."""
-        contest = JsonContest()
+        contest = JsonCaseContestInput()
         # Check that objects deserialize okay.
         expected_ballots = self.make_ballots()
         contest.load_jsobj({"ballots": ["3 2 1"]})

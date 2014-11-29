@@ -215,40 +215,12 @@ class JsonCaseContestInput(JsonableMixin):
     #     self.__init__(choices=choices, weight=weight)
 
 
-# TODO: remove this class.
-class JsonContest(JsonableMixin):
-
-    """Represents a contest for a JSON test case."""
-
-    meta_attrs = (Attribute('id'),
-                  Attribute('notes'))
-    data_attrs = (Attribute('ballots', cls=JsonBallot),
-                  Attribute('candidate_count'))
-
-    def __init__(self, candidate_count=None, ballots=None, id_=None, notes=None):
-        """
-        Arguments:
-          candidate_count: integer number of candidates
-        """
-        self.ballots = ballots
-        self.candidate_count = candidate_count
-        self.id = id_
-        self.notes = notes
-
-    def repr_info(self):
-        return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
-
-    def get_candidates(self):
-        """Return an iterable of the candidate numbers."""
-        return make_candidates(self.candidate_count)
-
-
 class JsonCaseContestsFile(JsonableMixin):
 
     """Represents a contests.json file for open-rcv-tests."""
 
     meta_attrs = (Attribute('version'), )
-    data_attrs = (Attribute('contests', cls=JsonContest), )
+    data_attrs = (Attribute('contests', cls=JsonCaseContestInput), )
 
     def __init__(self, contests=None, version=None):
         """
@@ -270,15 +242,6 @@ class JsonRoundResults(RoundResults, JsonableMixin):
 
     def __init__(self, totals=None):
         self.totals = totals
-
-
-class JsonTestCaseInput(JsonableMixin):
-
-    meta_attrs = ()
-    data_attrs = (Attribute('contest', cls=JsonContest), )
-
-    def __init__(self):
-        self.contest = None
 
 
 class JsonTestCaseOutput(JsonableMixin):
@@ -311,7 +274,7 @@ class JsonTestCase(JsonableMixin):
 
     meta_attrs = (Attribute('id'),
                   Attribute('contest_id'), )
-    data_attrs = (Attribute('input', cls=JsonTestCaseInput),
+    data_attrs = (Attribute('input', cls=JsonCaseContestInput),
                   Attribute('output', cls=JsonTestCaseOutput), )
 
     def __init__(self):

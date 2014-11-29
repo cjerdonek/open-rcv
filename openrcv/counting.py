@@ -149,40 +149,6 @@ def count_irv(blt_path, temp_dir=None):
     return results
 
 
-class InternalBallotsNormalizer(Parser):
-
-    """
-    Compresses and normalizes internal ballots.
-
-    This class takes a StreamInfo of internal ballots and returns a
-    new StreamInfo that represents an equivalent set of internal ballots,
-    but both "compressed" (by using the weight component) and ordered
-    lexicographically for readability by the list of choices on the ballot.
-
-    """
-
-    name = "normalizing internal ballots"
-
-    def __init__(self, output_stream):
-        """
-        Arguments:
-          output_stream: a StreamInfo object for output.
-
-        """
-        self.output_stream = output_stream
-
-    def get_parse_return_value(self):
-        return self.output_stream
-
-    def parse_lines(self, lines):
-        normalized = normalized_ballots(lines)
-
-        with self.output_stream.open("w") as f:
-            for ballot in normalized:
-                line = to_internal_ballot(ballot)
-                f.write(line + "\n")
-
-
 # TODO: this class should take the "count" function as an argument.
 class InternalBallotsCounter(Parser):
 

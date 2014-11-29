@@ -22,7 +22,6 @@ processed one at a time -- as opposed to having to load them into memory
 all at once.
 """
 
-from openrcv.counting import InternalBallotsNormalizer
 from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin,
                              JsonDeserializeError)
@@ -186,15 +185,6 @@ class JsonCaseContestInput(JsonableMixin):
         self.__init__(id_=contest.id, candidate_count=candidate_count, ballots=ballots,
                       name=contest.name, notes=contest.notes)
 
-    # TODO: this should probably be on the contest object and not here.
-    def normalize(self):
-        """Modifies the current contest in place."""
-        ballot_stream = JsonBallot.to_ballot_stream(self.ballots)
-        output_stream = StringInfo()
-        parser = InternalBallotsNormalizer(output_stream)
-        parser.parse(ballot_stream)
-        new_ballots = JsonBallot.from_ballot_stream(output_stream)
-        self.ballots = new_ballots
 
     #
     # def to_object(self):

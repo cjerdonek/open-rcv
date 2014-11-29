@@ -40,6 +40,9 @@ def temp_ballots_resource():
 
 # TODO: remove this in favor of the ballots resource version.
 def normalized_ballots(lines):
+    """
+
+    """
     parse_internal_ballot = internal.parse_internal_ballot
     # A dict mapping tuples of choices to the cumulative weight.
     choices_dict = {}
@@ -63,6 +66,7 @@ def normalized_ballots(lines):
 
 
 # TODO: allow ordering and compressing to be done separately.
+# TODO: think about proper use of yield here.
 def normalize_ballots(source, target):
     """
     Normalize ballots by ordering and "compressing" them.
@@ -75,6 +79,12 @@ def normalize_ballots(source, target):
       source: source ballots resource.
       target: target ballots resource.
 
+    TODO: incorporate some of the wording below into the above.
+
+    This class takes a StreamInfo of internal ballots and returns a
+    new StreamInfo that represents an equivalent set of internal ballots,
+    but both "compressed" (by using the weight component) and ordered
+    lexicographically for readability by the list of choices on the ballot.
     """
     # A dict mapping tuples of choices to the cumulative weight.
     choices_dict = {}
@@ -172,6 +182,16 @@ class ContestInput(ReprMixin):
     def get_candidates(self):
         """Return an iterable of the candidate numbers."""
         return make_candidates(len(self.candidates))
+
+    # TODO: consider removing this, otherwise implement it.
+    def normalize(self):
+        """Modifies the current contest in place."""
+        ballot_stream = JsonBallot.to_ballot_stream(self.ballots)
+        output_stream = StringInfo()
+        parser = InternalBallotsNormalizer(output_stream)
+        parser.parse(ballot_stream)
+        new_ballots = JsonBallot.from_ballot_stream(output_stream)
+        self.ballots = new_ballots
 
 
 class RoundResults(object):

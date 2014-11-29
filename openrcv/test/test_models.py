@@ -1,7 +1,7 @@
 
 from textwrap import dedent
 
-from openrcv.models import normalized_ballots, BallotsResource, BallotStreamResource, ContestInput
+from openrcv.models import normalized_ballots, BallotStreamResource, ContestInput
 from openrcv import streams
 from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
@@ -26,16 +26,6 @@ class ModuleTest(UnitCase):
         # list/tuple/etc.
         self.assertEqual(type(normalized), type((x for x in ())))
         self.assertEqual(list(normalized), [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))])
-
-
-class BallotsResourceTest(UnitCase):
-
-    def test(self):
-        ballots = [1, 3, 2]
-        ballot_resource = BallotsResource(ballots)
-        with ballot_resource() as ballots:
-            ballots = list(ballots)
-        self.assertEqual(ballots, [1, 3, 2])
 
 
 class BallotStreamResourceTest(UnitCase):

@@ -1,5 +1,5 @@
 
-from argparse2.argparse import ArgumentTypeError
+from argparse2 import ArgumentTypeError
 
 from openrcv.scripts.argparse import parse_log_level
 from openrcv.utiltest.helpers import UnitCase

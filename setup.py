@@ -57,7 +57,7 @@ setup(
     packages=find_packages(exclude=[]),
 
     install_requires=[
-        'argparse2==0.5.0-alpha',
+        'argparse2==0.5.0-alpha1',
         'colorlog >=2.0,<2.4',
     ],
 

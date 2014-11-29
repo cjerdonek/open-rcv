@@ -1,5 +1,5 @@
 
-from argparse2 import argparse
+import argparse2 as argparse
 from contextlib import contextmanager
 import logging
 import os

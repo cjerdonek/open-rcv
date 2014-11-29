@@ -1,8 +1,8 @@
 
 """Supports the "rcv" command-line command (aka console_script)."""
 
-from argparse2 import argparse
-from argparse2.argparse import RawDescriptionHelpFormatter
+import argparse2 as argparse
+from argparse2 import RawDescriptionHelpFormatter
 import logging
 from textwrap import dedent
 

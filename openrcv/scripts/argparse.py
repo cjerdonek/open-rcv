@@ -4,7 +4,7 @@
 This module contains generic functionality not specific to OpenRCV.
 """
 
-from argparse2 import argparse
+import argparse2 as argparse
 import logging
 
 

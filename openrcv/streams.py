@@ -62,15 +62,17 @@ use in-memory structures as opposed to writing to disk.
 Moreover, in the case of files especially, stream resources let us write
 code that is blind to what particular serialization format is being used.
 For example, ballot-counting code can deal with ballots independent of
-how they are being stored or serialized.  The same code can be used whether
-the ballots are being read from a BLT-formatted file or a WinEDS file.
+how they are being stored or serialized.  For example, the same code can
+be used whether the ballots are being read from a BLT-formatted file
+or a WinEDS-formatted file.
 
-In addition, stream resources let us delay the opening of streams to only
-when they are needed.  Instead of opening a stream early and passing the
-open stream into an API, a stream resource can be passed into the API, and
-the API's implementation can open the stream (e.g. using
-`with resource.reading() as stream`).  This pattern lets us iterate over
-large sets of ballots without having to store them in memory all at once.
+In addition, stream resources let us postpone the opening of files for
+clearer file-handle management.  For example, instead of opening a stream
+early and passing the open stream into an API, a stream resource can be
+passed into the API, and the API's implementation can open the stream
+(e.g. using `with resource.reading() as stream`).  This pattern also
+lets us iterate over large sets of ballots without having to store
+them in memory all at once.
 
 
 TODO: decide whether we need to inherit from StreamResourceBase.

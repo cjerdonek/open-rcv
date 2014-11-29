@@ -197,17 +197,26 @@ class GenExpectedCommand(CommandBase):
             help=("path to a contests.json file."))
 
 
-def add_command(subparsers, command):
-    """Add the command to subparsers."""
-    parser = subparsers.add_parser(command.name, help=command.help, description=command.desc,
-                                add_help=False)
-    command.add_arguments(parser)
-    # The RawDescriptionHelpFormatter preserves line breaks in the
-    # description and epilog strings.
-    parser.formatter_class = RawDescriptionHelpFormatter
-    parser.set_defaults(run_command=command.func)
-    add_help(parser)
+class ArgBuilder(object):
 
+    def __init__(self, formats):
+        self.formats = formats
+
+    def add_command(self, group, command_class):
+        """Add the command to a sub-command group."""
+        command = command_class(self.formats)
+        parser = group.add_parser(command.name, help=command.help, description=command.desc,
+                                  add_help=False)
+        command.add_arguments(parser)
+        # The RawDescriptionHelpFormatter preserves line breaks in the
+        # description and epilog strings.
+        parser.formatter_class = RawDescriptionHelpFormatter
+        parser.set_defaults(run_command=command.func)
+        add_help(parser)
+
+    def add_commands(self, group, cmd_classes):
+        for cls in cmd_classes:
+            self.add_command(group, cls)
 
 # TODO: unit-test print_help().
 def create_argparser(prog="rcv"):
@@ -227,18 +236,23 @@ def create_argparser(prog="rcv"):
     For help with a particular command, pass %s after the command name.
     For example, `%s count %s`.
     """ % (OPTION_HELP.display(' or '), prog, OPTION_HELP[0]))
-    subparsers = parser.add_subparsers(title='commands', metavar='COMMAND',
+    metavar = 'COMMAND'
+    subparsers = parser.add_subparsers(title='commands', metavar=metavar,
                                        description=desc)
     subparsers.formatter_class = RawDescriptionHelpFormatter
 
     formats = make_output_formats()
+    builder = ArgBuilder(formats)
 
-    add_command(subparsers, CountCommand(formats))
-    add_command(subparsers, RandContestCommand(formats))
+    builder.add_command(subparsers, CountCommand)
 
     group = subparsers.add_parser_group("Development commands")
-    add_command(group, CleanContestsCommand(formats))
-    add_command(group, GenExpectedCommand(formats))
+    classes = (
+        RandContestCommand,
+        CleanContestsCommand,
+        GenExpectedCommand,
+    )
+    builder.add_commands(group, classes)
 
     return parser
 

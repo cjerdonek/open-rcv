@@ -2,8 +2,8 @@
 from copy import copy
 from unittest.mock import patch, MagicMock
 
-from openrcv import datagen
-from openrcv.datagen import BallotGenerator, UniqueBallotGenerator, STOP_CHOICE
+from openrcv import jcmanage
+from openrcv.jcmanage import BallotGenerator, UniqueBallotGenerator, STOP_CHOICE
 from openrcv import models
 from openrcv.utiltest.helpers import UnitCase
 
@@ -22,14 +22,14 @@ class BallotGeneratorMixin(object):
     def patch_sample_one(self, values):
         # random.sample() returns a k-length list.
         values = ([v, ] for v in values)
-        return patch('openrcv.datagen.sample', new_callable=CopyingMock,
+        return patch('openrcv.jcmanage.sample', new_callable=CopyingMock,
                      side_effect=values)
 
 
 class BallotGeneratorTest(UnitCase, BallotGeneratorMixin):
 
     def patch_random(self, return_value):
-        return patch('openrcv.datagen.random', return_value=return_value)
+        return patch('openrcv.jcmanage.random', return_value=return_value)
 
     def test_init__defaults(self):
         chooser = BallotGenerator((1, 2, 3))
@@ -129,5 +129,5 @@ class ModuleTest(UnitCase):
 
     def patch_randint(self, randint_vals):
         randint = self.make_randint(randint_vals)
-        return patch('openrcv.datagen.randint', randint)
+        return patch('openrcv.jcmanage.randint', randint)
 

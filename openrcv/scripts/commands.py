@@ -9,7 +9,7 @@ import sys
 import yaml
 
 from openrcv import counting
-from openrcv import datagen
+from openrcv import jcmanage
 from openrcv.formats import jscase
 from openrcv.formats.internal import parse_internal_ballot
 from openrcv import jcmodels, jsonlib, models
@@ -45,15 +45,15 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
         stdout = sys.stdout
     format = format_cls()
 
-    creator_cls = (datagen.NormalizedContestCreator if normalize else
-                   datagen.ContestCreator)
+    creator_cls = (jcmanage.NormalizedContestCreator if normalize else
+                   jcmanage.ContestCreator)
     creator = creator_cls()
     with models.temp_ballots_resource() as ballots_resource:
         contest = creator.create_random(ballots_resource, ballot_count=ballot_count,
             candidate_count=candidate_count)
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
 
-        # TODO: refactor this out into datagen.
+        # TODO: refactor this out into jcmanage.
         if json_contests_path:
             jc_contest = jscase.JsonCaseContestInput.from_object(contest)
             jsobj_contest = jc_contest.to_jsobj()
@@ -64,15 +64,14 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
     return "\n".join(output_paths) + "\n" if output_paths else None
 
 
-# TODO: refactor code out into datagen.
+# TODO: refactor code out into jcmanage.
 # TODO: log normalization conversions (e.g. if they are unequal).
-# TODO: rename datagen to jcmanage
 def clean_contests(json_path):
     jsobj = jsonlib.read_json_path(json_path)
     test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
     jc_contests = []
     for id_, jc_contest in enumerate(test_file.contests, start=1):
-        contest = jc_contest
+        contest = jc_contest.to_object()
         contest.id = id_
         contest.normalize()
     #jsonlib.write_json(test_file, path=json_path)

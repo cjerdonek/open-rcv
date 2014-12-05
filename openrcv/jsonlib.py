@@ -162,6 +162,20 @@ class Attribute(object):
 
 class JsonableMixin(ReprMixin):
 
+    """A class that can be serialized to and from JSON.
+
+    Jsonable API
+    ------------
+
+    The Jsonable class has four main public methods (or class methods):
+
+      1) jsonable.to_model(): convert a Jsonable object to a model object.
+      2) jsonable_cls.from_model(model): convert a model to a Jsonable.
+      3) jsonable.to_jsobj(): convert a Jsonable to a JSON object.
+      4) jsonable_cls.from_jsobj(jsobj): convert a JSON object to a Jsonable.
+
+    """
+
     meta_attrs = ()
 
     @classmethod
@@ -285,8 +299,6 @@ class JsonableMixin(ReprMixin):
         return meta
 
     # TODO: need to_object()!
-    # TODO: document the four main Jsonable methods (conversion to and from
-    #   JSON object and model object).
 
     @classmethod
     def from_object(cls, model_obj):

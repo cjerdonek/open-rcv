@@ -113,9 +113,19 @@ class RandContestCommand(CommandBase):
     name = "randcontest"
     help = "Make a random contest."
 
-    @property
-    def func(self):
-        return commands.make_random_contest
+    def func(self, ns, stdout):
+        ballot_count = ns.ballot_count
+        candidate_count = ns.candidate_count
+        output_dir = ns.output_dir
+        format_cls = ns.output_format
+        json_contests_path = ns.json_contests_path
+        normalize = ns.normalize
+        return commands.make_random_contest(ballot_count=ballot_count,
+                            candidate_count=candidate_count,
+                            format_cls=format_cls,
+                            json_contests_path=json_contests_path,
+                            normalize=normalize,
+                            output_dir=output_dir)
 
     @property
     def desc(self):
@@ -165,9 +175,9 @@ class CleanContestsCommand(CommandBase):
     name = "cleancontests"
     help = "Clean and normalize a contests.json file."
 
-    @property
-    def func(self):
-        return commands.clean_contests
+    def func(self, ns, stdout):
+        json_path = ns.json_contests_path
+        return commands.clean_contests(json_path)
 
     @property
     def desc(self):
@@ -188,7 +198,6 @@ class GenExpectedCommand(CommandBase):
     help = "Generate JSON test expectations."
     desc = help
 
-    @property
     def func(self):
         return commands.clean_contests
 
@@ -246,7 +255,7 @@ def create_argparser(prog="rcv"):
 
     builder.add_command(subparsers, CountCommand)
 
-    group = subparsers.add_parser_group("Test-case management")
+    group = subparsers.add_parser_group("Manage test cases")
     classes = (
         RandContestCommand,
         CleanContestsCommand,

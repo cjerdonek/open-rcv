@@ -57,9 +57,9 @@ class JsonCaseBallotTest(UnitCase):
             self.assertNotEqual(ballot1, ballot2)
         self.assertEqual(ballot1, ballot2)  # sanity check
 
-    def test_from_object(self):
+    def test_from_model(self):
         ballot = (2, (3, 1))
-        jc_ballot = JsonCaseBallot.from_object(ballot)
+        jc_ballot = JsonCaseBallot.from_model(ballot)
         expected = JsonCaseBallot(choices=(3, 1), weight=2)
         jc_ballot.assert_equal(expected)
 
@@ -166,12 +166,12 @@ class JsonCaseContestInputTest(UnitCase):
                 actual = getattr(contest, attr)
                 self.assertEqual(actual, expected)
 
-    def test_from_object(self):
+    def test_from_model(self):
         contest = ContestInput()
         contest.candidates = ['Ann', 'Bob']
         ballots = [(2, (3, 1))]
         contest.ballots_resource = ListResource(ballots)
-        jc_contest = JsonCaseContestInput.from_object(contest)
+        jc_contest = JsonCaseContestInput.from_model(contest)
 
         expected = JsonCaseContestInput(candidate_count=2)
         expected.ballots = [JsonCaseBallot(weight=2, choices=(3, 1))]

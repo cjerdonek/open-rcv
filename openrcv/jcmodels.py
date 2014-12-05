@@ -181,7 +181,7 @@ class JsonCaseContestInput(JsonableMixin):
         """
         candidate_count = None if contest.candidates is None else len(contest.candidates)
         with contest.ballots_resource.reading() as ballots:
-            ballots = [JsonCaseBallot.from_object(b) for b in ballots]
+            ballots = [JsonCaseBallot.from_model(b) for b in ballots]
         self.__init__(id_=contest.id, candidate_count=candidate_count, ballots=ballots,
                       name=contest.name, notes=contest.notes)
 

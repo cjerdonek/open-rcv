@@ -114,6 +114,7 @@ class ArgumentParserTest(UnitCase):
         """
         parser = self.parser()
         ns = parser.parse_args(["randcontest"])
+        # Use os.devnull to prevent stdout from being written to the console.
         with open(os.devnull, "w") as f:
             ns.run_command(ns, stdout=f)
 

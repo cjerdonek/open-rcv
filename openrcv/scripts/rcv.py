@@ -125,7 +125,8 @@ class RandContestCommand(CommandBase):
                             format_cls=format_cls,
                             json_contests_path=json_contests_path,
                             normalize=normalize,
-                            output_dir=output_dir)
+                            output_dir=output_dir,
+                            stdout=stdout)
 
     @property
     def desc(self):

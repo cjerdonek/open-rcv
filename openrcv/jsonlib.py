@@ -1,6 +1,5 @@
 
-"""
-Supporting code for JSON serialization.
+"""Supporting code for JSON serialization.
 
 For the purposes of this project, "JSON object" (abbreviated in code as
 `js_obj`) means a Python object composed of instances of built-in types
@@ -19,7 +18,6 @@ to JSON, and JSON null values correspond to the JS_NULL object.
 This decision is based on the thinking that having "null" appear in the
 JSON should be a deliberate decision (and in the Python world, None
 is the usual default value).
-
 """
 
 import json
@@ -50,10 +48,7 @@ def to_json(jsobj):
 
 
 def read_json_path(path):
-    """
-    Read a JSON file and return its contents as a JSON object.
-
-    """
+    """Read a JSON file and return its contents as a JSON object."""
     stream_info = JsonPathInfo(path)
     with stream_info.open() as f:
         jsobj = json.load(f)
@@ -66,7 +61,6 @@ def write_json(obj, resource=None, path=None):
     """
     Arguments:
       resource: a stream resource object.
-
     """
     try:
         jsobj = obj.to_jsobj()
@@ -81,12 +75,10 @@ def write_json(obj, resource=None, path=None):
 
 # TODO: choose a less ambiguous name.
 def from_jsobj(jsobj, cls=None):
-    """
-    Convert a JSON object to a Python object, and return it.
+    """Convert a JSON object to a Python object, and return it.
 
     Arguments:
       cls: a class that serves as a "type hint."
-
     """
     if isinstance(jsobj, LIST_TYPES):
         return tuple((from_jsobj(o, cls=cls) for o in jsobj))
@@ -108,12 +100,10 @@ def from_jsobj(jsobj, cls=None):
 
 
 def to_jsobj(obj):
-    """
-    Convert a Python object to a JSON object, and return it.
+    """Convert a Python object to a JSON object, and return it.
 
     Arguments:
       cls: a class that serves as a "type hint."
-
     """
     if isinstance(obj, LIST_TYPES):
         return [to_jsobj(o) for o in obj]
@@ -139,22 +129,19 @@ class JsonDeserializeError(Exception):
 
 class Attribute(object):
 
-    """
-    Represents an attribute of a jsonable class that should be
+    """Represents an attribute of a jsonable class that should be
     serialized and deserialized to JSON.
 
     """
 
     def __init__(self, name, cls=None):
         """
-
         Arguments:
           name: the attribute name.
           cls: the jsonable class that should be used for serializing and
             deserializing the attribute value.  None means that no
             class is applicable: the attribute value is an instance of a
             Python built-in type.
-
         """
         self.name = name
         self.cls = cls
@@ -169,11 +156,10 @@ class JsonableMixin(ReprMixin):
 
     The Jsonable class has four main public methods (or class methods):
 
-      1) jsonable.to_model(): convert a Jsonable object to a model object.
-      2) jsonable_cls.from_model(model): convert a model to a Jsonable.
+      1) jsonable_cls.from_model(model): convert a model object to a Jsonable.
+      2) jsonable.to_model(): convert a Jsonable object to a model object.
       3) jsonable.to_jsobj(): convert a Jsonable to a JSON object.
       4) jsonable_cls.from_jsobj(jsobj): convert a JSON object to a Jsonable.
-
     """
 
     meta_attrs = ()
@@ -201,8 +187,7 @@ class JsonableMixin(ReprMixin):
         return True
 
     def assert_equal(self, other):
-        """
-        Raise an informative AssertionError if self and other differ.
+        """Raise an informative AssertionError if self and other differ.
 
         This is useful for debugging and unit testing.
         """
@@ -230,13 +215,11 @@ class JsonableMixin(ReprMixin):
         return ""
 
     def _attrs_from_jsdict(self, attrs, jsdict):
-        """
-        Read in attribute values from a JSON object dict.
+        """Read in attribute values from a JSON object dict.
 
         Arguments:
           attrs: iterable of attribute names.
           jsdict: a JSON object that is a mapping object.
-
         """
         for attr in attrs:
             name, cls = attr.name, attr.cls
@@ -249,10 +232,7 @@ class JsonableMixin(ReprMixin):
             setattr(self, name, obj)
 
     def _attrs_to_jsdict(self, attrs, jsdict):
-        """
-        Write attribute values to a JSON object dict.
-
-        """
+        """Write attribute values to a JSON object dict."""
         for attr in attrs:
             try:
                 name, cls = attr.name, attr.cls
@@ -272,10 +252,7 @@ class JsonableMixin(ReprMixin):
             jsdict[name] = jsobj
 
     def load_jsobj(self, jsobj):
-        """
-        Read data from the given JSON object and save it to attributes.
-
-        """
+        """Read data from the given JSON object and save it to attributes."""
         keys = set()
         try:
             meta_dict = jsobj['_meta']
@@ -298,31 +275,26 @@ class JsonableMixin(ReprMixin):
         self._attrs_to_jsdict(self.meta_attrs, meta)
         return meta
 
-    # TODO: need to_object()!
-
     @classmethod
-    def from_object(cls, model_obj):
-        """
-        Create an instance of the current class from a model object.
-        """
+    def from_model(cls, model_obj):
+        """Create an instance of the current class from a model object."""
         jsonable = cls()
         jsonable.load_object(model_obj)
         return jsonable
 
+    def to_model(self):
+        raise
+
+
     @classmethod
     def from_jsobj(cls, jsobj):
-        """
-        Create an instance of the current class from a JSON object.
-        """
+        """Create an instance of the current class from a JSON object."""
         jsonable = cls()
         jsonable.load_jsobj(jsobj)
         return jsonable
 
     def to_jsobj(self):
-        """
-        Convert the current object to a JSON object.
-
-        """
+        """Convert the current object to a JSON object."""
         jsobj = {}
         meta = self.get_meta_dict()
         if meta:

@@ -71,6 +71,8 @@ setup(
             'check-manifest',
             'pandocfilters >=1.2,<1.3',
             'PyYAML >=3,<4',
+            'sphinx',
+            'sphinx-autobuild',
             'twine >=1.3,<1.4',
         ],
         'test':  [

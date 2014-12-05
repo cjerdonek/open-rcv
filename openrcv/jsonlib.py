@@ -284,6 +284,10 @@ class JsonableMixin(ReprMixin):
         self._attrs_to_jsdict(self.meta_attrs, meta)
         return meta
 
+    # TODO: need to_object()!
+    # TODO: document the four main Jsonable methods (conversion to and from
+    #   JSON object and model object).
+
     @classmethod
     def from_object(cls, model_obj):
         """

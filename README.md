@@ -3,6 +3,7 @@ OpenRCV
 
 [![Build Status](https://travis-ci.org/cjerdonek/open-rcv.svg?branch=master)](https://travis-ci.org/cjerdonek/open-rcv)
 [![Coverage Status](https://img.shields.io/coveralls/cjerdonek/open-rcv.svg)](https://coveralls.io/r/cjerdonek/open-rcv?branch=master)
+[![Read the Docs Status](https://readthedocs.org/projects/openrcv/badge/?version=latest)](http://docs.openrcv.org)
 
 OpenRCV is an open source software project for tallying ranked-choice
 voting elections like instant runoff voting and the single transferable vote.
@@ -26,9 +27,10 @@ Features
 * Exposes both a command-line API and a Python API.
 * Both APIs support neutral input and output text formats to allow
   interoperability with other applications and programming languages.
-  For example, round-by-round results can be output as JSON to use
-  your own custom "pretty" HTML renderer.  And round-by-round totals can
-  be checked against publicly available test data.
+  For example, round-by-round results can be output as JSON to be--
+    * Passed to a custom "pretty" HTML renderer, or
+    * Checked numerically (i.e. independent of presentation) against
+      test data.
 * Detailed logging while counting contests.
 
 

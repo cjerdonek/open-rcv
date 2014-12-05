@@ -24,6 +24,7 @@ import json
 import logging
 
 from openrcv import streams
+from openrcv import utils
 from openrcv.utils import PathInfo, ReprMixin, ENCODING_JSON
 
 
@@ -283,8 +284,7 @@ class JsonableMixin(ReprMixin):
         return jsonable
 
     def to_model(self):
-        raise
-
+        raise utils.NoImplementation(self)
 
     @classmethod
     def from_jsobj(cls, jsobj):

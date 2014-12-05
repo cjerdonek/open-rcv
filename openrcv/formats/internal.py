@@ -91,6 +91,8 @@ class BallotsResourceBase(object):
         """
         self.resource = resource
 
+    # TODO: add normalize().
+
     @contextmanager
     def reading(self):
         with self.resource.reading() as stream:

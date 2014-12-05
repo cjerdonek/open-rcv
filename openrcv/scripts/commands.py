@@ -71,7 +71,7 @@ def clean_contests(json_path):
     test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
     jc_contests = []
     for id_, jc_contest in enumerate(test_file.contests, start=1):
-        contest = jc_contest.to_object()
+        contest = jc_contest.to_model()
         contest.id = id_
         contest.normalize()
     #jsonlib.write_json(test_file, path=json_path)

@@ -25,7 +25,8 @@ all at once.
 from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin,
                              JsonDeserializeError)
-from openrcv.models import make_candidates, BallotsResourceBase, RoundResults
+from openrcv import models
+from openrcv.models import make_candidates, RoundResults
 from openrcv.utils import StringInfo
 
 
@@ -55,7 +56,7 @@ class JsonCaseBallot(JsonableMixin):
         weight, choices = ballot
         self.__init__(choices=choices, weight=weight)
 
-    def to_object(self):
+    def to_model(self):
         """
         Arguments:
           ballot: a Ballot object.
@@ -74,7 +75,7 @@ class JsonCaseBallot(JsonableMixin):
 
     def to_jsobj(self):
         """Return a JSON object."""
-        ballot = self.to_object()
+        ballot = self.to_model()
         return to_internal_ballot(ballot)
 
 
@@ -185,6 +186,13 @@ class JsonCaseContestInput(JsonableMixin):
         self.__init__(id_=contest.id, candidate_count=candidate_count, ballots=ballots,
                       name=contest.name, notes=contest.notes)
 
+    def to_model(self):
+        """Return a ContestInput object."""
+        # TODO
+        contest = models.ContestInput(id_=self.id, name=self.name)
+        # (candidates=None, seat_count=None,
+        #              ballots_resource=None, notes=None)
+        return contest
 
     #
     # def to_object(self):

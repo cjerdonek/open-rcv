@@ -65,7 +65,7 @@ class JsonCaseBallotTest(UnitCase):
 
     def test_to_object(self):
         jc_ballot = JsonCaseBallot(choices=(1, 2), weight=3)
-        ballot = jc_ballot.to_object()
+        ballot = jc_ballot.to_model()
         self.assertEqual(ballot, (3, (1, 2)))
 
     def test_from_jsobj(self):

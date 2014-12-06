@@ -167,33 +167,6 @@ class BallotsResourceBase(object):
             yield _WriteableBallotStream(stream)
 
 
-# TODO: remove this in favor of use the same class as BallotsResource.
-class BallotStreamResource(object):
-
-    def __init__(self, stream_info, parse=None):
-        """
-        Arguments:
-          parse: a function that accepts a line and returns the object
-            it parses to.
-        """
-        if parse is None:
-            parse = lambda line: line
-        self.parse = parse
-        self.stream_info = stream_info
-
-    @contextmanager
-    def __call__(self):
-        with self.resource() as items:
-            yield items
-
-    @contextmanager
-    def resource(self):
-        with self.stream_info.open() as lines:
-            parse = self.parse
-            ballots = map(parse, lines)
-            yield ballots
-
-
 class SimpleBallotsResource(BallotsResourceBase):
 
     def __init__(self, resource):

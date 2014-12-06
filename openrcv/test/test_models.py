@@ -2,7 +2,7 @@
 from textwrap import dedent
 
 from openrcv import models
-from openrcv.models import normalized_ballots, BallotStreamResource, ContestInput
+from openrcv.models import normalized_ballots, ContestInput
 from openrcv import streams
 from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
@@ -27,24 +27,6 @@ class ModuleTest(UnitCase):
         # list/tuple/etc.
         self.assertEqual(type(normalized), type((x for x in ())))
         self.assertEqual(list(normalized), [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))])
-
-
-class BallotStreamResourceTest(UnitCase):
-
-    def test(self):
-        ballot_info = StringInfo("2 1 2\n3 1\n")
-        ballot_resource = BallotStreamResource(ballot_info)
-        with ballot_resource() as ballots:
-            ballots = list(ballots)
-        self.assertEqual(ballots, ['2 1 2\n', '3 1\n'])
-
-    def test_parse_default(self):
-        ballot_info = StringInfo("2 1 2\n3 1\n")
-        parse = lambda line: line.strip()
-        ballot_resource = BallotStreamResource(ballot_info, parse=parse)
-        with ballot_resource() as ballots:
-            ballots = list(ballots)
-        self.assertEqual(ballots, ['2 1 2', '3 1'])
 
 
 class SimpleBallotsResourceTest(UnitCase):

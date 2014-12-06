@@ -191,6 +191,7 @@ class NullStreamResource(StreamResourceMixin, ReprMixin):
 # TODO: consider simplifying the stream resource hierarchy, so that the
 #   various backed stream resources possibly don't need a base class
 #   and separate out the tracking part using a lighter-weight pattern.
+# TODO: document the StreamResource API.
 class StreamResourceBase(ReprMixin):
 
     """Abstract base class for stream resources.

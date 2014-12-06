@@ -1,6 +1,7 @@
 
 from textwrap import dedent
 
+from openrcv import models
 from openrcv.models import normalized_ballots, BallotStreamResource, ContestInput
 from openrcv import streams
 from openrcv.utils import StringInfo
@@ -44,6 +45,17 @@ class BallotStreamResourceTest(UnitCase):
         with ballot_resource() as ballots:
             ballots = list(ballots)
         self.assertEqual(ballots, ['2 1 2', '3 1'])
+
+
+class SimpleBallotsResourceTest(UnitCase):
+
+    def test_reading(self):
+        ballots = [(2, (1, 3)), (1, (4, 2))]
+        resource = streams.ListResource(ballots)
+        ballots_resource = models.SimpleBallotsResource(resource)
+        with ballots_resource.reading() as ballots:
+            ballots = list(ballots)
+        self.assertEqual(ballots, [(2, (1, 3)), (1, (4, 2))])
 
 
 class ContestInputTest(UnitCase):

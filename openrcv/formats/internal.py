@@ -43,67 +43,6 @@ def parse_internal_ballot(line):
     return weight, choices
 
 
-class _WriteableBallotsBase(object):
-
-    def __init__(self, resource, stream):
-        self.resource = resource
-        self.stream = stream
-
-    def write(self, ballot):
-        line = to_internal_ballot(ballot)
-        self.stream.write(line + "\n")
-
-
-# TODO: move this to models.py.
-class BallotsResourceBase(object):
-
-    # TODO: fix this docstring and DRY up with stream resource docs.
-    """
-    An instance of this class is a context manager factory function
-    for managing the resource of an iterable of ballots.
-
-    An instance of this class could be used as follows, for example:
-
-        with ballot_resource() as ballots:
-            for ballot in ballots:
-                # Handle ballot.
-                ...
-
-    This resembles the pattern of opening a file and reading its lines.
-    One reason to encapsulate ballots as a context manager as opposed to
-    an iterable is that ballots are often stored as a file.  Thus,
-    implementations should really support the act of opening and closing
-    the ballot file when the ballots are needed (i.e. managing the file
-    resource).  This is preferable to opening a handle to a ballot
-    file earlier than needed and then keeping the file open.
-    """
-
-    def read_convert(self, item):
-        raise NoImplementation(self)
-
-    def write_convert(self, item):
-        raise NoImplementation(self)
-
-    def __init__(self, resource):
-        """
-        Arguments:
-          resource: backing store for the ballots.
-        """
-        self.resource = resource
-
-    # TODO: add normalize().
-
-    @contextmanager
-    def reading(self):
-        with self.resource.reading() as stream:
-            yield map(self.read_convert, stream)
-
-    @contextmanager
-    def writing(self):
-        with self.resource.writing() as stream:
-            yield _WriteableBallotStream(stream)
-
-
 class _WriteableBallotStream(object):
 
     def __init__(self, stream):
@@ -115,7 +54,6 @@ class _WriteableBallotStream(object):
 
 
 # TODO: get this inheriting from BallotsResourceBase.
-# TODO: add a count_ballots() method that takes weight into account.
 class InternalBallotsResource(streams.StreamResourceMixin):
 
     def __init__(self, resource):

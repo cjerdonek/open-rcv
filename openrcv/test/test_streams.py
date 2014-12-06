@@ -108,20 +108,6 @@ class StreamResourceTestMixin(object):
                 items = tuple(stream)
             self.assertEqual(items, ())
 
-    def test_writing__error(self):
-        """Check that an error while writing shows the line number."""
-        with self.assertRaises(ValueError) as cm:
-            with self.resource() as resource:
-                with resource.writing() as stream:
-                    stream.write('c\n')
-                    stream.write('d\n')
-                    raise ValueError('foo')
-        # Check the exception text.
-        err = cm.exception
-        self.assertStartsWith(str(err), "last written %s of <%s:" %
-                              (self.expected_label, self.class_name))
-        self.assertEndsWith(str(err), ": number=2, 'd\\n'")
-
 
 class ListCoresourceTest(StreamResourceTestMixin, UnitCase):
 

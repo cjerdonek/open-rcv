@@ -159,13 +159,6 @@ class ReadableTrackedStream(TrackedStreamBase):
             yield item
 
 
-class WriteableTrackedStream(TrackedStreamBase):
-
-    def write(self, item):
-        self.increment(item)
-        self.stream.write(item)
-
-
 class WriteableListStream(object):
 
     def __init__(self, seq):
@@ -347,15 +340,6 @@ class StreamResourceBase(ReprMixin):
                             (self.label, self, tracked.item_number, tracked.item))
 
     @contextmanager
-    def track_writing(self, stream):
-        tracked = WriteableTrackedStream(stream)
-        try:
-            yield tracked
-        except Exception as exc:
-            raise type(exc)("last written %s of %r: number=%d, %r" %
-                            (self.label, self, tracked.item_number, tracked.item))
-
-    @contextmanager
     def reading(self):
         """Return a context manager that yields a readable stream.
 
@@ -378,8 +362,7 @@ class StreamResourceBase(ReprMixin):
         """
         log.debug("opening for writing: %r" % self)
         with self.open_write() as f:
-            with self.track_writing(f) as tracked:
-                yield tracked
+            yield f
 
 
 # TODO: add more to the repr and test.

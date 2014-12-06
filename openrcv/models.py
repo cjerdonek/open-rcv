@@ -105,19 +105,21 @@ def normalize_ballots(source, target):
             ballots.write(ballot)
 
 
-class _WriteableBallotsBase(object):
+class _WriteableResourceStream(object):
 
     def __init__(self, resource, stream):
         self.resource = resource
         self.stream = stream
 
-    def write(self, ballot):
-        line = to_internal_ballot(ballot)
-        self.stream.write(line + "\n")
+    def write(self, item):
+        converted = self.resource.write_convert(item)
+        self.stream.write(converted)
 
 
 # TODO: should this inherit from StreamResourceBase?
 # TODO: add a count_ballots() method that takes weight into account.
+# TODO: rename this ConvertingResourceBase?
+# TODO: see if we can get the converting functionality without inheritance.
 class BallotsResourceBase(object):
 
     # TODO: fix this docstring and DRY up with stream resource docs.
@@ -164,10 +166,22 @@ class BallotsResourceBase(object):
     @contextmanager
     def writing(self):
         with self.resource.writing() as stream:
-            yield _WriteableBallotStream(stream)
+            yield _WriteableResourceStream(self, stream)
+
+
+class _WriteableBallotStream(object):
+
+    def __init__(self, stream):
+        self.stream = stream
+
+    def write(self, ballot):
+        line = to_internal_ballot(ballot)
+        self.stream.write(line + "\n")
 
 
 class SimpleBallotsResource(BallotsResourceBase):
+
+    """A ballots resource that does no conversion."""
 
     def __init__(self, resource):
         """
@@ -179,15 +193,8 @@ class SimpleBallotsResource(BallotsResourceBase):
     def read_convert(self, item):
         return item
 
-    # @contextmanager
-    # def reading(self):
-    #     with self.resource.reading() as stream:
-    #         yield map(parse_internal_ballot, stream)
-    #
-    # @contextmanager
-    # def writing(self):
-    #     with self.resource.writing() as stream:
-    #         yield _WriteableBallotStream(stream)
+    def write_convert(self, item):
+        return item
 
 
 # TODO: add id and notes.

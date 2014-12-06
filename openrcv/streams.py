@@ -139,18 +139,6 @@ class StreamResourceMixin(object):
             return sum(1 for item in stream)
 
 
-class TrackedStreamBase(object):
-
-    def __init__(self, stream):
-        self.item_number = 0
-        self.item = None
-        self.stream = stream
-
-    def increment(self, item):
-        self.item = item
-        self.item_number += 1
-
-
 class WriteableListStream(object):
 
     def __init__(self, seq):

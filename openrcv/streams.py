@@ -180,6 +180,14 @@ def tracked(source, iterable):
             raise type(exc)("last read item from %r (number=%d): %r" % (source, i, item))
 
 
+@utils.coroutine
+def sink(write, target):
+    """Return a generator that writes to the given target."""
+    while True:
+        item = yield
+        write(target, item)
+
+
 class StreamCoresourceBase(ReprMixin):
 
     @contextmanager
@@ -200,14 +208,6 @@ class StreamCoresourceBase(ReprMixin):
     def write(self, item):
         raise utils.NoImplementation(self)
 
-    # TODO: make this accept the writer as an argument so
-    #  this function need not be part of the class.
-    @utils.coroutine
-    def sink(self):
-        while True:
-            item = yield
-            self.write(item)
-
     @contextmanager
     def writing(self):
         """Return a context manager that yields a coroutine sink.
@@ -219,7 +219,7 @@ class StreamCoresourceBase(ReprMixin):
         """
         log.debug("opening for writing: %r" % self)
         with self.open_write() as target:
-            yield self.sink()
+            yield sink(self.write, target)
 
 
 class ListCoresource(StreamCoresourceBase):
@@ -239,14 +239,15 @@ class ListCoresource(StreamCoresourceBase):
     def open_read(self):
         yield iter(self.seq)
 
-    def write(self, item):
-        self.seq.append(item)
+    def write(self, target, item):
+        target.append(item)
 
     @contextmanager
     def open_write(self):
+        seq = self.seq
         # Delete the contents of the list (analogous to deleting a file).
-        self.seq.clear()
-        yield
+        seq.clear()
+        yield seq
 
 
 # TODO: add more to the repr and test.

@@ -181,17 +181,6 @@ class NullStreamResource(StreamResourceMixin, ReprMixin):
         raise TypeError("The null stream resource does not allow writing.")
 
 
-# This pattern is from David Beazley's coroutine PDF slides located here:
-#  http://www.dabeaz.com/coroutines/
-# TODO: move this to utils.
-def coroutine(func):
-    def start(*args, **kwargs):
-        cr = func(*args, **kwargs)
-        next(cr)
-        return cr
-    return start
-
-
 def tracked(source, stream):
     """Return a "tracking" generator over the items in the given stream.
 
@@ -232,7 +221,7 @@ class StreamCoresourceBase(ReprMixin):
 
     # TODO: make this accept the writer as an argument so
     #  this function need not be part of the class.
-    @coroutine
+    @utils.coroutine
     def sink(self):
         while True:
             item = yield
@@ -567,7 +556,7 @@ class StringResource(StreamResourceBase):
             yield f
             self.contents = f.getvalue()
 
-    @coroutine
+    @utils.coroutine
     def co_open_write(self):
         # Delete the contents of the list (analogous to deleting a file).
         self.seq.clear()

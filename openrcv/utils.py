@@ -22,6 +22,16 @@ FILE_ENCODING = "utf-8"
 log = logging.getLogger(__name__)
 
 
+# This pattern is from David Beazley's coroutine PDF slides here:
+#  http://www.dabeaz.com/coroutines/
+def coroutine(func):
+    def start(*args, **kwargs):
+        cr = func(*args, **kwargs)
+        next(cr)
+        return cr
+    return start
+
+
 def join_values(values):
     """Return the values as a space-delimited string."""
     return " ".join((str(v) for v in values))

@@ -192,15 +192,25 @@ def coroutine(func):
     return start
 
 
-class StreamCoresourceBase(ReprMixin):
+def tracked(source, stream):
+    """Return a "tracking" generator over the items in the given stream.
 
-    def tracked(self, stream):
-        for i, item in enumerate(stream, start=1):
-            try:
-                yield item
-            except Exception as exc:
-                raise type(exc)("last read %s of %r: number=%d, %r" %
-                                (self.label, self, i, item))
+    If gen.throw(exc) is called on the generator return value, then the
+    generator adds information about the location of the stream to
+    the exception stack trace.
+
+    Arguments:
+      source: the source of the stream (for display purposes).
+      stream: an iterator object.
+    """
+    for i, item in enumerate(stream, start=1):
+        try:
+            yield item
+        except Exception as exc:
+            raise type(exc)("last read item of %r: number=%d, %r" % (source, i, item))
+
+
+class StreamCoresourceBase(ReprMixin):
 
     @contextmanager
     def reading(self):
@@ -211,7 +221,7 @@ class StreamCoresourceBase(ReprMixin):
         """
         log.debug("opening for reading: %r" % self)
         with self.open_read() as f:
-            gen = self.tracked(f)
+            gen = tracked(self, f)
             try:
                 yield gen
             except Exception as exc:

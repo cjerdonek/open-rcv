@@ -1,6 +1,9 @@
 TODO
 ====
 
+* Rename open-rcv to openrcv.
+* Make a reST long description for PyPI
+* Fix up remaining PyPI release instructions and commit.
 * Work on cleancontests command (need to examine add'l JsonCase* objects).
 * Remove cruft from utils.py (specifically StreamInfo).
 * Improve the random ballot generation by removing undervotes and
@@ -9,7 +12,6 @@ TODO
 * Add "samplecontest" command so people can play with using it?
 * Allow test logging messages to show (e.g. skips).
 * Add extra command options from molt.
-* Fix up remaining PyPI release instructions and commit.
 * Add definition of "contest metadata" to design doc.
 * Stub out batch IRV in open-rcv-tests
   - Stub out option & style docs, and update README.

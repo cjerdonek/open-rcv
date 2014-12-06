@@ -151,14 +151,6 @@ class TrackedStreamBase(object):
         self.item_number += 1
 
 
-class ReadableTrackedStream(TrackedStreamBase):
-
-    def __iter__(self):
-        for item in self.stream:
-            self.increment(item)
-            yield item
-
-
 class WriteableListStream(object):
 
     def __init__(self, seq):
@@ -181,7 +173,7 @@ class NullStreamResource(StreamResourceMixin, ReprMixin):
         raise TypeError("The null stream resource does not allow writing.")
 
 
-def tracked(source, stream):
+def tracked(source, iterable):
     """Return a "tracking" generator over the items in the given stream.
 
     If gen.throw(exc) is called on the generator return value, then the
@@ -190,13 +182,14 @@ def tracked(source, stream):
 
     Arguments:
       source: the source of the stream (for display purposes).
-      stream: an iterator object.
+      iterable: an iterable.  In particular, an iterator object is not
+        required.
     """
-    for i, item in enumerate(stream, start=1):
+    for i, item in enumerate(iterable, start=1):
         try:
             yield item
         except Exception as exc:
-            raise type(exc)("last read item of %r: number=%d, %r" % (source, i, item))
+            raise type(exc)("last read item from %r (number=%d): %r" % (source, i, item))
 
 
 class StreamCoresourceBase(ReprMixin):
@@ -244,8 +237,6 @@ class StreamCoresourceBase(ReprMixin):
 class ListCoresource(StreamCoresourceBase):
 
     """A stream resource backed by a list."""
-
-    label = "item"
 
     def __init__(self, seq=None):
         """
@@ -312,8 +303,6 @@ class StreamResourceBase(ReprMixin):
     backing store.
     """
 
-    label = "line"
-
     @contextmanager
     def open_read(self):
         """Return an iterator object."""
@@ -324,21 +313,6 @@ class StreamResourceBase(ReprMixin):
         raise NotImplementedError()
 
     @contextmanager
-    def track_reading(self, stream):
-        """Return a with-statement context manager for an iterable that provides
-        item-level information when an exception occurs.
-
-        The context manager yields an iterator object for the target `as`
-        expression that we call a "tracked iterator."
-        """
-        tracked = ReadableTrackedStream(stream)
-        try:
-            yield tracked
-        except Exception as exc:
-            raise type(exc)("last read %s of %r: number=%d, %r" %
-                            (self.label, self, tracked.item_number, tracked.item))
-
-    @contextmanager
     def reading(self):
         """Return a context manager that yields a readable stream.
 
@@ -347,8 +321,11 @@ class StreamResourceBase(ReprMixin):
         """
         log.debug("opening for reading: %r" % self)
         with self.open_read() as f:
-            with self.track_reading(f) as tracked:
-                yield iter(tracked)
+            gen = tracked(self, f)
+            try:
+                yield gen
+            except Exception as exc:
+                gen.throw(exc)
 
     @contextmanager
     def writing(self):
@@ -368,8 +345,6 @@ class StreamResourceBase(ReprMixin):
 class ListResource(StreamResourceBase):
 
     """A stream resource backed by a list."""
-
-    label = "item"
 
     def __init__(self, seq=None):
         """

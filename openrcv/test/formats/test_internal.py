@@ -46,8 +46,8 @@ class InternalBallotsResourceTest(UnitCase):
                 actual = list(stream)
         # Check the exception text.
         err = cm.exception
-        self.assertStartsWith(str(err), "last read line of <StringResource:")
-        self.assertEndsWith(str(err), ": number=2, '2 b 1\\n'")
+        self.assertStartsWith(str(err), "last read item from <StringResource:")
+        self.assertEndsWith(str(err), "(number=2): '2 b 1\\n'")
 
     def test_writing(self):
         ballots = [

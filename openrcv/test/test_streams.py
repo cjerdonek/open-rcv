@@ -5,7 +5,7 @@ import tempfile
 from tempfile import TemporaryDirectory
 
 from openrcv import streams
-from openrcv.streams import (ListResource, FilePathResource, ReadableTrackedStream,
+from openrcv.streams import (tracked, ListResource, FilePathResource,
                              ReadWriteFileResource, StringResource)
 from openrcv.utiltest.helpers import UnitCase
 
@@ -14,37 +14,35 @@ class FooException(Exception):
     pass
 
 
-# TODO: test the tracked() generator instead.
-class ReadableTrackedStreamTest(UnitCase):
+class TrackedTest(UnitCase):
 
-    def assert_state(self, tracking, item, number):
-        self.assertEqual(tracking.item, item)
-        self.assertEqual(tracking.item_number, number)
+    """Tests of tracked()."""
 
-    def test_init(self):
-        stream = [1, 2, 3]
-        tracking = ReadableTrackedStream(stream)
-        self.assert_state(tracking, None, 0)
+    def test(self):
+        stream = ['a', 'b', 'c']
+        gen = tracked("foo", stream)
+        items = list(gen)
+        self.assertEqual(items, ['a', 'b', 'c'])
+        # Check that the return value exhausts (i.e. is an iterator object).
+        items = list(gen)
+        self.assertEqual(items, [])
 
-    # TODO: enable this test.
-    def _test_iter(self):
-        stream = ListStream(['a', 'b', 'c'])
-        tracking = ReadableTrackedStream(stream)
-        items = iter(tracking)
-        self.assert_state(tracking, None, 0)
-        item = next(items)
-        self.assert_state(tracking, 'a', 1)
-        item = next(items)
-        self.assert_state(tracking, 'b', 2)
-        # Check what happens when you start over.
-        items = iter(tracking)
-        self.assert_state(tracking, None, 0)
+    def test__exception(self):
+        stream = ['a', 'b', 'c']
+        gen = tracked("foo", stream)
+        first = next(gen)
+        self.assertEqual(first, "a")
+        second = next(gen)
+        with self.assertRaises(ValueError) as cm:
+            gen.throw(ValueError("foo"))
+        # Check the exception text.
+        err = cm.exception
+        self.assertEqual(str(err), "last read item from 'foo' (number=2): 'b'")
+        # TODO: check that "foo" is also in the exception.
 
 class StreamResourceTestMixin(object):
 
     """Base mixin for StreamResource tests."""
-
-    expected_label = "line"
 
     def test_reading(self):
         with self.resource() as resource:
@@ -83,9 +81,8 @@ class StreamResourceTestMixin(object):
                     raise FooException()
         # Check the exception text.
         err = cm.exception
-        self.assertStartsWith(str(err), "last read %s of <%s:" %
-                              (self.expected_label, self.class_name))
-        self.assertEndsWith(str(err), ": number=1, 'a\\n'")
+        self.assertStartsWith(str(err), "last read item from <%s:" % self.class_name)
+        self.assertEndsWith(str(err), "(number=1): 'a\\n'")
 
     def test_writing(self):
         with self.resource() as resource:
@@ -114,7 +111,6 @@ class ListCoresourceTest(StreamResourceTestMixin, UnitCase):
     """ListResource tests."""
 
     class_name = "ListCoresource"
-    expected_label = "item"
 
     @contextmanager
     def resource(self):
@@ -162,7 +158,6 @@ class ListResourceTest(StreamResourceTestMixin, UnitCase):
     """ListResource tests."""
 
     class_name = "ListResource"
-    expected_label = "item"
 
     @contextmanager
     def resource(self):

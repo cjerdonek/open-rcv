@@ -13,7 +13,7 @@ from openrcv import jcmanage
 from openrcv.formats import jscase
 from openrcv.formats.internal import parse_internal_ballot
 from openrcv import jcmodels, jsonlib, models
-from openrcv.models import BallotStreamResource, ContestInput
+from openrcv.models import ContestInput
 from openrcv.utils import logged_open, PathInfo, StringInfo
 
 

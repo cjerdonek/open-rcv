@@ -85,6 +85,7 @@ from io import StringIO
 import logging
 import tempfile
 
+from openrcv import utils
 from openrcv.utils import logged_open, ReprMixin
 
 
@@ -109,7 +110,8 @@ def pipe_resource(resource, pipe_func):
 # TODO: remove this after thinking about whether it would be useful.
 class _PipedResource(object):
 
-    """An iterator resource in which the target iterable is passed to a pipe
+    """An iterator re
+    source in which the target iterable is passed to a pipe
     function (i.e. as a post-process).
     """
 
@@ -184,6 +186,120 @@ class NullStreamResource(StreamResourceMixin, ReprMixin):
     @contextmanager
     def writing(self):
         raise TypeError("The null stream resource does not allow writing.")
+
+
+# This pattern is from David Beazley's coroutine PDF slides located here:
+#  http://www.dabeaz.com/coroutines/
+# TODO: move this to utils.
+def coroutine(func):
+    def start(*args, **kwargs):
+        cr = func(*args, **kwargs)
+        next(cr)
+        return cr
+    return start
+
+
+class StreamCoresourceBase(ReprMixin):
+
+    def tracked(self, stream):
+        for i, item in enumerate(stream, start=1):
+            try:
+                yield item
+            except Exception as exc:
+                raise type(exc)("last read %s of %r: number=%d, %r" %
+                                (self.label, self, i, item))
+
+    @contextmanager
+    def reading(self):
+        """Return a context manager that yields a readable stream.
+
+        Here, "readable stream" means an iterator object over the elements
+        of the backing store.
+        """
+        log.debug("opening for reading: %r" % self)
+        with self.open_read() as f:
+            gen = self.tracked(f)
+            try:
+                yield gen
+            except Exception as exc:
+                gen.throw(exc)
+
+    def write(self, item):
+        raise utils.NoImplementation(self)
+
+    # TODO: make this accept the writer as an argument so
+    #  this function need not be part of the class.
+    @coroutine
+    def sink(self):
+        while True:
+            item = yield
+            self.write(item)
+
+    @contextmanager
+    def writing(self):
+        """Return a context manager that yields a coroutine sink.
+
+        Return a writeable stream, which is a coroutine.
+
+        Calling this method clears the contents of the backing store
+        before returning a stream that writes to the store.
+        """
+        log.debug("opening for writing: %r" % self)
+        with self.open_write() as target:
+            yield self.sink()
+
+
+class ListCoresource(StreamCoresourceBase):
+
+    """A stream resource backed by a list."""
+
+    label = "item"
+
+    def __init__(self, seq=None):
+        """
+        Arguments:
+          seq: an iterable.  Defaults to the empty list.
+        """
+        if seq is None:
+            seq = []
+        self.seq = seq
+
+    @contextmanager
+    def open_read(self):
+        yield iter(self.seq)
+
+    def write(self, item):
+        self.seq.append(item)
+
+    @contextmanager
+    def open_write(self):
+        # Delete the contents of the list (analogous to deleting a file).
+        self.seq.clear()
+        yield
+
+
+# TODO: add more to the repr and test.
+class FilePathCoresource(StreamCoresourceBase):
+
+    """A stream resource backed by a file."""
+
+    def __init__(self, path, encoding=None, **kwargs):
+        if encoding is None:
+            encoding = 'ascii'
+        self.path = path
+        self.encoding = encoding
+        self.kwargs = kwargs
+
+    @contextmanager
+    def _open(self, mode):
+        with logged_open(self.path, mode, encoding=self.encoding, **self.kwargs) as f:
+            yield f
+
+    def open_read(self):
+        return self._open("r")
+
+    def open_write(self):
+        return self._open("w")
 
 
 # TODO: rename to something that doesn't seem to imply that all
@@ -291,6 +407,9 @@ class ListResource(StreamResourceBase):
         # Delete the contents of the list (analogous to deleting a file).
         self.seq.clear()
         yield WriteableListStream(self.seq)
+
+    def write(self, item):
+        self.seq.append(item)
 
 
 # TODO: add more to the repr and test.
@@ -454,3 +573,11 @@ class StringResource(StreamResourceBase):
         with StringIO() as f:
             yield f
             self.contents = f.getvalue()
+
+    @coroutine
+    def co_open_write(self):
+        # Delete the contents of the list (analogous to deleting a file).
+        self.seq.clear()
+        while True:
+            item = yield
+            self.seq.append(item)

@@ -53,7 +53,7 @@ class _WriteableBallotStream(object):
         self.stream.write(line + "\n")
 
 
-# TODO: get this inheriting from BallotsResourceBase.
+# TODO: get this inheriting from ResourceConverterBase.
 class InternalBallotsResource(streams.StreamResourceMixin):
 
     def __init__(self, resource):

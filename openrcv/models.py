@@ -118,9 +118,8 @@ class _WriteableResourceStream(object):
 
 # TODO: should this inherit from StreamResourceBase?
 # TODO: add a count_ballots() method that takes weight into account.
-# TODO: rename this ConvertingResourceBase?
 # TODO: see if we can get the converting functionality without inheritance.
-class BallotsResourceBase(object):
+class ResourceConverterBase(object):
 
     # TODO: fix this docstring and DRY up with stream resource docs.
     """
@@ -161,7 +160,7 @@ class BallotsResourceBase(object):
     @contextmanager
     def reading(self):
         with self.resource.reading() as stream:
-            yield map(self.read_convert, stream)
+            yield (self.read_convert(item) for item in stream)
 
     @contextmanager
     def writing(self):
@@ -169,17 +168,7 @@ class BallotsResourceBase(object):
             yield _WriteableResourceStream(self, stream)
 
 
-class _WriteableBallotStream(object):
-
-    def __init__(self, stream):
-        self.stream = stream
-
-    def write(self, ballot):
-        line = to_internal_ballot(ballot)
-        self.stream.write(line + "\n")
-
-
-class SimpleBallotsResource(BallotsResourceBase):
+class SimpleBallotsResource(ResourceConverterBase):
 
     """A ballots resource that does no conversion."""
 
@@ -204,7 +193,7 @@ class ContestInput(ReprMixin):
     """
     Attributes:
       ballots: a context manager factory function that yields an
-        iterable of ballots (e.g. a BallotsResourceBase object).
+        iterable of ballots (e.g. a ResourceConverterBase object).
       candidates: an iterable of the names of all candidates, in numeric
         order of their ballot ID.
       name: contest name.

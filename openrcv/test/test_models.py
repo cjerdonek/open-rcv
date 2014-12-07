@@ -43,8 +43,8 @@ class SimpleBallotsResourceTest(UnitCase):
         ballots = [(2, (1, 3)), (1, (4, 2))]
         resource = streams.ListResource(ballots)
         ballots_resource = models.SimpleBallotsResource(resource)
-        with ballots_resource.writing() as ballots:
-            ballots.write((1, (2, 3)))
+        with ballots_resource.writing() as target:
+            target.send((1, (2, 3)))
         with ballots_resource.reading() as ballots:
             ballots = list(ballots)
         self.assertEqual(ballots, [(1, (2, 3))])

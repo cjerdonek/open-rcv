@@ -1,6 +1,11 @@
 TODO
 ====
 
+* Add unit tests for ConvertingResource.
+* Test that resource.writing() closes its coroutine.
+* Add unit tests for BallotsResource.
+* Get unit tests checking JSON test cases (after normalizing and generating
+  files)
 * Rename open-rcv to openrcv.
 * Make a reST long description for PyPI
 * Fix up remaining PyPI release instructions and commit.

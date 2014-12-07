@@ -44,6 +44,10 @@ class StreamResourceTestMixin(object):
 
     """Base mixin for StreamResource tests."""
 
+    def assertGenClosed(self, gen):
+        with self.assertRaises(StopIteration):
+            gen.send(1)
+
     def test_reading(self):
         with self.resource() as resource:
             with resource.reading() as stream:
@@ -55,6 +59,14 @@ class StreamResourceTestMixin(object):
             self.assertEqual(items, ("a\n", "b\n"))
             # Sanity-check that reading() doesn't return the same object each time.
             self.assertIsNot(stream, stream2)
+
+    def test_reading__closes(self):
+        """Check that the context manager closes the generator."""
+        with self.resource() as resource:
+            with resource.reading() as gen:
+                item = next(gen)
+            self.assertEqual(item, "a\n")
+            self.assertGenClosed(gen)
 
     def test_reading__iterator(self):
         """Check that reading() returns an iterator [1].

@@ -111,12 +111,26 @@ def tracked(source, iterable):
             raise type(exc)("last read item from %r (number=%d): %r" % (source, i, item))
 
 
+# TODO: need to close coroutines.
 @utils.coroutine
 def sink(write, target):
     """Return a generator that writes to the given target."""
     while True:
         item = yield
         write(target, item)
+
+
+@utils.coroutine
+def converting_pipe(convert, target):
+    """
+    Arguments:
+      convert: a function that accepts one argument to transform
+        items before sending them to the target coroutine.
+    """
+    while True:
+        item = (yield)
+        item = convert(item)
+        target.send(item)
 
 
 # TODO: remove this after thinking about whether it would be useful.
@@ -195,6 +209,26 @@ class StreamResourceBase(ReprMixin):
 
     Normally, the __init__() constructor accepts a reference to the stream
     backing store.
+
+    TODO: clean up the below.
+
+    An instance of this class is a context manager factory function
+    for managing the resource of an iterable of ballots.
+
+    An instance of this class could be used as follows, for example:
+
+        with ballot_resource() as ballots:
+            for ballot in ballots:
+                # Handle ballot.
+                ...
+
+    This resembles the pattern of opening a file and reading its lines.
+    One reason to encapsulate ballots as a context manager as opposed to
+    an iterable is that ballots are often stored as a file.  Thus,
+    implementations should really support the act of opening and closing
+    the ballot file when the ballots are needed (i.e. managing the file
+    resource).  This is preferable to opening a handle to a ballot
+    file earlier than needed and then keeping the file open.
     """
 
     @contextmanager
@@ -211,11 +245,14 @@ class StreamResourceBase(ReprMixin):
         """
         log.debug("opening for reading: %r" % self)
         with self.open_read() as f:
-            gen = tracked(self, f)
             try:
-                yield gen
-            except Exception as exc:
-                gen.throw(exc)
+                gen = tracked(self, f)
+                try:
+                    yield gen
+                except Exception as exc:
+                    gen.throw(exc)
+            finally:
+                gen.close()
 
     # The default implementation.
     def write(self, f, item):
@@ -430,3 +467,37 @@ class StringResource(StreamResourceBase):
         with StringIO() as f:
             yield f
             self.contents = f.getvalue()
+
+
+class Converter(object):
+
+    def from_resource(self, item):
+        raise NoImplementation(self)
+
+    def to_resource(self, item):
+        raise NoImplementation(self)
+
+
+class ConvertingResource(object):
+
+    def __init__(self, resource, converter):
+        """
+        Arguments:
+          TODO: define the "stream resource protocol."
+          resource: a stream resource.
+          converter: a converter
+        """
+        self.converter = converter
+        self.resource = resource
+
+    @contextmanager
+    def reading(self):
+        convert = self.converter.from_resource
+        with self.resource.reading() as gen:
+            yield (convert(item) for item in gen)
+
+    @contextmanager
+    def writing(self):
+        convert = self.converter.from_resource
+        with self.resource.writing() as gen:
+            yield converting_pipe(convert, target=gen)

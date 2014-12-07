@@ -17,7 +17,7 @@ import tempfile
 
 from openrcv.formats import internal
 from openrcv import streams
-from openrcv.streams import NullStreamResource, ReadWriteFileResource
+from openrcv import utils
 from openrcv.utils import NoImplementation, ReprMixin
 
 
@@ -105,83 +105,16 @@ def normalize_ballots(source, target):
             gen.send(ballot)
 
 
-class _WriteableResourceStream(object):
-
-    def __init__(self, resource, stream):
-        self.resource = resource
-        self.stream = stream
-
-    def write(self, item):
-        converted = self.resource.write_convert(item)
-        self.stream.send(converted)
-
-
-# TODO: should this inherit from StreamResourceBase?
+# TODO: add normalize().
 # TODO: add a count_ballots() method that takes weight into account.
-# TODO: see if we can get the converting functionality without inheritance.
-class ResourceConverterBase(object):
+class BallotsResource(streams.ConvertingResource):
 
-    # TODO: fix this docstring and DRY up with stream resource docs.
-    """
-    An instance of this class is a context manager factory function
-    for managing the resource of an iterable of ballots.
-
-    An instance of this class could be used as follows, for example:
-
-        with ballot_resource() as ballots:
-            for ballot in ballots:
-                # Handle ballot.
-                ...
-
-    This resembles the pattern of opening a file and reading its lines.
-    One reason to encapsulate ballots as a context manager as opposed to
-    an iterable is that ballots are often stored as a file.  Thus,
-    implementations should really support the act of opening and closing
-    the ballot file when the ballots are needed (i.e. managing the file
-    resource).  This is preferable to opening a handle to a ballot
-    file earlier than needed and then keeping the file open.
-    """
-
-    def read_convert(self, item):
-        raise NoImplementation(self)
-
-    def write_convert(self, item):
-        raise NoImplementation(self)
-
-    def __init__(self, resource):
-        """
-        Arguments:
-          resource: backing store for the ballots.
-        """
-        self.resource = resource
-
-    # TODO: add normalize().
-
-    @contextmanager
-    def reading(self):
-        with self.resource.reading() as stream:
-            yield (self.read_convert(item) for item in stream)
-
-    @contextmanager
-    def writing(self):
-        with self.resource.writing() as stream:
-            yield _WriteableResourceStream(self, stream)
-
-
-class SimpleBallotsResource(ResourceConverterBase):
-
-    """A ballots resource that does no conversion."""
-
-    def __init__(self, resource):
-        """
-        Arguments:
-          resource: backing store for the resource.
-        """
-        self.resource = resource
+    """A simple ballots resource."""
 
     def read_convert(self, item):
         return item
 
+    @contextmanager
     def write_convert(self, item):
         return item
 
@@ -193,7 +126,7 @@ class ContestInput(ReprMixin):
     """
     Attributes:
       ballots: a context manager factory function that yields an
-        iterable of ballots (e.g. a ResourceConverterBase object).
+        iterable of ballots (e.g. a ConvertingResource object).
       candidates: an iterable of the names of all candidates, in numeric
         order of their ballot ID.
       name: contest name.
@@ -206,7 +139,7 @@ class ContestInput(ReprMixin):
     def __init__(self, id_=None, name=None, candidates=None, seat_count=None,
                  ballots_resource=None, notes=None):
         if ballots_resource is None:
-            ballots_resource = NullStreamResource()
+            ballots_resource = streams.NullStreamResource()
         if candidates is None:
             candidates = []
         if id_ is None:

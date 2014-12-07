@@ -35,36 +35,8 @@ def temp_ballots_resource():
         yield ballots_resource
 
 
-# TODO: remove this in favor of the ballots resource version.
-def normalized_ballots(lines):
-    """
-
-    """
-    parse_internal_ballot = internal.parse_internal_ballot
-    # A dict mapping tuples of choices to the cumulative weight.
-    choices_dict = {}
-
-    for line in lines:
-        weight, choices = parse_internal_ballot(line)
-        try:
-            choices_dict[choices] += weight
-        except KeyError:
-            # Then we are adding the choices for the first time.
-            choices_dict[choices] = weight
-
-    sorted_choices = sorted(choices_dict.keys())
-
-    def iterator():
-        for choices in sorted_choices:
-            weight = choices_dict[choices]
-            yield weight, choices
-
-    return iterator()
-
-
 # TODO: allow ordering and compressing to be done separately.
-# TODO: think about proper use of yield here.
-def normalize_ballots(source, target):
+def normalize_ballots_to(source, target):
     """
     Normalize ballots by ordering and "compressing" them.
 
@@ -93,7 +65,7 @@ def normalize_ballots(source, target):
             except KeyError:
                 # Then we are adding the choices for the first time.
                 choices_dict[choices] = weight
-        sorted_choices = sorted(choices_dict.keys())
+    sorted_choices = sorted(choices_dict.keys())
 
     with target.writing() as gen:
         for choices in sorted_choices:
@@ -110,6 +82,7 @@ class BallotsResourceMixin(object):
             return sum(weight for weight, choices in gen)
 
     def normalize(self):
+        # TODO
         raise utils.NoImplementation(self)
 
 

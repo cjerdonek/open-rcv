@@ -16,7 +16,7 @@ import string
 # to any counting and not a prerequisite.
 
 from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
-from openrcv.models import normalized_ballots, ContestResults, RoundResults
+from openrcv.models import ContestResults, RoundResults
 from openrcv.parsing import BLTParser, Parser
 from openrcv import utils
 from openrcv.utils import parse_integer_line, PathInfo, ENCODING_INTERNAL_BALLOTS

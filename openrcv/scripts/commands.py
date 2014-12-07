@@ -60,18 +60,21 @@ def count(ns, stdout=None):
 
 def make_random_contest(ballot_count, candidate_count, format_cls,
                         json_contests_path, output_dir,
-                        normalize=False, stdout=None):
+                        normalize=True, stdout=None):
     """Generate a random contest."""
     if stdout is None:
         stdout = sys.stdout
-    format = format_cls()
 
-    creator_cls = (jcmanage.NormalizedContestCreator if normalize else
-                   jcmanage.ContestCreator)
-    creator = creator_cls()
+    format = format_cls()
+    creator = jcmanage.ContestCreator()
+
     with models.temp_ballots_resource() as ballots_resource:
         contest = creator.create_random(ballots_resource, ballot_count=ballot_count,
             candidate_count=candidate_count)
+        contest.normalize = normalize
+        if normalize:
+            contest.ballots_resource.normalize()
+
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
 
         # TODO: refactor this out into jcmanage.

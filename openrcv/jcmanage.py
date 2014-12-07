@@ -159,11 +159,7 @@ def make_candidates(count):
     return names
 
 
-class _ContestCreatorBase(object):
-
-    @contextmanager
-    def adding_ballots(self, target_resource):
-        raise utils.NoImplementation(self)
+class ContestCreator(object):
 
     def create_random(self, ballots_resource, candidate_count=None, ballot_count=None):
         """Create a random contest.
@@ -177,18 +173,17 @@ class _ContestCreatorBase(object):
         choices = range(1, candidate_count + 1)
         chooser = BallotGenerator(choices=choices)
 
-        with self.adding_ballots(ballots_resource) as initial_resource:
-            chooser.add_random_ballots(initial_resource, ballot_count)
+        chooser.add_random_ballots(ballots_resource, ballot_count)
 
         name = "Random Contest"
 
         now = datetime.datetime.now()
         # We call int() to remove leading zero-padding.
-        dt_string = ('{0:%B} {0:%d}, {0:%Y} {1:d}:{0:%M:%S%p}'
+        dt_string = ('{0:%B} {0:%d}, {0:%Y} at {1:d}:{0:%M:%S%p}'
                      .format(now, int(now.strftime("%I"))))
         notes = [
-            "Contest has {0:d} candidates and {1:d} ballots.  {2}"
-            .format(candidate_count, ballot_count, self.extra_notes),
+            "Contest has {0:d} candidates and {1:d} ballots.  "
+                                .format(candidate_count, ballot_count),
             "Created on {0}.".format(dt_string),
         ]
 
@@ -196,31 +191,6 @@ class _ContestCreatorBase(object):
                                ballots_resource=ballots_resource)
 
         return contest
-
-
-class ContestCreator(_ContestCreatorBase):
-
-    """Creates random contest without normalizing ballots."""
-
-    extra_notes = ""
-
-    @contextmanager
-    def adding_ballots(self, target_resource):
-        yield target_resource
-
-
-class NormalizedContestCreator(_ContestCreatorBase):
-
-    """Creates random contest with normalized ballots."""
-
-    extra_notes = "Ballots are normalized.  "
-
-    @contextmanager
-    def adding_ballots(self, target_resource):
-        # TODO: examine this code again.
-        with models.temp_ballots_resource() as source_resource:
-            yield source_resource
-            models.normalize_ballots(source_resource, target=target_resource)
 
 
 # TODO: consider removing this.

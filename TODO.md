@@ -1,9 +1,9 @@
 TODO
 ====
 
-* Add a normalize flag to contests.
 * Decide if normalizing ballots should alter the backing resource or
   simply swap it out.
+* Add a normalize flag to contests.
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)
 * Rename open-rcv to openrcv.

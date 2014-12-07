@@ -126,6 +126,13 @@ class StreamResourceTestMixin(object):
                 items = tuple(stream)
             self.assertEqual(items, ('c\n', 'd\n'))
 
+    def test_writing__closes(self):
+        """Check that the context manager closes the generator."""
+        with self.resource() as resource:
+            with resource.writing() as gen:
+                gen.send('c\n')
+            self.assertGeneratorClosed(gen)
+
     def test_writing__deletes(self):
         """Check that writing() deletes the current data."""
         with self.resource() as resource:

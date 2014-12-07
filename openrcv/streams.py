@@ -145,9 +145,8 @@ def tracked(source, iterable):
             raise type(exc)("last read item from %r (number=%d): %r" % (source, i, item))
 
 
-# TODO: need to close coroutines.
 @utils.coroutine
-def sink(write, target):
+def _sink(write, target):
     """Return a generator that writes to the given target."""
     while True:
         item = yield
@@ -282,8 +281,12 @@ class StreamResourceBase(ReprMixin):
         before returning a stream that writes to the store.
         """
         log.debug("opening for writing: %r" % self)
-        with self.open_write() as target:
-            yield sink(self.write, target)
+        with self.open_write() as stream:
+            gen = _sink(self.write, stream)
+            try:
+                yield gen
+            finally:
+                gen.close()
 
 
 # TODO: add more to the repr and test.

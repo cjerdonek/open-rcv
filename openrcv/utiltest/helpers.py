@@ -108,7 +108,8 @@ class CaseMixin(object):
         self.assertEqual(text[index:], initial, msg=msg)
 
     def assertGeneratorClosed(self, gen):
-        with self.assertRaises(StopIteration):
+        with self.assertRaises(StopIteration,
+                        msg="Generator failed test that it is closed."):
             gen.send(1)
 
 

@@ -92,6 +92,33 @@ from openrcv.utils import logged_open, ReprMixin
 log = logging.getLogger(__name__)
 
 
+def tracked(source, iterable):
+    """Return a "tracking" generator over the items in the given stream.
+
+    If gen.throw(exc) is called on the generator return value, then the
+    generator adds information about the location of the stream to
+    the exception stack trace.
+
+    Arguments:
+      source: the source of the stream (for display purposes).
+      iterable: an iterable.  In particular, an iterator object is not
+        required.
+    """
+    for i, item in enumerate(iterable, start=1):
+        try:
+            yield item
+        except Exception as exc:
+            raise type(exc)("last read item from %r (number=%d): %r" % (source, i, item))
+
+
+@utils.coroutine
+def sink(write, target):
+    """Return a generator that writes to the given target."""
+    while True:
+        item = yield
+        write(target, item)
+
+
 # TODO: remove this after thinking about whether it would be useful.
 def pipe_resource(resource, pipe_func):
     """Pipe a resource's iterator object through a function.
@@ -139,15 +166,6 @@ class StreamResourceMixin(object):
             return sum(1 for item in stream)
 
 
-class WriteableListStream(object):
-
-    def __init__(self, seq):
-        self.seq = seq
-
-    def write(self, obj):
-        self.seq.append(obj)
-
-
 class NullStreamResource(StreamResourceMixin, ReprMixin):
 
     """A placeholder stream resource used as a default."""
@@ -159,33 +177,6 @@ class NullStreamResource(StreamResourceMixin, ReprMixin):
     @contextmanager
     def writing(self):
         raise TypeError("The null stream resource does not allow writing.")
-
-
-def tracked(source, iterable):
-    """Return a "tracking" generator over the items in the given stream.
-
-    If gen.throw(exc) is called on the generator return value, then the
-    generator adds information about the location of the stream to
-    the exception stack trace.
-
-    Arguments:
-      source: the source of the stream (for display purposes).
-      iterable: an iterable.  In particular, an iterator object is not
-        required.
-    """
-    for i, item in enumerate(iterable, start=1):
-        try:
-            yield item
-        except Exception as exc:
-            raise type(exc)("last read item from %r (number=%d): %r" % (source, i, item))
-
-
-@utils.coroutine
-def sink(write, target):
-    """Return a generator that writes to the given target."""
-    while True:
-        item = yield
-        write(target, item)
 
 
 # TODO: rename to something that doesn't seem to imply that all

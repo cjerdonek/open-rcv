@@ -74,8 +74,8 @@ class CaseMixin(object):
             setattr(obj, name, initial_value)
 
     def _assertStringMessage(self, text, initial, verb):
-        return ('Details: The string """\\\n%s"""\ndoes not %s with: %r' %
-                (text, verb, initial))
+        return ('Details: string does not %s with: %r\n-->"""%s"""' %
+                (verb, initial, text))
 
     def assertStartsWith(self, text, initial):
         msg = self._assertStringMessage(text, initial, "start")

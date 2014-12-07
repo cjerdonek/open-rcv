@@ -1,9 +1,8 @@
 TODO
 ====
 
-* Add unit tests for ConvertingResource.
-* Test that resource.writing() closes its coroutine.
 * Add unit tests for BallotsResource.
+* Test that resource.writing() closes its coroutine.
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)
 * Rename open-rcv to openrcv.

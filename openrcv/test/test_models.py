@@ -2,8 +2,9 @@
 from textwrap import dedent
 
 from openrcv import models
-from openrcv.models import normalized_ballots, ContestInput
+from openrcv.models import normalized_ballots, BallotsResource, ContestInput
 from openrcv import streams
+from openrcv.streams import ListResource
 from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
@@ -29,23 +30,35 @@ class ModuleTest(UnitCase):
         self.assertEqual(list(normalized), [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))])
 
 
-class SimpleBallotsResourceTest(UnitCase):
+class BallotsResourceTest(UnitCase):
+
+    def make_ballots_resource(self):
+        ballots = [(2, (1, 3)), (1, (4, 2))]
+        resource = ListResource(ballots)
+        ballots_resource = BallotsResource(resource)
+        return ballots_resource
+
+    def test_repr(self):
+        resource = self.make_ballots_resource()
+        self.assertStartsWith(repr(resource),
+                    "<BallotsResource: [resource=<ListResource: [")
+
+    def test_count_ballots(self):
+        resource = self.make_ballots_resource()
+        count = resource.count_ballots()
+        self.assertEqual(count, 3)
 
     def test_reading(self):
-        ballots = [(2, (1, 3)), (1, (4, 2))]
-        resource = streams.ListResource(ballots)
-        ballots_resource = models.SimpleBallotsResource(resource)
-        with ballots_resource.reading() as ballots:
+        resource = self.make_ballots_resource()
+        with resource.reading() as ballots:
             ballots = list(ballots)
         self.assertEqual(ballots, [(2, (1, 3)), (1, (4, 2))])
 
     def test_writing(self):
-        ballots = [(2, (1, 3)), (1, (4, 2))]
-        resource = streams.ListResource(ballots)
-        ballots_resource = models.SimpleBallotsResource(resource)
-        with ballots_resource.writing() as target:
+        resource = self.make_ballots_resource()
+        with resource.writing() as target:
             target.send((1, (2, 3)))
-        with ballots_resource.reading() as ballots:
+        with resource.reading() as ballots:
             ballots = list(ballots)
         self.assertEqual(ballots, [(1, (2, 3))])
 

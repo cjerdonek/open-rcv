@@ -1,6 +1,5 @@
 
-"""
-Internal models that do not require JSON serialization.
+"""Internal models that do not require JSON serialization.
 
 Ballot Model
 ------------
@@ -8,7 +7,6 @@ Ballot Model
 For now, the "Ballot" object is not represented by a class.  It is
 simply a `(weight, choices)` 2-tuple, where `weight` is a number and
 choices is a tuple of integer choice ID's.
-
 """
 
 from contextlib import contextmanager
@@ -16,9 +14,8 @@ import logging
 import tempfile
 
 from openrcv.formats import internal
-from openrcv import streams
-from openrcv import utils
-from openrcv.utils import NoImplementation, ReprMixin
+from openrcv import streams, utils
+from openrcv.utils import ReprMixin
 
 
 log = logging.getLogger(__name__)
@@ -106,17 +103,18 @@ def normalize_ballots(source, target):
 
 
 # TODO: add normalize().
-# TODO: add a count_ballots() method that takes weight into account.
-class BallotsResource(streams.ConvertingResource):
+class BallotsResourceMixin(object):
 
-    """A simple ballots resource."""
+    def count_ballots(self):
+        with self.resource.reading() as gen:
+            return sum(weight for weight, choices in gen)
 
-    def read_convert(self, item):
-        return item
+    def normalize(self):
+        raise utils.NoImplementation(self)
 
-    @contextmanager
-    def write_convert(self, item):
-        return item
+
+class BallotsResource(streams.WrapperResource, BallotsResourceMixin):
+    pass
 
 
 # TODO: add id and notes.

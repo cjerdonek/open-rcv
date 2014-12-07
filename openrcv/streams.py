@@ -470,6 +470,32 @@ class StringResource(StreamResourceBase):
             self.contents = f.getvalue()
 
 
+# TODO: unit test this.
+class WrapperResource(ReprMixin):
+
+    """A stream resource that wraps another resource.
+
+    This class is useful for defining classes whose constructor can
+    accept any stream resource.
+    """
+
+    def __init__(self, resource):
+        """
+        Arguments:
+          resource: a stream resource.
+        """
+        self.resource = resource
+
+    def repr_info(self):
+        return "resource=%r" % self.resource
+
+    def reading(self):
+        return self.resource.reading()
+
+    def writing(self):
+        return self.resource.writing()
+
+
 class Converter(object):
 
     def from_resource(self, item):

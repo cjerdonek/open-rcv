@@ -50,7 +50,7 @@ class _WriteableBallotStream(object):
 
     def write(self, ballot):
         line = to_internal_ballot(ballot)
-        self.stream.write(line + "\n")
+        self.stream.send(line + "\n")
 
 
 # TODO: get this inheriting from ResourceConverterBase.

@@ -86,9 +86,9 @@ class StreamResourceTestMixin(object):
 
     def test_writing(self):
         with self.resource() as resource:
-            with resource.writing() as stream:
-                stream.write('c\n')
-                stream.write('d\n')
+            with resource.writing() as target:
+                target.send('c\n')
+                target.send('d\n')
             with resource.reading() as stream:
                 items = tuple(stream)
             self.assertEqual(items, ('c\n', 'd\n'))

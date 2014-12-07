@@ -298,10 +298,6 @@ class StreamResourceBase(ReprMixin):
         raise NotImplementedError()
 
     @contextmanager
-    def open_write(self):
-        raise NotImplementedError()
-
-    @contextmanager
     def reading(self):
         """Return a context manager that yields a readable stream.
 
@@ -316,19 +312,24 @@ class StreamResourceBase(ReprMixin):
             except Exception as exc:
                 gen.throw(exc)
 
+    # The default implementation.
+    def write(self, f, item):
+        f.write(item)
+
+    @contextmanager
+    def open_write(self):
+        raise NotImplementedError()
+
     @contextmanager
     def writing(self):
-        """Return a context manager that yields a writeable stream.
-
-        Return a writeable stream.
+        """Return a context manager that yields a generator.
 
         Calling this method clears the contents of the backing store
         before returning a stream that writes to the store.
         """
         log.debug("opening for writing: %r" % self)
-        with self.open_write() as f:
-            yield f
-
+        with self.open_write() as target:
+            yield sink(self.write, target)
 
 # TODO: add more to the repr and test.
 class ListResource(StreamResourceBase):
@@ -348,14 +349,15 @@ class ListResource(StreamResourceBase):
     def open_read(self):
         yield iter(self.seq)
 
+    def write(self, target, item):
+        target.append(item)
+
     @contextmanager
     def open_write(self):
+        seq = self.seq
         # Delete the contents of the list (analogous to deleting a file).
-        self.seq.clear()
-        yield WriteableListStream(self.seq)
-
-    def write(self, item):
-        self.seq.append(item)
+        seq.clear()
+        yield seq
 
 
 # TODO: add more to the repr and test.
@@ -514,16 +516,12 @@ class StringResource(StreamResourceBase):
     def open_read(self):
         yield StringIO(self.contents)
 
+    def write(self, f, item):
+        f.write(item)
+
     @contextmanager
     def open_write(self):
+        # TODO: confirm that the contents get deleted.
         with StringIO() as f:
             yield f
             self.contents = f.getvalue()
-
-    @utils.coroutine
-    def co_open_write(self):
-        # Delete the contents of the list (analogous to deleting a file).
-        self.seq.clear()
-        while True:
-            item = yield
-            self.seq.append(item)

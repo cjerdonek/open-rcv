@@ -98,11 +98,11 @@ def normalize_ballots(source, target):
                 choices_dict[choices] = weight
         sorted_choices = sorted(choices_dict.keys())
 
-    with target.writing() as ballots:
+    with target.writing() as gen:
         for choices in sorted_choices:
             weight = choices_dict[choices]
             ballot = weight, choices
-            ballots.write(ballot)
+            gen.send(ballot)
 
 
 class _WriteableResourceStream(object):
@@ -113,7 +113,7 @@ class _WriteableResourceStream(object):
 
     def write(self, item):
         converted = self.resource.write_convert(item)
-        self.stream.write(converted)
+        self.stream.send(converted)
 
 
 # TODO: should this inherit from StreamResourceBase?

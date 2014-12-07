@@ -310,4 +310,4 @@ class FileWriter(object):
             yield
 
     def writeln(self, line):
-        self.file.write(line + "\n")
+        self.file.send(line + "\n")

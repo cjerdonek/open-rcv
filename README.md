@@ -92,6 +92,12 @@ This project is licensed under the permissive MIT license.
 See the [LICENSE](LICENSE) file for the actual license wording.
 
 
+History
+-------
+
+Chris Jerdonek began writing the code on September 27, 2014.
+
+
 Author
 ------
 

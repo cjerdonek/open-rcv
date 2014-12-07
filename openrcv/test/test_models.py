@@ -60,7 +60,16 @@ class NormalizeBallotTest(UnitCase):
 class BallotsResourceTest(UnitCase):
 
     def make_ballots_resource(self):
-        ballots = [(2, (1, 3)), (1, (4, 2))]
+        # We deliberately choose a list of ballots complicated enough to
+        # have better tests for (1) count_ballots() (by including weights
+        # greater than 1), and (2) normalize() (by listing the ballots out
+        # out of order and including multiple ballots with the same choice).
+        ballots = [
+            (1, (3, )),
+            (1, ()),
+            (1, (2, )),
+            (2, ()),
+        ]
         resource = ListResource(ballots)
         ballots_resource = BallotsResource(resource)
         return ballots_resource
@@ -72,16 +81,20 @@ class BallotsResourceTest(UnitCase):
     def test_count_ballots(self):
         resource = self.make_ballots_resource()
         count = resource.count_ballots()
-        self.assertEqual(count, 3)
+        self.assertEqual(count, 5)
 
     def test_normalize(self):
         resource = self.make_ballots_resource()
+        resource.normalize()
+        with resource.reading() as ballots:
+            ballots = list(ballots)
+        self.assertEqual(ballots, [(3, ()), (1, (2,)), (1, (3,))])
 
     def test_reading(self):
         resource = self.make_ballots_resource()
         with resource.reading() as ballots:
             ballots = list(ballots)
-        self.assertEqual(ballots, [(2, (1, 3)), (1, (4, 2))])
+        self.assertEqual(ballots, [(1, (3,)), (1, ()), (1, (2,)), (2, ())])
 
     def test_writing(self):
         resource = self.make_ballots_resource()

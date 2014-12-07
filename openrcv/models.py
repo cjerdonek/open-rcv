@@ -90,7 +90,6 @@ def normalize_ballots(ballots_resource):
         temp_ballots_resource.delete()
 
 
-# TODO: add normalize().
 class BallotsResourceMixin(object):
 
     def count_ballots(self):
@@ -98,8 +97,7 @@ class BallotsResourceMixin(object):
             return sum(weight for weight, choices in gen)
 
     def normalize(self):
-        # TODO
-        raise utils.NoImplementation(self)
+        normalize_ballots(self)
 
 
 class BallotsResource(streams.WrapperResource, BallotsResourceMixin):

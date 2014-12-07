@@ -78,15 +78,16 @@ def normalize_ballots(ballots_resource):
     """Normalize ballots in place.
 
     Arguments:
-      resource: a ballots resource.
+      ballots_resource: a ballots resource.
     """
-    backing_resource = ballots_resource.resource
-    temp_resource = backing_resource.make_temp()
+    temp_ballots_resource = ballots_resource.make_temp()
     try:
-        temp_ballots_resource = BallotsResource(temp_resource)
-        normalize_ballots_to(source, target)
+        normalize_ballots_to(ballots_resource, temp_ballots_resource)
+        # TODO: can and should I modify the old backing resource?
+        #   Either way, the behavior should be documented.
+        ballots_resource.resource = temp_ballots_resource
     except:
-        temp_resource.delete()
+        temp_ballots_resource.delete()
 
 
 # TODO: add normalize().

@@ -80,16 +80,29 @@ TODO: decide whether we need to inherit from StreamResourceBase.
 [1]: https://docs.python.org/3/library/contextlib.html
 """
 
+import contextlib
 from contextlib import contextmanager
 from io import StringIO
 import logging
 import tempfile
 
 from openrcv import utils
-from openrcv.utils import logged_open, ReprMixin
+from openrcv.utils import logged_open, NoImplementation, ReprMixin
 
 
 log = logging.getLogger(__name__)
+
+
+def temp_stream_resource():
+    """Return a context manager for a temporary stream resource.
+
+    Entering the context manager yields a stream resource without
+    actually opening a file handle.  Rather, the file is opened lazily,
+    i.e. when the stream resource is first opened for reading or writing.
+    Exiting the context manager closes the file handle if it is open.
+    """
+    resource = _TempFileResource()
+    return contextlib.closing(resource)
 
 
 def tracked(source, iterable):
@@ -133,45 +146,7 @@ def converting_pipe(convert, target):
         target.send(item)
 
 
-# TODO: remove this after thinking about whether it would be useful.
-def pipe_resource(resource, pipe_func):
-    """Pipe a resource's iterator object through a function.
-
-    Create an iterator resource that passes the iterator object from the
-    given iterator resource through the given pipe function.
-
-    Arguments:
-      pip_func: a function that accepts an iterable and returns an
-        iterator object.
-      resource: an iterator resource.
-    """
-    return _PipedResource(resource, pipe_func)
-
-
-# TODO: remove this after thinking about whether it would be useful.
-class _PipedResource(object):
-
-    """An iterator re
-    source in which the target iterable is passed to a pipe
-    function (i.e. as a post-process).
-    """
-
-    def __init__(self, resource, pipe_func):
-        """
-        Arguments:
-          pip_func: a function that accepts an iterable and returns an
-            iterator object.
-          resource: an iterator resource.
-        """
-        self.pipe_func = pipe_func
-        self.resource = resource
-
-    @contextmanager
-    def __call__(self):
-        with self.resource() as items:
-            yield self.pipe_func(items)
-
-
+# TODO: incorporate this and test.
 class StreamResourceMixin(object):
 
     def count(self):
@@ -231,10 +206,34 @@ class StreamResourceBase(ReprMixin):
     file earlier than needed and then keeping the file open.
     """
 
+    @classmethod
+    def make_temp(cls):
+        raise NoImplementation(cls)
+
+    def _delete(self):
+        raise NoImplementation(cls)
+
     @contextmanager
     def open_read(self):
         """Return an iterator object."""
-        raise NotImplementedError()
+        raise NoImplementation(self)
+
+    # The default implementation.
+    def write(self, f, item):
+        f.write(item)
+
+    @contextmanager
+    def open_write(self):
+        raise NoImplementation(self)
+
+    @classmethod  # must be applied "last" (i.e. top-most).
+    @contextmanager
+    def temp(cls):
+        temp_resource = cls.make_temp()
+        try:
+            yield temp_resource
+        except:
+            temp_resource._delete()
 
     @contextmanager
     def reading(self):
@@ -253,14 +252,6 @@ class StreamResourceBase(ReprMixin):
                     gen.throw(exc)
             finally:
                 gen.close()
-
-    # The default implementation.
-    def write(self, f, item):
-        f.write(item)
-
-    @contextmanager
-    def open_write(self):
-        raise NotImplementedError()
 
     @contextmanager
     def writing(self):
@@ -287,6 +278,10 @@ class ListResource(StreamResourceBase):
         if seq is None:
             seq = []
         self.seq = seq
+
+    @classmethod
+    def make_temp(cls):
+        return cls()
 
     @contextmanager
     def open_read(self):
@@ -315,6 +310,10 @@ class FilePathResource(StreamResourceBase):
         self.encoding = encoding
         self.kwargs = kwargs
 
+    @classmethod
+    def make_temp(cls):
+        return tempfile.SpooledTemporaryFile(encoding=self.encoding)
+
     @contextmanager
     def _open(self, mode):
         with logged_open(self.path, mode, encoding=self.encoding, **self.kwargs) as f:
@@ -327,7 +326,7 @@ class FilePathResource(StreamResourceBase):
         return self._open("w")
 
 
-class ReadWriteFileResource(StreamResourceBase):
+class _ReadWriteFileBase(StreamResourceBase):
 
     """A stream resource backed by a readable-writeable file.
 
@@ -339,36 +338,48 @@ class ReadWriteFileResource(StreamResourceBase):
     def __init__(self, file_):
         self.file = file_
 
+    @classmethod
+    def make_temp(cls):
+        return tempfile.NamedTemporaryFile(mode='w+t', encoding='utf-8')
+
+    def _open(self):
+        raise NoImplementation(self)
+
     @contextmanager
     def open_read(self):
-        self.file.seek(0)
+        self._open()
         yield self.file
 
     @contextmanager
     def open_write(self):
-        self.file.seek(0)
+        self._open()
         self.file.truncate()
         yield self.file
 
+    def close(self):
+        # TODO: handle exception happening if self.file is None.
+        close = self.file.close
+        close()
 
-@contextmanager
-def temp_stream_resource():
-    """Return a context manager for a temporary stream resource.
 
-    Entering the context manager yields a stream resource without
-    actually opening a file handle.  Rather, the file is opened lazily,
-    i.e. when the stream resource is first opened for reading or writing.
-    Exiting the context manager closes the file handle if it is open.
+class ReadWriteFileResource(_ReadWriteFileBase):
+
+    """A stream resource backed by a readable-writeable file.
+
+    To support reading and writing to the same stream, this class never
+    closes the underlying file.  Thus, closing the file is the responsibility
+    of the caller.
     """
-    resource = _TempFileResource()
-    try:
-        yield resource
-    finally:
-        if resource.file is not None:
-            resource.file.close()
+
+    def __init__(self, file_, encoding=None):
+        self.encoding = encoding
+        self.file = file_
+
+    def _open(self):
+        self.file.seek(0)
 
 
-class _TempFileResource(StreamResourceBase):
+class _TempFileResource(_ReadWriteFileBase):
 
     """A stream resource for temporary use.
 
@@ -385,23 +396,14 @@ class _TempFileResource(StreamResourceBase):
         self.file = None
 
     def _open(self):
+        f = self.file
         try:
-            seek = self.file.seek
+            seek = f.seek
         except AttributeError:
-            self.file = tempfile.SpooledTemporaryFile(mode='w+t', encoding=self.encoding)
-            seek = self.file.seek
+            f = tempfile.SpooledTemporaryFile(mode='w+t', encoding=self.encoding)
+            self.file = f
+            seek = f.seek
         seek(0)
-
-    @contextmanager
-    def open_read(self):
-        self._open()
-        yield self.file
-
-    @contextmanager
-    def open_write(self):
-        self._open()
-        self.file.truncate()
-        yield self.file
 
 
 # TODO: add more to the repr and test.
@@ -455,6 +457,10 @@ class StringResource(StreamResourceBase):
     #         return value
     #     return repr(value[:limit]) + "..."
 
+    @classmethod
+    def make_temp(cls):
+        return cls()
+
     @contextmanager
     def open_read(self):
         yield StringIO(self.contents)
@@ -488,6 +494,10 @@ class WrapperResource(ReprMixin):
 
     def repr_info(self):
         return "resource=%r" % self.resource
+
+    def make_temp(self):
+        temp_resource = self.resource.make_temp()
+        return self.__class__(temp_resource)
 
     def reading(self):
         return self.resource.reading()

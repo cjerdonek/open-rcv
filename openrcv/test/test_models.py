@@ -2,14 +2,14 @@
 from textwrap import dedent
 
 from openrcv import models
-from openrcv.models import normalize_ballots_to, BallotsResource, ContestInput
+from openrcv.models import normalize_ballots, normalize_ballots_to, BallotsResource, ContestInput
 from openrcv import streams
 from openrcv.streams import ListResource
 from openrcv.utils import StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
-class NormalizeBallotsTest(UnitCase):
+class NormalizeBallotsToTest(UnitCase):
 
     """Tests of normalize_ballots_to()."""
 
@@ -32,6 +32,27 @@ class NormalizeBallotsTest(UnitCase):
         target = ListResource()
         normalize_ballots_to(source, target)
         with target.reading() as gen:
+            normalized = list(gen)
+        self.assertEqual(normalized, [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))])
+
+
+class NormalizeBallotTest(UnitCase):
+
+    """Tests of normalize_ballots()."""
+
+    def test(self):
+        ballots = [
+            (1, (2, )),
+            (1, ()),
+            (1, (3, )),
+            (2, ()),
+            (4, (1, )),
+            (1, (2, )),
+        ]
+        resource = ListResource(ballots)
+        ballots_resource = BallotsResource(resource)
+        normalize_ballots(ballots_resource)
+        with ballots_resource.reading() as gen:
             normalized = list(gen)
         self.assertEqual(normalized, [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))])
 

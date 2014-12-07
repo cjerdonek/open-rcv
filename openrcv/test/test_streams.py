@@ -10,7 +10,7 @@ from openrcv.streams import (tracked, FilePathResource,
 from openrcv.utiltest.helpers import UnitCase
 
 
-class FooException(Exception):
+class _Exception(Exception):
     pass
 
 
@@ -43,6 +43,10 @@ class TrackedTest(UnitCase):
 class StreamResourceTestMixin(object):
 
     """Base mixin for StreamResource tests."""
+
+    @property
+    def class_name(self):
+        return self.cls.__name__
 
     def test_reading(self):
         with self.resource() as resource:
@@ -81,12 +85,12 @@ class StreamResourceTestMixin(object):
 
     def test_reading__error(self):
         """Check that an error while reading shows the line number."""
-        with self.assertRaises(FooException) as cm:
+        with self.assertRaises(_Exception) as cm:
             with self.resource() as resource:
                 with resource.reading() as stream:
                     item = next(stream)
                     self.assertEqual(item, "a\n")
-                    raise FooException()
+                    raise _Exception()
         # Check the exception text.
         err = cm.exception
         self.assertStartsWith(str(err), "last read item from <%s:" % self.class_name)
@@ -113,12 +117,19 @@ class StreamResourceTestMixin(object):
                 items = tuple(stream)
             self.assertEqual(items, ())
 
+    # TODO
+    def _test_temp(self):
+        cls = self.cls
+        with cls.temp() as resource:
+            with resource.reading() as gen:
+                items = list(gen)
+            self.assertEqual(items, [])
 
 class ListResourceTest(StreamResourceTestMixin, UnitCase):
 
     """ListResource tests."""
 
-    class_name = "ListResource"
+    cls = streams.ListResource
 
     @contextmanager
     def resource(self):
@@ -129,7 +140,7 @@ class FilePathResourceTest(StreamResourceTestMixin, UnitCase):
 
     """FilePathResource tests."""
 
-    class_name = "FilePathResource"
+    cls = streams.FilePathResource
 
     @contextmanager
     def resource(self):
@@ -144,7 +155,7 @@ class ReadWriteFileResourceTest(StreamResourceTestMixin, UnitCase):
 
     """ReadWriteFileResource tests."""
 
-    class_name = "ReadWriteFileResource"
+    cls = streams.ReadWriteFileResource
 
     @contextmanager
     def resource(self):
@@ -157,7 +168,7 @@ class SpooledReadWriteFileResourceTest(StreamResourceTestMixin, UnitCase):
 
     """ReadWriteFileResource tests (using tempfile.SpooledTemporaryFile)."""
 
-    class_name = "ReadWriteFileResource"
+    cls = streams.ReadWriteFileResource
 
     @contextmanager
     def resource(self):
@@ -172,7 +183,7 @@ class StringResourceTest(StreamResourceTestMixin, UnitCase):
 
     """StringResource tests."""
 
-    class_name = "StringResource"
+    cls = streams.StringResource
 
     @contextmanager
     def resource(self):

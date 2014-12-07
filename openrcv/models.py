@@ -168,16 +168,6 @@ class ContestInput(ReprMixin):
         """Return an iterable of the candidate numbers."""
         return make_candidates(len(self.candidates))
 
-    # TODO: consider removing this, otherwise implement it.
-    def normalize(self):
-        """Modifies the current contest in place."""
-        ballot_stream = JsonBallot.to_ballot_stream(self.ballots)
-        output_stream = StringInfo()
-        parser = InternalBallotsNormalizer(output_stream)
-        parser.parse(ballot_stream)
-        new_ballots = JsonBallot.from_ballot_stream(output_stream)
-        self.ballots = new_ballots
-
 
 class RoundResults(object):
 

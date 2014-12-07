@@ -174,16 +174,18 @@ class JsonCaseContestInput(JsonableMixin):
 
     meta_attrs = (Attribute('id'),
                   Attribute('name'),
+                  Attribute('normalized'),
                   Attribute('notes'))
     data_attrs = (Attribute('ballots', cls=JsonCaseBallot),
                   Attribute('candidate_count'))
 
     def __init__(self, id_=None, candidate_count=None, ballots=None,
-                 name=None, notes=None):
+                 name=None, normalized=None, notes=None):
         """
         Arguments:
           ballots: an iterable of JsonCaseBallot objects.
           candidate_count: integer number of candidates.
+          normalized: False or None.
         """
         if id_ is None:
             id_ = 0
@@ -191,6 +193,7 @@ class JsonCaseContestInput(JsonableMixin):
         self.candidate_count = candidate_count
         self.id = id_
         self.name = name
+        self.normalized = normalized
         self.notes = notes
 
     def repr_info(self):

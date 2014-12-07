@@ -33,7 +33,7 @@ import datetime
 import logging
 from random import random, sample
 
-from openrcv import models
+from openrcv import jcmodels, jsonlib, models
 from openrcv.models import ContestInput
 from openrcv import utils
 
@@ -57,6 +57,18 @@ Leo
 
 
 log = logging.getLogger(__name__)
+
+
+# TODO: log normalization conversions (e.g. if they are unequal).
+def clean_contests(json_path):
+    jsobj = jsonlib.read_json_path(json_path)
+    test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
+    for id_, jc_contest in enumerate(test_file.contests, start=1):
+        jc_contest.id = id_
+        contest = jc_contest.to_model()
+        ballots = contest.ballots_resource
+        ballots.normalize()
+    #jsonlib.write_json(test_file, path=json_path)
 
 
 class BallotGenerator(object):
@@ -176,7 +188,7 @@ class _ContestCreatorBase(object):
                      .format(now, int(now.strftime("%I"))))
         notes = [
             "Contest has {0:d} candidates and {1:d} ballots.  {2}"
-            .format(candidate_count, ballot_count, self.notes),
+            .format(candidate_count, ballot_count, self.extra_notes),
             "Created on {0}.".format(dt_string),
         ]
 
@@ -190,7 +202,7 @@ class ContestCreator(_ContestCreatorBase):
 
     """Creates random contest without normalizing ballots."""
 
-    notes = ""
+    extra_notes = ""
 
     @contextmanager
     def adding_ballots(self, target_resource):
@@ -201,10 +213,11 @@ class NormalizedContestCreator(_ContestCreatorBase):
 
     """Creates random contest with normalized ballots."""
 
-    notes = "Ballots are normalized.  "
+    extra_notes = "Ballots are normalized.  "
 
     @contextmanager
     def adding_ballots(self, target_resource):
+        # TODO: examine this code again.
         with models.temp_ballots_resource() as source_resource:
             yield source_resource
             models.normalize_ballots(source_resource, target=target_resource)

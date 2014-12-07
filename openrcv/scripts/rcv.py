@@ -27,11 +27,12 @@ from argparse2 import RawDescriptionHelpFormatter
 import logging
 from textwrap import dedent
 
-from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
-                                      HelpRequested, Option, UsageException)
 from openrcv.formats.blt import BLTFormat
 from openrcv.formats.internal import InternalFormat
+from openrcv import jcmanage
 from openrcv.formats.jscase import JsonCaseFormat
+from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
+                                      HelpRequested, Option, UsageException)
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
 from openrcv import utils
@@ -197,17 +198,20 @@ class CleanContestsCommand(CommandBase):
     name = "cleancontests"
     help = "Clean and normalize a contests.json file."
 
+    raw_desc = """\
+    Clean and normalize a contests.json file.
+
+    Cleaning operations include updating the integer contest IDs and
+    normalizing any ballot data that needs it.
+    """
+
     def func(self, ns, stdout):
         json_path = ns.json_contests_path
-        return commands.clean_contests(json_path)
+        return jcmanage.clean_contests(json_path)
 
     @property
     def desc(self):
-        return dedent("""\
-            Clean and normalize a contests.json file.
-
-            For example, this command updates the integer contest IDs.
-            """)
+        return dedent(self.raw_desc)
 
     def add_arguments(self, parser):
         parser.add_argument('json_contests_path', metavar='JSON_PATH',

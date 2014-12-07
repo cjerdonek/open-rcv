@@ -52,5 +52,5 @@ class JsonCaseContestWriter(FormatWriter):
         return os.path.join(output_dir, "contest.json"), ENCODING_JSON
 
     def resource_write(self, resource, contest):
-        jc_contest = JsonCaseContestInput.from_object(contest)
+        jc_contest = JsonCaseContestInput.from_model(contest)
         write_json(jc_contest, resource=resource)

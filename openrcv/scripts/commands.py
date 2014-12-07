@@ -83,16 +83,3 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
             jsonlib.write_json(data, path=json_contests_path)
 
     return "\n".join(output_paths) + "\n" if output_paths else None
-
-
-# TODO: refactor code out into jcmanage.
-# TODO: log normalization conversions (e.g. if they are unequal).
-def clean_contests(json_path):
-    jsobj = jsonlib.read_json_path(json_path)
-    test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
-    jc_contests = []
-    for id_, jc_contest in enumerate(test_file.contests, start=1):
-        contest = jc_contest.to_model()
-        contest.id = id_
-        contest.normalize()
-    #jsonlib.write_json(test_file, path=json_path)

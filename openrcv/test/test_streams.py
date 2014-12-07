@@ -106,53 +106,6 @@ class StreamResourceTestMixin(object):
             self.assertEqual(items, ())
 
 
-class ListCoresourceTest(StreamResourceTestMixin, UnitCase):
-
-    """ListResource tests."""
-
-    class_name = "ListCoresource"
-
-    @contextmanager
-    def resource(self):
-        yield streams.ListCoresource(["a\n", "b\n"])
-
-    def test_writing(self):
-        with self.resource() as resource:
-            with resource.writing() as target:
-                target.send('c\n')
-                target.send('d\n')
-            with resource.reading() as stream:
-                items = tuple(stream)
-            self.assertEqual(items, ('c\n', 'd\n'))
-
-    def test_writing__deletes(self):
-        """Check that writing() deletes the current data."""
-        with self.resource() as resource:
-            with resource.reading() as stream:
-                items = tuple(stream)
-            self.assertEqual(items, ("a\n", "b\n"))
-            with resource.writing() as stream:
-                pass
-            with resource.reading() as stream:
-                items = tuple(stream)
-            self.assertEqual(items, ())
-
-    def test_writing__error(self):
-        """Check that an error while writing shows the line number."""
-        return
-        with self.assertRaises(ValueError) as cm:
-            with self.resource() as resource:
-                with resource.writing() as stream:
-                    stream.send('c\n')
-                    stream.send('d\n')
-                    raise ValueError('foo')
-        # Check the exception text.
-        err = cm.exception
-        self.assertStartsWith(str(err), "last written %s of <%s:" %
-                              (self.expected_label, self.class_name))
-        self.assertEndsWith(str(err), ": number=2, 'd\\n'")
-
-
 class ListResourceTest(StreamResourceTestMixin, UnitCase):
 
     """ListResource tests."""

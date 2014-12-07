@@ -74,6 +74,21 @@ def normalize_ballots_to(source, target):
             gen.send(ballot)
 
 
+def normalize_ballots(ballots_resource):
+    """Normalize ballots in place.
+
+    Arguments:
+      resource: a ballots resource.
+    """
+    backing_resource = ballots_resource.resource
+    temp_resource = backing_resource.make_temp()
+    try:
+        temp_ballots_resource = BallotsResource(temp_resource)
+        normalize_ballots_to(source, target)
+    except:
+        temp_resource.delete()
+
+
 # TODO: add normalize().
 class BallotsResourceMixin(object):
 

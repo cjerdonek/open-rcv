@@ -2,6 +2,7 @@ TODO
 ====
 
 * Add unit tests for BallotsResource.
+* Add license to files.
 * Test that resource.writing() closes its coroutine.
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)
@@ -28,6 +29,5 @@ TODO
   an internal ballot file and a ContestInput object.
 * Add auto-generation comment to top of `setup_long_description.rst`.
 * Only include newest changes in README.
-* Add nice online documentation (convert to reST).
 * Add PEP8 checking.
 * Add option for specifying file format to bypass detection based on file extension.

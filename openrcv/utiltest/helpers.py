@@ -86,6 +86,10 @@ class CaseMixin(object):
         msg = self._assertStringMessage(text, initial, "end")
         self.assertEqual(text[index:], initial, msg=msg)
 
+    def assertGeneratorClosed(self, gen):
+        with self.assertRaises(StopIteration):
+            gen.send(1)
+
 
 # This is for convenience to reduce typing.
 class UnitCase(CaseMixin, unittest.TestCase):

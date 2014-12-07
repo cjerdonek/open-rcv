@@ -273,6 +273,7 @@ class StreamResourceBase(ReprMixin):
         with self.open_write() as target:
             yield sink(self.write, target)
 
+
 # TODO: add more to the repr and test.
 class ListResource(StreamResourceBase):
 
@@ -500,4 +501,8 @@ class ConvertingResource(object):
     def writing(self):
         convert = self.converter.from_resource
         with self.resource.writing() as gen:
-            yield converting_pipe(convert, target=gen)
+            new_gen = converting_pipe(convert, target=gen)
+            try:
+                yield new_gen
+            finally:
+                new_gen.close()

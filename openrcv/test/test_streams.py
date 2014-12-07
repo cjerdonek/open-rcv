@@ -5,7 +5,7 @@ import tempfile
 from tempfile import TemporaryDirectory
 
 from openrcv import streams
-from openrcv.streams import (tracked, ListResource, FilePathResource,
+from openrcv.streams import (tracked, FilePathResource,
                              ReadWriteFileResource, StringResource)
 from openrcv.utiltest.helpers import UnitCase
 
@@ -44,10 +44,6 @@ class StreamResourceTestMixin(object):
 
     """Base mixin for StreamResource tests."""
 
-    def assertGenClosed(self, gen):
-        with self.assertRaises(StopIteration):
-            gen.send(1)
-
     def test_reading(self):
         with self.resource() as resource:
             with resource.reading() as stream:
@@ -66,7 +62,7 @@ class StreamResourceTestMixin(object):
             with resource.reading() as gen:
                 item = next(gen)
             self.assertEqual(item, "a\n")
-            self.assertGenClosed(gen)
+            self.assertGeneratorClosed(gen)
 
     def test_reading__iterator(self):
         """Check that reading() returns an iterator [1].
@@ -126,7 +122,7 @@ class ListResourceTest(StreamResourceTestMixin, UnitCase):
 
     @contextmanager
     def resource(self):
-        yield ListResource(["a\n", "b\n"])
+        yield streams.ListResource(["a\n", "b\n"])
 
 
 class FilePathResourceTest(StreamResourceTestMixin, UnitCase):
@@ -181,3 +177,36 @@ class StringResourceTest(StreamResourceTestMixin, UnitCase):
     @contextmanager
     def resource(self):
         yield StringResource('a\nb\n')
+
+
+class _Converter(object):
+
+    def from_resource(self, item):
+        return 2 * item
+
+    def to_resource(self, item):
+        return 3 * item
+
+
+class ConvertingResourceTest(UnitCase):
+
+    """Tests of the ConvertingResource class."""
+
+    def test_reading(self):
+        backing = streams.ListResource([1, 2, 3])
+        converter = _Converter()
+        resource = streams.ConvertingResource(backing, converter=converter)
+        with resource.reading() as gen:
+            items = list(gen)
+        self.assertEqual(items, [2, 4, 6])
+        self.assertGeneratorClosed(gen)
+
+    def test_writing(self):
+        backing = streams.ListResource()
+        converter = _Converter()
+        resource = streams.ConvertingResource(backing, converter=converter)
+        with resource.writing() as gen:
+            for i in range(4):
+                gen.send(i)
+        self.assertGeneratorClosed(gen)
+        self.assertEqual(backing.seq, [0, 2, 4, 6])

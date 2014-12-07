@@ -1,8 +1,6 @@
 TODO
 ====
 
-* Add unit tests for BallotsResource.
-* Add license to files.
 * Test that resource.writing() closes its coroutine.
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)

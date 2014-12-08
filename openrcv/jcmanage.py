@@ -142,6 +142,7 @@ class BallotGenerator(object):
             for i in range(count):
                 choices = self.make_choices()
                 ballot = 1, choices
+                # TODO: check why we are not using send() here.
                 stream.write(ballot)
 
 

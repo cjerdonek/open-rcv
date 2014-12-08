@@ -75,7 +75,14 @@ class NormalizeBallotTest(UnitCase):
         normalize_ballots(ballots_resource)
         with ballots_resource.reading() as gen:
             normalized = list(gen)
-        self.assertEqual(normalized, [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))])
+        expected = [(3, ()), (4, (1,)), (2, (2,)), (1, (3,))]
+        self.assertEqual(normalized, expected)
+        # Check that the original resource was normalized.
+        with resource.reading() as gen:
+            original_ballots = list(gen)
+        # TODO
+        #self.assertEqual(original_ballots, expected)
+        # TODO: check that the original backing list was also normalized.
 
 
 class BallotsResourceTest(UnitCase):

@@ -96,19 +96,13 @@ def normalize_ballots_to(source, target):
 
 
 def normalize_ballots(ballots_resource):
-    """Normalize ballots in place.
+    """Normalize the given ballots in place.
 
     Arguments:
       ballots_resource: a ballots resource.
     """
-    temp_ballots_resource = ballots_resource.make_temp()
-    try:
-        normalize_ballots_to(ballots_resource, temp_ballots_resource)
-        # TODO: can and should I modify the old backing resource?
-        #   Either way, the behavior should be documented.
-        ballots_resource.resource = temp_ballots_resource
-    except:
-        temp_ballots_resource.delete()
+    with ballots_resource.replacement() as temp_resource:
+        normalize_ballots_to(ballots_resource, temp_resource)
 
 
 class BallotsResourceMixin(object):

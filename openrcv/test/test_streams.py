@@ -145,13 +145,6 @@ class StreamResourceTestMixin(object):
                 items = tuple(stream)
             self.assertEqual(items, ())
 
-    # TODO
-    def _test_temp(self):
-        cls = self.cls
-        with cls.temp() as resource:
-            with resource.reading() as gen:
-                items = list(gen)
-            self.assertEqual(items, [])
 
 class ListResourceTest(StreamResourceTestMixin, UnitCase):
 
@@ -161,8 +154,26 @@ class ListResourceTest(StreamResourceTestMixin, UnitCase):
 
     @contextmanager
     def resource(self):
-        yield streams.ListResource(["a\n", "b\n"])
+        yield self.cls(["a\n", "b\n"])
 
+    def test_temp(self):
+        with self.cls.temp() as temp_resource:
+            with temp_resource.writing() as gen:
+                gen.send("f\n")
+            self.assertResourceContents(temp_resource, ["f\n"])
+        # Check that the temp resource was deleted.
+        self.assertResourceContents(temp_resource, [])
+
+    def test_replacement(self):
+        with self.resource() as resource:
+            with resource.replacement() as temp_resource:
+                with temp_resource.writing() as gen:
+                    gen.send("f\n")
+                self.assertResourceContents(resource, ["a\n", "b\n"])
+                self.assertResourceContents(temp_resource, ["f\n"])
+            # Check after replacement.
+            self.assertResourceContents(resource, ["f\n"])
+            self.assertResourceContents(temp_resource, [])
 
 class FilePathResourceTest(StreamResourceTestMixin, UnitCase):
 

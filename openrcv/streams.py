@@ -226,6 +226,7 @@ class StreamResourceBase(ReprMixin):
     file earlier than needed and then keeping the file open.
     """
 
+    # TODO: remove this?
     @classmethod
     def make_temp(cls):
         raise NoImplementation(cls)
@@ -233,12 +234,39 @@ class StreamResourceBase(ReprMixin):
     def _delete(self):
         raise NoImplementation(cls)
 
+    # TODO: remove this.
+    def move(self, other):
+        """Move the contents of a resource to another resource.
+
+        This operation should be thought of like moving the contents of
+        a file from one path to another.
+        """
+        raise NoImplementation(cls)
+
+    @contextmanager
+    def replacement(self):
+        """Return a context manager that yields a temporary resource.
+
+        The temporary resource replaces the contents of the current resource
+        when exiting the context manager.
+        """
+        # try:
+        #     yield temp_resource
+        # try:
+        #     normalize_ballots_to(ballots_resource, temp_ballots_resource)
+        #     # TODO: can and should I modify the old backing resource?
+        #     #   Either way, the behavior should be documented.
+        #     ballots_resource.resource = temp_ballots_resource
+        # except:
+        #     temp_ballots_resource.delete()
+        raise NoImplementation(self)
+
     @contextmanager
     def open_read(self):
         """Return an iterator object."""
         raise NoImplementation(self)
 
-    # The default implementation.
+    # Default implementation.
     def write(self, f, item):
         f.write(item)
 
@@ -246,14 +274,15 @@ class StreamResourceBase(ReprMixin):
     def open_write(self):
         raise NoImplementation(self)
 
-    @classmethod  # must be applied "last" (i.e. top-most).
-    @contextmanager
-    def temp(cls):
-        temp_resource = cls.make_temp()
-        try:
-            yield temp_resource
-        except:
-            temp_resource._delete()
+    # TODO: decide whether to expose this.
+    # @classmethod  # must be applied "last" (i.e. top-most).
+    # @contextmanager
+    # def temp(cls):
+    #     temp_resource = cls.make_temp()
+    #     try:
+    #         yield temp_resource
+    #     except:
+    #         temp_resource._delete()
 
     @contextmanager
     def reading(self):
@@ -301,11 +330,31 @@ class ListResource(StreamResourceBase):
         """
         if seq is None:
             seq = []
+        # TODO: rename seq to _seq to keep it internal.
         self.seq = seq
 
     @classmethod
     def make_temp(cls):
         return cls()
+
+    @classmethod  # must be applied "last" (i.e. top-most).
+    @contextmanager
+    def temp(cls):
+        temp_resource = cls.make_temp()
+        try:
+            yield temp_resource
+        finally:
+            temp_resource.seq.clear()
+
+    @contextmanager
+    def replacement(self):
+        """See StreamResourceBase.replacement()."""
+        with self.temp() as temp_resource:
+            try:
+                yield temp_resource
+            finally:
+                # Replace the current resource with contents of the temporary.
+                self.seq[:] = temp_resource.seq
 
     @contextmanager
     def open_read(self):
@@ -500,8 +549,18 @@ class StringResource(StreamResourceBase):
             self.contents = f.getvalue()
 
 
+class WrappedResourceMixin(ReprMixin):
+
+    def repr_info(self):
+        return "resource=%r" % self.resource
+
+    def replacement(self):
+        """See StreamResourceBase.replacement()."""
+        return self.resource.replacement()
+
+
 # TODO: unit test this.
-class WrapperResource(ReprMixin):
+class WrapperResource(WrappedResourceMixin):
 
     """A stream resource that wraps another resource.
 
@@ -515,9 +574,6 @@ class WrapperResource(ReprMixin):
           resource: a stream resource.
         """
         self.resource = resource
-
-    def repr_info(self):
-        return "resource=%r" % self.resource
 
     def make_temp(self):
         temp_resource = self.resource.make_temp()
@@ -539,7 +595,7 @@ class Converter(object):
         raise NoImplementation(self)
 
 
-class ConvertingResource(object):
+class ConvertingResource(WrappedResourceMixin):
 
     def __init__(self, resource, converter):
         """

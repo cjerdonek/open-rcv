@@ -112,6 +112,16 @@ class CaseMixin(object):
                         msg="Generator failed test that it is closed."):
             gen.send(1)
 
+    def assertResourceContents(self, resource, expected):
+        """Assert what the contents of the resource are.
+
+        Arguments:
+          expected: the items as a list.
+        """
+        with resource.reading() as gen:
+            actual_items = list(gen)
+        self.assertEqual(actual_items, expected)
+
 
 # This is for convenience to reduce typing.
 class UnitCase(CaseMixin, unittest.TestCase):

@@ -40,21 +40,6 @@ from openrcv import utils
 
 STOP_CHOICE = object()
 
-CANDIDATE_NAMES = """\
-Ann
-Bob
-Carol
-Dave
-Ellen
-Fred
-Gwen
-Hank
-Irene
-Joe
-Katy
-Leo
-""".split()
-
 
 log = logging.getLogger(__name__)
 
@@ -68,7 +53,11 @@ def clean_contests(json_path):
         contest = jc_contest.to_model()
         ballots = contest.ballots_resource
         ballots.normalize()
-    #jsonlib.write_json(test_file, path=json_path)
+        with ballots.reading() as gen:
+            cls = jcmodels.JsonCaseBallot
+            jc_ballots = [cls.from_model(b) for b in gen]
+        jc_contest.ballots = jc_ballots
+    jsonlib.write_json(test_file, path=json_path)
 
 
 class BallotGenerator(object):
@@ -152,14 +141,6 @@ class UniqueBallotGenerator(BallotGenerator):
         choices.remove(choice)
 
 
-# TODO: test this.
-def make_candidates(count):
-    names = CANDIDATE_NAMES[:count]
-    for n in range(len(names) + 1, count + 1):
-        names.append("Candidate %d" % n)
-    return names
-
-
 class ContestCreator(object):
 
     def create_random(self, ballots_resource, candidate_count=None, ballot_count=None):
@@ -169,7 +150,9 @@ class ContestCreator(object):
         """
         if ballot_count is None:
             ballot_count = 20
-        candidates = make_candidates(candidate_count)
+        # TODO: look more closely at this line and choose better variables
+        # and function names (also look how it is used).
+        candidates = models.make_candidates(candidate_count)
 
         choices = range(1, candidate_count + 1)
         chooser = BallotGenerator(choices=choices)

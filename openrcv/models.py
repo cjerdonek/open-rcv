@@ -34,6 +34,7 @@ from contextlib import contextmanager
 import logging
 import tempfile
 
+# TODO: this module should not depend on formats.internal.
 from openrcv.formats import internal
 from openrcv import streams, utils
 from openrcv.utils import ReprMixin
@@ -49,6 +50,7 @@ def make_candidates(candidate_count):
     return range(1, candidate_count + 1)
 
 
+# TODO: can I remove this?
 @contextmanager
 def temp_ballots_resource():
     with streams.temp_stream_resource() as backing_resource:

@@ -122,6 +122,12 @@ class CaseMixin(object):
             actual_items = list(gen)
         self.assertEqual(actual_items, expected)
 
+    def assertAttrs(self, obj, attrs):
+        for attr, expected in attrs:
+            with self.subTest(attr_name=attr, expected_val=expected):
+                actual = getattr(obj, attr)
+                self.assertEqual(actual, expected)
+
 
 # This is for convenience to reduce typing.
 class UnitCase(CaseMixin, unittest.TestCase):

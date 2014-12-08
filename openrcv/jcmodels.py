@@ -48,7 +48,34 @@ from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin
                              JsonDeserializeError)
 from openrcv import models
 from openrcv.models import make_candidates, RoundResults
+from openrcv import streams
 from openrcv.utils import StringInfo
+
+
+CANDIDATE_NAMES = """\
+Ann
+Bob
+Carol
+Dave
+Ellen
+Fred
+Gwen
+Hank
+Irene
+Joe
+Katy
+Leo
+""".split()
+
+
+# TODO: test this.
+# TODO: choose a better name for this function.
+def make_candidates(count):
+    names = CANDIDATE_NAMES[:count]
+    for n in range(len(names) + 1, count + 1):
+        names.append("Candidate %d" % n)
+    return names
+
 
 
 class JsonCaseBallot(JsonableMixin):
@@ -74,7 +101,10 @@ class JsonCaseBallot(JsonableMixin):
         Arguments:
           ballot: a Ballot object.
         """
-        weight, choices = ballot
+        try:
+            weight, choices = ballot
+        except:
+            raise Exception("ballot: %r" % ballot)
         self.__init__(choices=choices, weight=weight)
 
     def to_model(self):
@@ -210,13 +240,19 @@ class JsonCaseContestInput(JsonableMixin):
         self.__init__(id_=contest.id, candidate_count=candidate_count, ballots=ballots,
                       name=contest.name, notes=contest.notes)
 
-    # TODO: unit test this.
+    # TODO: implement and unit test this.
+    # TODO: think about how the creation of a new ballots resource should
+    # be handled, since it involves managing another resource.
     def to_model(self):
         """Return a ContestInput object."""
-        # TODO
-        contest = models.ContestInput(id_=self.id, name=self.name)
-        # (candidates=None, seat_count=None,
-        #              ballots_resource=None, notes=None)
+        candidates = make_candidates(self.candidate_count)
+        ballots = [b.to_model() for b in self.ballots]
+        # We use a list resource as the backing store for now because the
+        # number of ballots is small.
+        resource = streams.ListResource(ballots)
+        ballots_resource = models.BallotsResource(resource)
+        contest = models.ContestInput(id_=self.id,name=self.name, notes=self.notes,
+                    candidates=candidates, ballots_resource=ballots_resource)
         return contest
 
     # def save_from_jsobj(self, jsobj):

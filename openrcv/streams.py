@@ -431,9 +431,15 @@ class _ReadWriteFileBase(StreamResourceBase):
         yield self.file
 
     def close(self):
-        # TODO: handle exception happening if self.file is None.
-        close = self.file.close
-        close()
+        # TODO: add a unit test that this try-except logic is necessary.
+        try:
+            close = self.file.close
+        except AttributeError:
+            if self.file is not None:
+                raise
+            # Otherwise, the file was never opened in the first place.
+        else:
+            close()
 
 
 class ReadWriteFileResource(_ReadWriteFileBase):

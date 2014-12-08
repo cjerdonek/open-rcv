@@ -51,7 +51,8 @@ from openrcv.utils import PathInfo, ReprMixin, ENCODING_JSON
 
 log = logging.getLogger(__name__)
 
-LIST_TYPES = (list, tuple)
+# Sequence types, including the generator type.
+LIST_TYPES = (list, tuple, type(0 for i in ()))
 
 # TODO: refactor this to be a JSON object?  This would give us things
 # like a nice repr() and the chance to reduce special-casing.
@@ -95,6 +96,13 @@ def write_json(obj, resource=None, path=None):
         return call_json(json.dump, jsobj, f)
 
 
+def from_model(model_obj, cls):
+    """Create an instance of the current class from a model object."""
+    if isinstance(model_obj, LIST_TYPES):
+        return [from_model(o, cls) for o in model_obj]
+
+    return cls.from_model(model_obj)
+
 # TODO: choose a less ambiguous name.
 def from_jsobj(jsobj, cls=None):
     """Create an instance of the given class from a JSON object.
@@ -103,17 +111,10 @@ def from_jsobj(jsobj, cls=None):
       cls: a class that serves as a "type hint."
     """
     if isinstance(jsobj, LIST_TYPES):
-        return tuple((from_jsobj(o, cls=cls) for o in jsobj))
+        return [from_jsobj(o, cls=cls) for o in jsobj]
 
     if cls is not None:
-        try:
-            obj = cls()
-        except TypeError:
-            # TODO: preserve the exception type below.
-            # We don't get the class name otherwise.
-            raise Exception("error constructing class: %s" % cls.__name__)
-        obj.save_from_jsobj(jsobj)
-        return obj
+        return cls.from_jsobj(jsobj)
 
     # The json module converts Javascript null to and from None.
     if jsobj is None:
@@ -287,9 +288,9 @@ class JsonableMixin(ReprMixin):
             self._attrs_from_jsdict(self.meta_attrs, meta_dict)
         keys |= set(jsobj.keys())
         keys -= set(('_meta', ))
-        extra_keys = set((attr.name for attr in self.attrs())) - keys
+        extra_keys = keys - set((attr.name for attr in self.attrs()))
         if extra_keys:
-            log.warning("JSON object has unserializable keys: %r" % (", ".join(extra_keys)))
+            log.warning("JSON object has unrecognized keys: %r (%r)" % (list(extra_keys), jsobj))
         self._attrs_from_jsdict(self.data_attrs, jsobj)
 
     def get_meta_dict(self):

@@ -31,6 +31,18 @@ from openrcv.utils import StreamInfo, StringInfo
 from openrcv.utiltest.helpers import UnitCase
 
 
+def make_jc_ballot(weight, choices):
+    return JsonCaseBallot(weight=weight, choices=choices)
+
+
+def make_jc_ballots(seq):
+    ballots = []
+    for weight, choices in seq:
+        ballot = make_jc_ballot(weight, choices)
+        ballots.append(ballot)
+    return ballots
+
+
 # TODO: move/convert tests from JsonBallotTest to JsonCaseBallotTest.
 class JsonCaseBallotTest(UnitCase):
 
@@ -113,23 +125,23 @@ class JsonBallotTest(UnitCase):
         jsobj = ballot.to_jsobj()
         self.assertEqual(jsobj, "3")
 
-    def test_load_jsobj(self):
+    def test_save_from_jsobj(self):
         ballot = JsonBallot()
-        ballot.load_jsobj("2")
+        ballot.save_from_jsobj("2")
         self.assertEqual(ballot, JsonBallot(weight=2))
 
     # TODO: add tests for pure from_jsobj() function.
 
-    def test_load_jsobj(self):
+    def test_save_from_jsobj(self):
         ballot = JsonBallot()
-        ballot.load_jsobj("2 3 4")
+        ballot.save_from_jsobj("2 3 4")
         self.assertEqual(ballot, JsonBallot(choices=(3, 4), weight=2))
 
-    def test_load_jsobj__bad_format(self):
+    def test_save_from_jsobj__bad_format(self):
         """Check a string that does not parse."""
         ballot = JsonBallot()
         with self.assertRaises(JsonableError):
-            ballot.load_jsobj("1 a 2")
+            ballot.save_from_jsobj("1 a 2")
 
     def test_to_ballot_stream(self):
         ballots = [JsonBallot(weight=3),
@@ -150,6 +162,15 @@ class JsonBallotTest(UnitCase):
 
 
 class JsonCaseContestInputTest(UnitCase):
+
+    cls = JsonCaseContestInput
+
+    def make_ballots(self):
+        seq = [
+            (1, (1, 2)),
+            (3, (2, )),
+        ]
+        return make_jc_ballots(seq)
 
     def make_contest(self, ballots=None):
         """Return a test contest."""
@@ -197,6 +218,27 @@ class JsonCaseContestInputTest(UnitCase):
         expected = JsonCaseContestInput(candidate_count=2)
         expected.ballots = [JsonCaseBallot(weight=2, choices=(3, 1))]
         jc_contest.assert_equal(expected)
+
+    def test_to_model(self):
+        cls = self.cls
+        ballots = make_jc_ballots([(3, (2, 1))])
+        jc_contest = cls(id_=2, name="My Name", notes="Notes...", candidate_count=3,
+                         ballots=ballots, normalized=False)
+        contest = jc_contest.to_model()
+        expected_attrs = [
+            ("id", 2),
+            ("name", "My Name"),
+            ("notes", "Notes..."),
+        ]
+        self.assertAttrs(contest, expected_attrs)
+
+
+    def test_from_jsobj__ballots(self):
+        """Check that ballots deserialize okay."""
+        cls = self.cls
+        jc_contest = cls.from_jsobj({"ballots": ["3 2 1"]})
+        expected_ballots = make_jc_ballots([(3, (2, 1))])
+        self.assertEqual(jc_contest.ballots, expected_ballots)
 
     def test_to_jsobj(self):
         jc_ballots = [
@@ -246,39 +288,26 @@ class JsonCaseContestInputTest2(UnitCase):
                     self.assertNotEqual(contest1, contest2)
         self.assertEqual(contest1, contest2)  # sanity check
 
-    def test_load_jsobj(self):
+    def test_save_from_jsobj(self):
         contest = JsonCaseContestInput()
         self.assertEqual(contest.candidate_count, None)
         # Check loading an empty dict.
         # In particular, attributes should not get set to JS_NULL.
-        contest.load_jsobj({})
+        contest.save_from_jsobj({})
         self.assertEqual(contest.candidate_count, None)
 
         # Check loading metadata.
         # Check that the id needs to be in the meta dict.
-        contest.load_jsobj({"id": 5})
+        contest.save_from_jsobj({"id": 5})
         self.assertEqual(contest.id, 0)
-        contest.load_jsobj({"_meta": {"id": 5}})
+        contest.save_from_jsobj({"_meta": {"id": 5}})
         self.assertEqual(contest.id, 5)
         # Check explicit None (to which the json module converts Javascript null).
-        contest.load_jsobj({"_meta": {"id": None}})
+        contest.save_from_jsobj({"_meta": {"id": None}})
         self.assertEqual(contest.id, JS_NULL)
 
-        contest.load_jsobj({"candidate_count": 5})
+        contest.save_from_jsobj({"candidate_count": 5})
         self.assertEqual(contest.candidate_count, 5)
-
-    def test_load_jsobj__ballots(self):
-        """Check that ballots deserialize okay."""
-        contest = JsonCaseContestInput()
-        # Check that objects deserialize okay.
-        expected_ballots = self.make_ballots()
-        contest.load_jsobj({"ballots": ["3 2 1"]})
-        # TODO
-        # self.assertEqual(contest.ballots, expected_ballots)
-
-    def test_to_jsobj(self):
-        # TODO
-        pass
 
 
 class JsonRoundResultsTest(UnitCase):

@@ -93,7 +93,7 @@ Or for just tests--
 
 To run a single test, for example--
 
-    $ python -m unittest openrcv.test.test_models.JsonContestTest.test_load_jsobj
+    $ python -m unittest openrcv.test.test_models.JsonContestTest.test_save_from_jsobj
 
 
 Viewing Docs

@@ -332,6 +332,9 @@ class ListResource(StreamResourceBase):
             seq = []
         self._seq = seq
 
+    def delete(self):
+        self._seq.clear()
+
     @classmethod
     def make_temp(cls):
         return cls()
@@ -343,7 +346,7 @@ class ListResource(StreamResourceBase):
         try:
             yield temp_resource
         finally:
-            temp_resource._seq.clear()
+            temp_resource.delete()
 
     @contextmanager
     def replacement(self):
@@ -364,10 +367,9 @@ class ListResource(StreamResourceBase):
 
     @contextmanager
     def open_write(self):
-        seq = self._seq
         # Delete the contents of the list (analogous to deleting a file).
-        seq.clear()
-        yield seq
+        self.delete()
+        yield self._seq
 
 
 # TODO: add more to the repr and test.

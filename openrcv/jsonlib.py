@@ -97,7 +97,7 @@ def write_json(obj, resource=None, path=None):
 
 # TODO: choose a less ambiguous name.
 def from_jsobj(jsobj, cls=None):
-    """Convert a JSON object to a Python object, and return it.
+    """Create an instance of the given class from a JSON object.
 
     Arguments:
       cls: a class that serves as a "type hint."
@@ -112,7 +112,7 @@ def from_jsobj(jsobj, cls=None):
             # TODO: preserve the exception type below.
             # We don't get the class name otherwise.
             raise Exception("error constructing class: %s" % cls.__name__)
-        obj.load_jsobj(jsobj)
+        obj.save_from_jsobj(jsobj)
         return obj
 
     # The json module converts Javascript null to and from None.
@@ -176,7 +176,8 @@ class JsonableMixin(ReprMixin):
     Jsonable API
     ------------
 
-    The Jsonable class has four main public methods (or class methods):
+    The Jsonable class has four main public methods.  Two of them are
+    class methods:
 
       1) jsonable_cls.from_model(model): convert a model object to a Jsonable.
       2) jsonable.to_model(): convert a Jsonable object to a model object.
@@ -273,7 +274,7 @@ class JsonableMixin(ReprMixin):
                 continue
             jsdict[name] = jsobj
 
-    def load_jsobj(self, jsobj):
+    def save_from_jsobj(self, jsobj):
         """Read data from the given JSON object and save it to attributes."""
         keys = set()
         try:
@@ -301,8 +302,11 @@ class JsonableMixin(ReprMixin):
     def from_model(cls, model_obj):
         """Create an instance of the current class from a model object."""
         jsonable = cls()
-        jsonable.load_object(model_obj)
+        jsonable.save_from_model(model_obj)
         return jsonable
+
+    def save_from_model(self):
+        raise utils.NoImplementation(self)
 
     def to_model(self):
         raise utils.NoImplementation(self)
@@ -311,7 +315,7 @@ class JsonableMixin(ReprMixin):
     def from_jsobj(cls, jsobj):
         """Create an instance of the current class from a JSON object."""
         jsonable = cls()
-        jsonable.load_jsobj(jsobj)
+        jsonable.save_from_jsobj(jsobj)
         return jsonable
 
     def to_jsobj(self):

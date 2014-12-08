@@ -69,7 +69,7 @@ class JsonCaseBallot(JsonableMixin):
     def repr_info(self):
         return "weight=%r choices=%r" % (self.weight, self.choices)
 
-    def load_object(self, ballot):
+    def save_from_model(self, ballot):
         """
         Arguments:
           ballot: a Ballot object.
@@ -84,7 +84,7 @@ class JsonCaseBallot(JsonableMixin):
         """
         return self.weight, self.choices
 
-    def load_jsobj(self, jsobj):
+    def save_from_jsobj(self, jsobj):
         """Read a JSON object, and set attributes to match."""
         try:
             weight, choices = parse_internal_ballot(jsobj)
@@ -148,7 +148,7 @@ class JsonBallot(JsonableMixin):
         """Return additional info for __repr__()."""
         return "weight=%r choices=%r" % (self.weight, self.choices)
 
-    def load_jsobj(self, jsobj):
+    def save_from_jsobj(self, jsobj):
         """
         Arguments:
           jsobj: a space-delimited string of integers of the form
@@ -199,7 +199,7 @@ class JsonCaseContestInput(JsonableMixin):
     def repr_info(self):
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
 
-    def load_object(self, contest):
+    def save_from_model(self, contest):
         """
         Arguments:
           contest: a ContestInput object.
@@ -210,6 +210,7 @@ class JsonCaseContestInput(JsonableMixin):
         self.__init__(id_=contest.id, candidate_count=candidate_count, ballots=ballots,
                       name=contest.name, notes=contest.notes)
 
+    # TODO: unit test this.
     def to_model(self):
         """Return a ContestInput object."""
         # TODO
@@ -218,15 +219,7 @@ class JsonCaseContestInput(JsonableMixin):
         #              ballots_resource=None, notes=None)
         return contest
 
-    #
-    # def to_object(self):
-    #     """
-    #     Arguments:
-    #       ballot: a Ballot object.
-    #     """
-    #     return self.weight, self.choices
-    #
-    # def load_jsobj(self, jsobj):
+    # def save_from_jsobj(self, jsobj):
     #     """Read a JSON object, and set attributes to match."""
     #     try:
     #         weight, choices = parse_internal_ballot(jsobj)

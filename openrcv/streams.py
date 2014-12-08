@@ -330,8 +330,7 @@ class ListResource(StreamResourceBase):
         """
         if seq is None:
             seq = []
-        # TODO: rename seq to _seq to keep it internal.
-        self.seq = seq
+        self._seq = seq
 
     @classmethod
     def make_temp(cls):
@@ -344,7 +343,7 @@ class ListResource(StreamResourceBase):
         try:
             yield temp_resource
         finally:
-            temp_resource.seq.clear()
+            temp_resource._seq.clear()
 
     @contextmanager
     def replacement(self):
@@ -354,18 +353,18 @@ class ListResource(StreamResourceBase):
                 yield temp_resource
             finally:
                 # Replace the current resource with contents of the temporary.
-                self.seq[:] = temp_resource.seq
+                self._seq[:] = temp_resource._seq
 
     @contextmanager
     def open_read(self):
-        yield iter(self.seq)
+        yield iter(self._seq)
 
     def write(self, target, item):
         target.append(item)
 
     @contextmanager
     def open_write(self):
-        seq = self.seq
+        seq = self._seq
         # Delete the contents of the list (analogous to deleting a file).
         seq.clear()
         yield seq

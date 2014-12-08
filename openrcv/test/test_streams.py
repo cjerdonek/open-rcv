@@ -72,12 +72,12 @@ class StreamResourceTestMixin(object):
     def test_reading(self):
         with self.resource() as resource:
             with resource.reading() as stream:
-                items = tuple(stream)
-            self.assertEqual(items, ("a\n", "b\n"))
+                items = list(stream)
+            self.assertEqual(items, ["a\n", "b\n"])
             # Check that you can read again.
             with resource.reading() as stream2:
-                items = tuple(stream2)
-            self.assertEqual(items, ("a\n", "b\n"))
+                items = list(stream2)
+            self.assertEqual(items, ["a\n", "b\n"])
             # Sanity-check that reading() doesn't return the same object each time.
             self.assertIsNot(stream, stream2)
 
@@ -85,6 +85,7 @@ class StreamResourceTestMixin(object):
         """Check that the context manager closes the generator."""
         with self.resource() as resource:
             with resource.reading() as gen:
+                # We deliberately read only one of the two items.
                 item = next(gen)
             self.assertEqual(item, "a\n")
             self.assertGeneratorClosed(gen)
@@ -122,9 +123,7 @@ class StreamResourceTestMixin(object):
             with resource.writing() as target:
                 target.send('c\n')
                 target.send('d\n')
-            with resource.reading() as stream:
-                items = tuple(stream)
-            self.assertEqual(items, ('c\n', 'd\n'))
+            self.assertResourceContents(resource, ['c\n', 'd\n'])
 
     def test_writing__closes(self):
         """Check that the context manager closes the generator."""
@@ -136,14 +135,10 @@ class StreamResourceTestMixin(object):
     def test_writing__deletes(self):
         """Check that writing() deletes the current data."""
         with self.resource() as resource:
-            with resource.reading() as stream:
-                items = tuple(stream)
-            self.assertEqual(items, ("a\n", "b\n"))
+            self.assertResourceContents(resource, ['a\n', 'b\n'])
             with resource.writing() as stream:
                 pass
-            with resource.reading() as stream:
-                items = tuple(stream)
-            self.assertEqual(items, ())
+            self.assertResourceContents(resource, [])
 
 
 class ListResourceTest(StreamResourceTestMixin, UnitCase):

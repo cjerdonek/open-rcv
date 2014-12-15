@@ -153,6 +153,10 @@ class ContestInput(ReprMixin):
         """Return an iterable of the candidate numbers."""
         return make_candidates(len(self.candidates))
 
+    @property
+    def should_normalize_ballots(self):
+        # Default to normalizing.
+        return (self.normalize_ballots is None) or self.normalize_ballots
 
 class RoundResults(object):
 

@@ -82,6 +82,7 @@ def add_contest_to_contests_file(contest, contests_path):
 
 
 # TODO: log normalization conversions (e.g. if they are unequal).
+# TODO: use an equality check on the JSON object to know if there was a difference.
 def clean_contests(json_path):
     jsobj = jsonlib.read_json_path(json_path)
     test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
@@ -89,7 +90,8 @@ def clean_contests(json_path):
         jc_contest.id = id_
         contest = jc_contest.to_model()
         ballots = contest.ballots_resource
-        ballots.normalize()
+        if contest.should_normalize_ballots:
+            ballots.normalize()
         with ballots.reading() as gen:
             cls = jcmodels.JsonCaseBallot
             jc_ballots = [cls.from_model(b) for b in gen]

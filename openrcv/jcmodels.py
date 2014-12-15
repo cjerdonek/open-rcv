@@ -227,7 +227,9 @@ class JsonCaseContestInput(JsonableMixin):
         resource = streams.ListResource(ballots)
         ballots_resource = models.BallotsResource(resource)
         contest = models.ContestInput(id_=self.id,name=self.name, notes=self.notes,
-                    candidates=candidates, ballots_resource=ballots_resource)
+                                      candidates=candidates,
+                                      ballots_resource=ballots_resource,
+                                      normalize_ballots=self.normalize_ballots)
         return contest
 
     # def save_from_jsobj(self, jsobj):

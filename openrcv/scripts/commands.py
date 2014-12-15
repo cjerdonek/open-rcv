@@ -22,6 +22,7 @@
 
 """Contains the functions for each rcv command-line command."""
 
+from contextlib import contextmanager
 import logging
 import os
 from textwrap import dedent
@@ -29,16 +30,22 @@ import sys
 
 import yaml
 
-from openrcv import counting
-from openrcv import jcmanage
-from openrcv.formats import jscase
-from openrcv.formats.internal import parse_internal_ballot
-from openrcv import jcmodels, jsonlib, models
+from openrcv import counting, jcmanage, jcmodels, jsonlib, models, streams
+from openrcv.formats import internal, jscase
 from openrcv.models import ContestInput
 from openrcv.utils import logged_open, PathInfo, StringInfo
 
 
 log = logging.getLogger(__name__)
+
+
+# TODO: is this necessary as its own function?
+@contextmanager
+def temp_ballots_resource():
+    with streams.temp_stream_resource() as backing_resource:
+        ballots_resource = internal.internal_ballots_resource(backing_resource)
+        yield ballots_resource
+
 
 # TODO: finish removing references to ns in this module.
 #  This will decouple the argparse definitions from these functions.
@@ -68,12 +75,13 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
     format = format_cls()
     creator = jcmanage.ContestCreator()
 
-    with models.temp_ballots_resource() as ballots_resource:
+    with temp_ballots_resource() as ballots_resource:
         contest = creator.create_random(ballots_resource, ballot_count=ballot_count,
             candidate_count=candidate_count)
-        contest.normalize = normalize
         if normalize:
             contest.ballots_resource.normalize()
+        else:
+            contest.normalize_ballots = False
 
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
 

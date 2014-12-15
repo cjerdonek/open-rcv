@@ -29,7 +29,7 @@ from contextlib import contextmanager
 import os
 
 from openrcv.formats.common import Format, FormatWriter
-from openrcv import streams
+from openrcv import models, streams
 from openrcv.streams import StreamResourceBase
 from openrcv.utils import join_values, parse_integer_line, FileWriter, NoImplementation
 
@@ -64,35 +64,27 @@ def parse_internal_ballot(line):
     return weight, choices
 
 
-class _WriteableBallotStream(object):
-
-    def __init__(self, stream):
-        self.stream = stream
-
-    def write(self, ballot):
-        line = to_internal_ballot(ballot)
-        self.stream.send(line + "\n")
-
-
-# TODO: get this inheriting from ConvertingResource.
-class InternalBallotsResource(streams.StreamResourceMixin):
-
-    def __init__(self, resource):
+def internal_ballots_resource(resource):
         """
         Arguments:
-          resource: backing store for the resource.
+          resource: a stream resource which is a backing store for the resource.
         """
-        self.resource = resource
+        converter = _InternalBallotsConverter()
+        return _InternalBallotsResource(resource, converter=converter)
 
-    @contextmanager
-    def reading(self):
-        with self.resource.reading() as stream:
-            yield map(parse_internal_ballot, stream)
 
-    @contextmanager
-    def writing(self):
-        with self.resource.writing() as stream:
-            yield _WriteableBallotStream(stream)
+class _InternalBallotsConverter(streams.Converter):
+
+    def from_resource(self, item):
+        return parse_internal_ballot(item)
+
+    def to_resource(self, item):
+        line = to_internal_ballot(item)
+        return line + "\n"
+
+
+class _InternalBallotsResource(streams.ConvertingResource, models.BallotsResourceMixin):
+    pass
 
 
 class InternalFormat(Format):
@@ -117,6 +109,7 @@ class InternalContestWriter(FormatWriter):
         writer.write_ballots(contest)
 
 
+# TODO: is this still necessary with InternalBallotsResource?
 class InternalBallotsWriter(FileWriter):
 
     def _write_ballots(self, contest):

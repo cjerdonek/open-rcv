@@ -127,12 +127,11 @@ class BallotGenerator(object):
           choices: a sequence of integers.
 
         """
-        with ballots_resource.writing() as stream:
+        with ballots_resource.writing() as gen:
             for i in range(count):
                 choices = self.make_choices()
                 ballot = 1, choices
-                # TODO: check why we are not using send() here.
-                stream.write(ballot)
+                gen.send(ballot)
 
 
 class UniqueBallotGenerator(BallotGenerator):
@@ -142,6 +141,19 @@ class UniqueBallotGenerator(BallotGenerator):
 
 
 class ContestCreator(object):
+
+    def make_notes(self, candidate_count, ballot_count):
+        now = datetime.datetime.now()
+        # We call int() to remove leading zero-padding.
+        dt_string = ('{0:%B} {0:%d}, {0:%Y} at {1:d}:{0:%M:%S%p}'
+                     .format(now, int(now.strftime("%I"))))
+        # TODO: allow for extra notes.
+        notes = [
+            "Random contest with {0:d} candidates and {1:d} ballots.  "
+                                .format(candidate_count, ballot_count),
+            "Created on {0}.".format(dt_string),
+        ]
+        return notes
 
     def create_random(self, ballots_resource, candidate_count=None, ballot_count=None):
         """Create a random contest.
@@ -156,24 +168,12 @@ class ContestCreator(object):
 
         choices = range(1, candidate_count + 1)
         chooser = BallotGenerator(choices=choices)
-
         chooser.add_random_ballots(ballots_resource, ballot_count)
 
         name = "Random Contest"
-
-        now = datetime.datetime.now()
-        # We call int() to remove leading zero-padding.
-        dt_string = ('{0:%B} {0:%d}, {0:%Y} at {1:d}:{0:%M:%S%p}'
-                     .format(now, int(now.strftime("%I"))))
-        notes = [
-            "Contest has {0:d} candidates and {1:d} ballots.  "
-                                .format(candidate_count, ballot_count),
-            "Created on {0}.".format(dt_string),
-        ]
-
+        notes = self.make_notes(candidate_count, ballot_count)
         contest = ContestInput(name=name, notes=notes, candidates=candidates,
                                ballots_resource=ballots_resource)
-
         return contest
 
 

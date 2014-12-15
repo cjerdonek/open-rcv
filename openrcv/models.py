@@ -34,8 +34,8 @@ from contextlib import contextmanager
 import logging
 import tempfile
 
-# TODO: this module should not depend on formats.internal.
-from openrcv.formats import internal
+# It is deliberate that this module does not depend on any modules
+# in openrcv.formats.
 from openrcv import streams, utils
 from openrcv.utils import ReprMixin
 
@@ -48,14 +48,6 @@ def make_candidates(candidate_count):
     Return an iterable of candidate numbers.
     """
     return range(1, candidate_count + 1)
-
-
-# TODO: can I remove this?
-@contextmanager
-def temp_ballots_resource():
-    with streams.temp_stream_resource() as backing_resource:
-        ballots_resource = internal.InternalBallotsResource(backing_resource)
-        yield ballots_resource
 
 
 # TODO: allow ordering and compressing to be done separately.
@@ -121,25 +113,21 @@ class BallotsResource(streams.WrapperResource, BallotsResourceMixin):
     pass
 
 
-# TODO: add id and notes.
 class ContestInput(ReprMixin):
 
-    # TODO: fix the description of ballots.
     """
     Attributes:
-      ballots: a context manager factory function that yields an
-        iterable of ballots (e.g. a ConvertingResource object).
+      ballots_resource: a BallotsResource object.
       candidates: an iterable of the names of all candidates, in numeric
         order of their ballot ID.
       name: contest name.
       seat_count: integer number of winners.
     """
 
-    ballot_count = 0
-
+    # We include an underscore at the end of id_ since id() is a built-in.
     # TODO: test defaults -- especially properties of default ballots resource.
     def __init__(self, id_=None, name=None, candidates=None, seat_count=None,
-                 ballots_resource=None, notes=None):
+                 ballots_resource=None, notes=None, normalize_ballots=None):
         if ballots_resource is None:
             ballots_resource = streams.NullStreamResource()
         if candidates is None:
@@ -153,6 +141,7 @@ class ContestInput(ReprMixin):
         self.candidates = candidates
         self.id = id_
         self.name = name
+        self.normalize_ballots = normalize_ballots
         self.notes = notes
         self.seat_count = seat_count
 

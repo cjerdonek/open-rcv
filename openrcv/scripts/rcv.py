@@ -25,7 +25,7 @@
 import argparse2 as argparse
 from argparse2 import RawDescriptionHelpFormatter
 import logging
-from textwrap import dedent
+import textwrap
 
 from openrcv.formats.blt import BLTFormat
 from openrcv.formats.internal import InternalFormat
@@ -65,9 +65,13 @@ OUTPUT_FORMAT_TEST = 'jscase'
 OUTPUT_FORMAT_DEFAULT = OUTPUT_FORMAT_BLT
 
 
-def main():
-    parser = create_argparser()
-    _main(parser)
+# TODO: use this function throughout this module.
+def fill(text):
+    text = textwrap.dedent(text)
+    paras = text.split("\n\n")
+    fill_ = textwrap.fill
+    text = "\n\n".join(fill_(p) for p in paras)
+    return text
 
 
 def make_output_formats():
@@ -88,6 +92,11 @@ def add_help(parser):
     # does it internally.
     parser.add_argument(*OPTION_HELP, action=HelpAction,
         help='show this help message and exit.')
+
+
+def main():
+    parser = create_argparser()
+    _main(parser)
 
 
 class CommandBase(object):
@@ -141,7 +150,7 @@ class RandContestCommand(CommandBase):
         output_dir = ns.output_dir
         format_cls = ns.output_format
         json_contests_path = ns.json_contests_path
-        normalize = ns.normalize
+        normalize = ns.normalize_ballots
         return commands.make_random_contest(ballot_count=ballot_count,
                             candidate_count=candidate_count,
                             format_cls=format_cls,
@@ -152,13 +161,14 @@ class RandContestCommand(CommandBase):
 
     @property
     def desc(self):
-        return dedent("""\
+        return fill("""\
             Create a random contest.
 
             This command creates a contest with random ballot data and writes the
-            contest to stdout in the chosen format.  If {output_dir} is provided,
+            contest to stdout in the format {output_format}. If {output_dir} is provided,
             then only the paths to the output files are written to stdout.
-            """.format(output_dir=OPTION_OUTPUT_DIR.metavar))
+            """.format(output_format=OPTION_OUTPUT_FORMAT.metavar,
+                       output_dir=OPTION_OUTPUT_DIR.metavar))
 
     def add_arguments(self, parser):
         default_candidates = 6
@@ -171,10 +181,6 @@ class RandContestCommand(CommandBase):
         parser.add_argument('-b', '--ballots', dest='ballot_count', metavar='N', type=int,
                            help=('number of ballots.  Defaults to {:d}.'
                                  .format(default_ballots)))
-        parser.add_argument('-N', '--normalize', action='store_true',
-            help=("whether to normalize the list of ballots, which means "
-                  "ordering them lexicographically and grouping identical "
-                  "choices using weight."))
         parser.add_argument(*OPTION_OUTPUT_DIR.flags, metavar=OPTION_OUTPUT_DIR.metavar,
             help=("directory to write output files to.  If the empty string, "
                   "writes to stdout.  Defaults to the empty string."))
@@ -189,6 +195,11 @@ class RandContestCommand(CommandBase):
             dest='json_contests_path',
             help=("path to a contests.json file.  If provided, also adds the contest "
                   "to the end of the given JSON file."))
+        parser.add_argument('-S, ''--suppress-ballot-normalization',
+            action='store_false', dest='normalize_ballots',
+            help=("whether to suppress normalizing the list of ballots, which includes "
+                  "ordering the ballots lexicographically and then grouping identical "
+                  "choices using the weight."))
 
 
 # TODO: allow passing a contest ID to clean up just one contest.
@@ -211,7 +222,7 @@ class CleanContestsCommand(CommandBase):
 
     @property
     def desc(self):
-        return dedent(self.raw_desc)
+        return textwrap.dedent(self.raw_desc)
 
     def add_arguments(self, parser):
         parser.add_argument('json_contests_path', metavar='JSON_PATH',
@@ -265,7 +276,7 @@ def create_argparser(prog="rcv"):
               "Defaults to %s." % LOG_LEVEL_DEFAULT_NAME))
     add_help(parser)
 
-    desc = dedent("""\
+    desc = textwrap.dedent("""\
     Available commands are below.
 
     For help with a particular command, pass %s after the command name.

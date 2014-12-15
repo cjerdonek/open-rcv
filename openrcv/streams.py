@@ -114,6 +114,7 @@ from openrcv.utils import logged_open, NoImplementation, ReprMixin
 log = logging.getLogger(__name__)
 
 
+# TODO: remove this in favor of TempFileResource?
 def temp_stream_resource():
     """Return a context manager for a temporary stream resource.
 
@@ -122,7 +123,7 @@ def temp_stream_resource():
     i.e. when the stream resource is first opened for reading or writing.
     Exiting the context manager closes the file handle if it is open.
     """
-    resource = _TempFileResource()
+    resource = TempFileResource()
     return contextlib.closing(resource)
 
 
@@ -166,16 +167,48 @@ def converting_pipe(convert, target):
         target.send(item)
 
 
-# TODO: incorporate this and test.
-class StreamResourceMixin(object):
+class StreamResourceMixin(ReprMixin):
 
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
+    def move(self, dest):
+        """Move the contents of a resource to another resource.
+
+        This operation should be thought of like moving the contents of
+        a file from one path to another.
+        """
+        raise NoImplementation(self)
+
+    # TODO: test this.
     def count(self):
         """Return the number of elements in the stream."""
         with self.reading() as stream:
             return sum(1 for item in stream)
 
+    @contextmanager
+    def replacement(self):
+        """Return a context manager that yields a temporary resource.
 
-class NullStreamResource(StreamResourceMixin, ReprMixin):
+        The temporary resource replaces the contents of the current resource
+        when exiting the context manager.
+        """
+        temp_resource = self.copy()
+        # TODO: do I need to close/clean up the original file?
+        # TODO: review this logic.
+        # TODO: can and should I modify the old backing resource?
+        #   Either way, the behavior should be documented.
+        try:
+            yield temp_resource
+        except:
+            temp_resource.close()
+            raise
+        else:
+            temp_resource.move(dest=self)
+
+
+class NullStreamResource(StreamResourceMixin):
 
     """A placeholder stream resource used as a default."""
 
@@ -194,7 +227,7 @@ class NullStreamResource(StreamResourceMixin, ReprMixin):
 #   various backed stream resources possibly don't need a base class
 #   and separate out the tracking part using a lighter-weight pattern.
 # TODO: document the StreamResource API.
-class StreamResourceBase(ReprMixin):
+class StreamResourceBase(StreamResourceMixin):
 
     """Abstract base class for stream resources.
 
@@ -234,41 +267,17 @@ class StreamResourceBase(ReprMixin):
     def _delete(self):
         raise NoImplementation(cls)
 
-    # TODO: remove this.
-    def move(self, other):
-        """Move the contents of a resource to another resource.
-
-        This operation should be thought of like moving the contents of
-        a file from one path to another.
-        """
-        raise NoImplementation(cls)
-
-    @contextmanager
-    def replacement(self):
-        """Return a context manager that yields a temporary resource.
-
-        The temporary resource replaces the contents of the current resource
-        when exiting the context manager.
-        """
-        # try:
-        #     yield temp_resource
-        # try:
-        #     normalize_ballots_to(ballots_resource, temp_ballots_resource)
-        #     # TODO: can and should I modify the old backing resource?
-        #     #   Either way, the behavior should be documented.
-        #     ballots_resource.resource = temp_ballots_resource
-        # except:
-        #     temp_ballots_resource.delete()
-        raise NoImplementation(self)
-
     @contextmanager
     def open_read(self):
         """Return an iterator object."""
         raise NoImplementation(self)
 
     # Default implementation.
+    # def write(self, f, item):
+    #     f.write(item)
+
     def write(self, f, item):
-        f.write(item)
+        raise NoImplementation(self)
 
     @contextmanager
     def open_write(self):
@@ -459,7 +468,7 @@ class ReadWriteFileResource(_ReadWriteFileBase):
         self.file.seek(0)
 
 
-class _TempFileResource(_ReadWriteFileBase):
+class TempFileResource(_ReadWriteFileBase):
 
     """A stream resource for temporary use.
 
@@ -474,6 +483,31 @@ class _TempFileResource(_ReadWriteFileBase):
             encoding = 'ascii'
         self.encoding = encoding
         self.file = None
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
+    def copy(self):
+        return self.create(encoding=self.encoding)
+
+    def move(self, dest):
+        dest.file = self.file
+
+    @classmethod
+    def temp_stream_resource():
+        """Return a context manager for a temporary stream resource.
+
+        Entering the context manager yields a stream resource without
+        actually opening a file handle.  Rather, the file is opened lazily,
+        i.e. when the stream resource is first opened for reading or writing.
+        Exiting the context manager closes the file handle if it is open.
+        """
+        resource = TempFileResource()
+        return contextlib.closing(resource)
+
+    def write(self, f, item):
+        f.write(item)
 
     def _open(self):
         f = self.file
@@ -556,14 +590,13 @@ class StringResource(StreamResourceBase):
             self.contents = f.getvalue()
 
 
-class WrappedResourceMixin(ReprMixin):
+class WrappedResourceMixin(StreamResourceMixin):
 
     def repr_info(self):
         return "resource=%r" % self.resource
 
-    def replacement(self):
-        """See StreamResourceBase.replacement()."""
-        return self.resource.replacement()
+    def move(self, dest):
+        self.resource.move(dest.resource)
 
 
 # TODO: unit test this.
@@ -604,15 +637,19 @@ class Converter(object):
 
 class ConvertingResource(WrappedResourceMixin):
 
+    # TODO: define the "stream resource protocol."
     def __init__(self, resource, converter):
         """
         Arguments:
-          TODO: define the "stream resource protocol."
-          resource: a stream resource.
+          resource: a stream resource which is a backing store for the resource.
           converter: a converter
         """
         self.converter = converter
         self.resource = resource
+
+    def copy(self):
+        new_resource = self.resource.copy()
+        return self.create(resource=new_resource, converter=self.converter)
 
     @contextmanager
     def reading(self):
@@ -622,7 +659,8 @@ class ConvertingResource(WrappedResourceMixin):
 
     @contextmanager
     def writing(self):
-        convert = self.converter.from_resource
+        # TODO: test this so that from_resource would fail here.
+        convert = self.converter.to_resource
         with self.resource.writing() as gen:
             new_gen = converting_pipe(convert, target=gen)
             try:

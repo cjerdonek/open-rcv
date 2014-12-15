@@ -204,18 +204,18 @@ class JsonCaseContestInput(JsonableMixin):
 
     meta_attrs = (Attribute('id'),
                   Attribute('name'),
-                  Attribute('normalized'),
+                  Attribute('normalize_ballots'),
                   Attribute('notes'))
     data_attrs = (Attribute('ballots', cls=JsonCaseBallot),
                   Attribute('candidate_count'))
 
     def __init__(self, id_=None, candidate_count=None, ballots=None,
-                 name=None, normalized=None, notes=None):
+                 name=None, normalize_ballots=None, notes=None):
         """
         Arguments:
           ballots: an iterable of JsonCaseBallot objects.
           candidate_count: integer number of candidates.
-          normalized: False or None.
+          normalize_ballots: None means True.  Defaults to None.
         """
         if id_ is None:
             id_ = 0
@@ -223,7 +223,7 @@ class JsonCaseContestInput(JsonableMixin):
         self.candidate_count = candidate_count
         self.id = id_
         self.name = name
-        self.normalized = normalized
+        self.normalize_ballots = normalize_ballots
         self.notes = notes
 
     def repr_info(self):
@@ -238,7 +238,8 @@ class JsonCaseContestInput(JsonableMixin):
         with contest.ballots_resource.reading() as ballots:
             ballots = [JsonCaseBallot.from_model(b) for b in ballots]
         self.__init__(id_=contest.id, candidate_count=candidate_count, ballots=ballots,
-                      name=contest.name, notes=contest.notes)
+                      name=contest.name, notes=contest.notes,
+                      normalize_ballots=contest.normalize_ballots)
 
     # TODO: implement and unit test this.
     # TODO: think about how the creation of a new ballots resource should

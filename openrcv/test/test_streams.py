@@ -254,4 +254,4 @@ class ConvertingResourceTest(UnitCase):
             for i in range(4):
                 gen.send(i)
         self.assertGeneratorClosed(gen)
-        self.assertResourceContents(backing, [0, 2, 4, 6])
+        self.assertResourceContents(backing, [0, 3, 6, 9])

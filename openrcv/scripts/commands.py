@@ -77,7 +77,7 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
 
     with temp_ballots_resource() as ballots_resource:
         contest = creator.create_random(ballots_resource, ballot_count=ballot_count,
-            candidate_count=candidate_count)
+                                        candidate_count=candidate_count)
         if normalize:
             contest.ballots_resource.normalize()
         else:
@@ -85,12 +85,7 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
 
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
 
-        # TODO: refactor this out into jcmanage.
         if json_contests_path:
-            jc_contest = jscase.JsonCaseContestInput.from_model(contest)
-            jsobj_contest = jc_contest.to_jsobj()
-            data = jsonlib.read_json_path(json_contests_path)
-            data["contests"].append(jsobj_contest)
-            jsonlib.write_json(data, path=json_contests_path)
+            jcmanage.add_contest_to_contests_file(contest, json_contests_path)
 
     return "\n".join(output_paths) + "\n" if output_paths else None

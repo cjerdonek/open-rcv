@@ -33,9 +33,9 @@ import datetime
 import logging
 from random import random, sample
 
-from openrcv import jcmodels, jsonlib, models
+from openrcv import jcmodels, jsonlib, models, utils
+from openrcv.formats import jscase
 from openrcv.models import ContestInput
-from openrcv import utils
 
 
 STOP_CHOICE = object()
@@ -67,6 +67,18 @@ def make_standard_candidate_names(count, names=None):
     for n in range(len(names) + 1, count + 1):
         names.append("Candidate %d" % n)
     return names
+
+
+def add_contest_to_contests_file(contest, contests_path):
+    """
+    Arguments:
+      contests_path: a path to a JSON contests file.
+    """
+    jc_contest = jscase.JsonCaseContestInput.from_model(contest)
+    jsobj_contest = jc_contest.to_jsobj()
+    data = jsonlib.read_json_path(contests_path)
+    data["contests"].append(jsobj_contest)
+    jsonlib.write_json(data, path=contests_path)
 
 
 # TODO: log normalization conversions (e.g. if they are unequal).

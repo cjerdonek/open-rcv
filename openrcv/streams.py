@@ -173,6 +173,9 @@ class StreamResourceMixin(ReprMixin):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
 
+    def copy(self):
+        raise NoImplementation(self)
+
     def move(self, dest):
         """Move the contents of a resource to another resource.
 
@@ -341,6 +344,15 @@ class ListResource(StreamResourceBase):
             seq = []
         self._seq = seq
 
+    def copy(self):
+        new_seq = self._seq.copy()
+        return self.create(seq=new_seq)
+
+    # TODO: think about whether to move the items to the list instead
+    #   of simply setting the attribute, and add a test for this.
+    def move(self, dest):
+        dest._seq = self._seq
+
     def delete(self):
         self._seq.clear()
 
@@ -405,6 +417,9 @@ class FilePathResource(StreamResourceBase):
     def open_read(self):
         return self._open("r")
 
+    def write(self, f, item):
+        f.write(item)
+
     def open_write(self):
         return self._open("w")
 
@@ -432,6 +447,9 @@ class _ReadWriteFileBase(StreamResourceBase):
     def open_read(self):
         self._open()
         yield self.file
+
+    def write(self, f, item):
+        f.write(item)
 
     @contextmanager
     def open_write(self):
@@ -505,9 +523,6 @@ class TempFileResource(_ReadWriteFileBase):
         """
         resource = TempFileResource()
         return contextlib.closing(resource)
-
-    def write(self, f, item):
-        f.write(item)
 
     def _open(self):
         f = self.file
@@ -614,6 +629,10 @@ class WrapperResource(WrappedResourceMixin):
           resource: a stream resource.
         """
         self.resource = resource
+
+    def copy(self):
+        new_resource = self.resource.copy()
+        return self.create(resource=new_resource)
 
     def make_temp(self):
         temp_resource = self.resource.make_temp()

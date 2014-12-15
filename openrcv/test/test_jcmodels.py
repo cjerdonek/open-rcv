@@ -223,7 +223,7 @@ class JsonCaseContestInputTest(UnitCase):
         cls = self.cls
         ballots = make_jc_ballots([(3, (2, 1))])
         jc_contest = cls(id_=2, name="My Name", notes="Notes...", candidate_count=3,
-                         ballots=ballots, normalized=False)
+                         ballots=ballots, normalize_ballots=False)
         contest = jc_contest.to_model()
         expected_attrs = [
             ("id", 2),

@@ -20,8 +20,7 @@
 # DEALINGS IN THE SOFTWARE.
 #
 
-from openrcv.formats.internal import (parse_internal_ballot, to_internal_ballot,
-                                      InternalBallotsResource)
+from openrcv.formats.internal import internal_ballots_resource, parse_internal_ballot, to_internal_ballot
 from openrcv.streams import StringResource
 from openrcv.utiltest.helpers import UnitCase
 
@@ -49,7 +48,7 @@ class InternalBallotsResourceTest(UnitCase):
 
     def test_reading(self):
         resource = StringResource("1 2\n2 3 1\n")
-        ballots_resource = InternalBallotsResource(resource)
+        ballots_resource = internal_ballots_resource(resource)
         with ballots_resource.reading() as stream:
             actual = list(stream)
         expected = [
@@ -60,7 +59,7 @@ class InternalBallotsResourceTest(UnitCase):
 
     def test_reading__error(self):
         resource = StringResource("1 2\n2 b 1\n")
-        ballots_resource = InternalBallotsResource(resource)
+        ballots_resource = internal_ballots_resource(resource)
 
         with self.assertRaises(ValueError) as cm:
             with ballots_resource.reading() as stream:
@@ -76,10 +75,10 @@ class InternalBallotsResourceTest(UnitCase):
             (2, (3, 1)),
         ]
         resource = StringResource()
-        ballots_resource = InternalBallotsResource(resource)
-        with ballots_resource.writing() as stream:
+        ballots_resource = internal_ballots_resource(resource)
+        with ballots_resource.writing() as gen:
             for ballot in ballots:
-                stream.write(ballot)
+                gen.send(ballot)
         self.assertEqual(resource.contents, "1 2\n2 3 1\n")
 
 class InternalModuleTest(UnitCase):

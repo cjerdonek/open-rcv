@@ -20,13 +20,20 @@
 # DEALINGS IN THE SOFTWARE.
 #
 
+from contextlib import contextmanager
 from copy import copy
 from unittest.mock import patch, MagicMock
 
-from openrcv import jcmanage
+from openrcv import jcmanage, models, streams
 from openrcv.jcmanage import BallotGenerator, UniqueBallotGenerator, STOP_CHOICE
-from openrcv import models
 from openrcv.utiltest.helpers import UnitCase
+
+
+@contextmanager
+def _temp_ballots_resource():
+    resource = streams.ListResource()
+    ballots_resource = models.BallotsResource(resource)
+    yield ballots_resource
 
 
 class CopyingMock(MagicMock):
@@ -108,7 +115,7 @@ class BallotGeneratorTest(UnitCase, BallotGeneratorMixin):
 
     def test_add_random_ballots(self):
         chooser = BallotGenerator((1, 2, 3), undervote=0)
-        with models.temp_ballots_resource() as ballots_resource:
+        with _temp_ballots_resource() as ballots_resource:
             chooser.add_random_ballots(ballots_resource, count=12)
             self.assertEqual(ballots_resource.count(), 12)
 

@@ -275,10 +275,6 @@ class StreamResourceBase(StreamResourceMixin):
         """Return an iterator object."""
         raise NoImplementation(self)
 
-    # Default implementation.
-    # def write(self, f, item):
-    #     f.write(item)
-
     def write(self, f, item):
         raise NoImplementation(self)
 
@@ -553,6 +549,10 @@ class StandardResource(StreamResourceBase):
 
     def open_read(self):
         return self._open()
+
+    # TODO: move this method to a FileResourceMixin.
+    def write(self, f, item):
+        f.write(item)
 
     def open_write(self):
         return self._open()

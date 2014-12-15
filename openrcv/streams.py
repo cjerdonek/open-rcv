@@ -52,8 +52,8 @@ for the target `as` expression, in the same way that calling the built-in
 function `open(path)` yields an iterator object over the lines of a file.
 Here is a typical example of reading from a stream resource named `resource`:
 
-    with resource.reading() as stream:
-        for item in stream:
+    with resource.reading() as gen:
+        for item in gen:
             # Do stuff.
             ...
 
@@ -61,9 +61,9 @@ Similarly, for the writing() method, the context manager must yield
 a writeable stream for the target `as` expression.  Here is a typical
 example of writing to a stream resource:
 
-    with resource.writing() as stream:
+    with resource.writing() as gen:
         for item in items:
-            stream.write(item)
+            gen.write(item)
             ...
 
 The semantics of the reading() and writing() methods closely resemble those
@@ -112,19 +112,6 @@ from openrcv.utils import logged_open, NoImplementation, ReprMixin
 
 
 log = logging.getLogger(__name__)
-
-
-# TODO: remove this in favor of TempFileResource?
-def temp_stream_resource():
-    """Return a context manager for a temporary stream resource.
-
-    Entering the context manager yields a stream resource without
-    actually opening a file handle.  Rather, the file is opened lazily,
-    i.e. when the stream resource is first opened for reading or writing.
-    Exiting the context manager closes the file handle if it is open.
-    """
-    resource = TempFileResource()
-    return contextlib.closing(resource)
 
 
 def tracked(source, iterable):
@@ -432,6 +419,9 @@ class _ReadWriteFileBase(StreamResourceBase):
     def __init__(self, file_):
         self.file = file_
 
+    def repr_info(self):
+        return "encoding={0!r}, file={1!r}".format(self.encoding, self.file)
+
     @classmethod
     def make_temp(cls):
         return tempfile.NamedTemporaryFile(mode='w+t', encoding='utf-8')
@@ -502,14 +492,8 @@ class TempFileResource(_ReadWriteFileBase):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
 
-    def copy(self):
-        return self.create(encoding=self.encoding)
-
-    def move(self, dest):
-        dest.file = self.file
-
     @classmethod
-    def temp_stream_resource():
+    def create_temp(cls, *args, **kwargs):
         """Return a context manager for a temporary stream resource.
 
         Entering the context manager yields a stream resource without
@@ -517,11 +501,18 @@ class TempFileResource(_ReadWriteFileBase):
         i.e. when the stream resource is first opened for reading or writing.
         Exiting the context manager closes the file handle if it is open.
         """
-        resource = TempFileResource()
+        resource = cls.create(*args, **kwargs)
         return contextlib.closing(resource)
+
+    def copy(self):
+        return self.create(encoding=self.encoding)
+
+    def move(self, dest):
+        dest.file = self.file
 
     def _open(self):
         f = self.file
+        # TODO: DRY this up with ReadWriteFileResource.
         try:
             seek = f.seek
         except AttributeError:

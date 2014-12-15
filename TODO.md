@@ -1,10 +1,8 @@
 TODO
 ====
 
-* Add a normalize flag to contests.
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)
-* Rename open-rcv to openrcv.
 * Make a reST long description for PyPI
 * Fix up remaining PyPI release instructions and commit.
 * Work on cleancontests command (need to examine add'l JsonCase* objects).

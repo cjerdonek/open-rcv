@@ -40,8 +40,33 @@ from openrcv import utils
 
 STOP_CHOICE = object()
 
+CANDIDATE_NAMES = """\
+Ann
+Bob
+Carol
+Dave
+Ellen
+Fred
+Gwen
+Hank
+Irene
+Joe
+Katy
+Leo
+""".split()
+
 
 log = logging.getLogger(__name__)
+
+
+# TODO: test this.
+def make_standard_candidate_names(count, names=None):
+    if names is None:
+        names = CANDIDATE_NAMES
+    names = CANDIDATE_NAMES[:count]
+    for n in range(len(names) + 1, count + 1):
+        names.append("Candidate %d" % n)
+    return names
 
 
 # TODO: log normalization conversions (e.g. if they are unequal).
@@ -162,9 +187,8 @@ class ContestCreator(object):
         """
         if ballot_count is None:
             ballot_count = 20
-        # TODO: look more closely at this line and choose better variables
-        # and function names (also look how it is used).
-        candidates = models.make_candidates(candidate_count)
+
+        candidates = make_standard_candidate_names(candidate_count)
 
         choices = range(1, candidate_count + 1)
         chooser = BallotGenerator(choices=choices)

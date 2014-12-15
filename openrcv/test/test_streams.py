@@ -136,7 +136,7 @@ class StreamResourceTestMixin(object):
         """Check that writing() deletes the current data."""
         with self.resource() as resource:
             self.assertResourceContents(resource, ['a\n', 'b\n'])
-            with resource.writing() as stream:
+            with resource.writing() as gen:
                 pass
             self.assertResourceContents(resource, [])
 

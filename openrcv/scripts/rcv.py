@@ -292,7 +292,7 @@ def create_argparser(prog="rcv"):
 
     builder.add_command(subparsers, CountCommand)
 
-    group = subparsers.add_parser_group("Manage test cases")
+    group = subparsers.add_parser_group("Test-case management")
     classes = (
         RandContestCommand,
         CleanContestsCommand,

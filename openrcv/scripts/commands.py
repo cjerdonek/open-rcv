@@ -42,7 +42,7 @@ log = logging.getLogger(__name__)
 # TODO: is this necessary as its own function?
 @contextmanager
 def temp_ballots_resource():
-    with streams.temp_stream_resource() as backing_resource:
+    with streams.TempFileResource.create_temp() as backing_resource:
         ballots_resource = internal.internal_ballots_resource(backing_resource)
         yield ballots_resource
 
@@ -87,7 +87,7 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
 
         # TODO: refactor this out into jcmanage.
         if json_contests_path:
-            jc_contest = jscase.JsonCaseContestInput.from_object(contest)
+            jc_contest = jscase.JsonCaseContestInput.from_model(contest)
             jsobj_contest = jc_contest.to_jsobj()
             data = jsonlib.read_json_path(json_contests_path)
             data["contests"].append(jsobj_contest)

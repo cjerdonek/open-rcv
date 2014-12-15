@@ -52,32 +52,6 @@ from openrcv import streams
 from openrcv.utils import StringInfo
 
 
-CANDIDATE_NAMES = """\
-Ann
-Bob
-Carol
-Dave
-Ellen
-Fred
-Gwen
-Hank
-Irene
-Joe
-Katy
-Leo
-""".split()
-
-
-# TODO: test this.
-# TODO: choose a better name for this function.
-def make_candidates(count):
-    names = CANDIDATE_NAMES[:count]
-    for n in range(len(names) + 1, count + 1):
-        names.append("Candidate %d" % n)
-    return names
-
-
-
 class JsonCaseBallot(JsonableMixin):
 
     """The serialization format is a space-delimited string of integers of

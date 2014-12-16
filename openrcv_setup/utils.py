@@ -32,7 +32,7 @@ from setuptools import Command
 DOCS_PATH = "docs"
 DOCS_BUILD_PATH = os.path.join(DOCS_PATH, "build")
 ENCODING = 'utf-8'
-LONG_DESCRIPTION_PATH = "setup_long_description.rst"
+LICENSE_PATH = "LICENSE"
 README_PATH = "README.md"
 # We do not need to actually import the pandoc filters.
 PANDOC_FILTER_DIR = "pandoc_filters"

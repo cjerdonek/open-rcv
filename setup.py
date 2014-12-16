@@ -8,6 +8,55 @@ from openrcv_setup import utils
 
 PACKAGE_NAME = "openrcv"
 
+LONG_DESCRIPTION = """\
+OpenRCV
+=======
+
+OpenRCV is an open source software project for tallying ranked-choice
+voting elections like instant runoff voting and the single transferable vote.
+
+OpenRCV can be used as a command-line tool or as a Python library.
+
+It is distributed for free on PyPI_ and the source code
+is hosted on GitHub_.  It is open source under the permissive MIT
+license.  See the License section below for details.
+
+
+Features
+--------
+
+* Completely open and extensible.
+* Tested against the publicly available test cases in the
+  `open-rcv-tests`_ repository.
+* Exposes both a command-line API and a Python API.
+* Both APIs support neutral input and output text formats to allow
+  interoperability with other applications and programming languages.
+  For example, round-by-round results can be output as JSON to be--
+
+    * Passed to a custom "pretty" HTML renderer, or
+    * Checked numerically (i.e. independent of presentation) against
+      test data.
+
+* Detailed logging while counting contests.
+
+
+Author
+------
+
+Chris Jerdonek (chris.jerdonek@gmail.com)
+
+
+License
+-------
+
+{license}
+
+.. _GitHub: https://github.com/cjerdonek/open-rcv
+.. _PyPI: https://pypi.python.org/pypi/OpenRCV
+.. _open-rcv-tests: https://github.com/cjerdonek/open-rcv-tests
+
+"""
+
 log = logging.getLogger(os.path.basename(__file__))
 
 
@@ -20,6 +69,10 @@ def configure_logging():
     logging.basicConfig(format=format_string, level=logging.INFO)
     log.debug("Debug logging enabled.")
 
+
+def make_long_description():
+    license = utils.read(utils.LICENSE_PATH)
+    return LONG_DESCRIPTION.format(license=license)
 
 configure_logging()
 
@@ -35,9 +88,9 @@ setup(
     # The project homepage.
     url='https://github.com/cjerdonek/open-rcv',
 
-    description='open-source software for tallying ranked-choice voting elections',
-    keywords='ballot choice election ranked rcv single tally transferable stv vote voting',
-    long_description=utils.read(utils.LONG_DESCRIPTION_PATH),
+    description='Software for tallying ranked-choice voting elections like IRV and STV',
+    keywords='ballot choice election IRV ranked RCV single tally transferable STV vote voting',
+    long_description=make_long_description(),
 
     author='Chris Jerdonek',
     author_email='chris.jerdonek@gmail.com',

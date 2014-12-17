@@ -84,7 +84,6 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
             contest.normalize_ballots = False
 
         output_paths = format.write_contest(contest, output_dir=output_dir, stdout=stdout)
-
         if json_contests_path:
             jcmanage.add_contest_to_contests_file(contest, json_contests_path)
 

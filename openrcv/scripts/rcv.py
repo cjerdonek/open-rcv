@@ -130,6 +130,9 @@ class CommandBase(object):
                 "(choose from: %s)" % (label, ", ".join(labels)))
         return format.cls
 
+    def add_contests_path_argument(self, parser):
+        parser.add_argument('json_contests_path', metavar='JSON_PATH',
+            help=("path to a contests.json file."))
 
 class CountCommand(CommandBase):
 
@@ -229,8 +232,19 @@ class CleanContestsCommand(CommandBase):
         return jcmanage.clean_contests(json_path)
 
     def add_arguments(self, parser):
-        parser.add_argument('json_contests_path', metavar='JSON_PATH',
-            help=("path to a contests.json file."))
+        self.add_contests_path_argument(parser)
+
+
+class UpdateTestInputsCommand(CommandBase):
+
+    name = "updatetestinputs"
+    help = "Update test inputs from a contests.json file."
+
+    def func(self):
+        return commands.clean_contests
+
+    def add_arguments(self, parser):
+        self.add_contests_path_argument(parser)
 
 
 class GenExpectedCommand(CommandBase):
@@ -242,8 +256,7 @@ class GenExpectedCommand(CommandBase):
         return commands.clean_contests
 
     def add_arguments(self, parser):
-        parser.add_argument('json_contests_path', metavar='JSON_PATH',
-            help=("path to a contests.json file."))
+        self.add_contests_path_argument(parser)
 
 
 class ArgBuilder(object):
@@ -299,6 +312,7 @@ def create_argparser(prog="rcv"):
     classes = (
         RandContestCommand,
         CleanContestsCommand,
+        UpdateTestInputsCommand,
         GenExpectedCommand,
     )
     builder.add_commands(group, classes)

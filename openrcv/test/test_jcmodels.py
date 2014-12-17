@@ -103,7 +103,7 @@ class JsonCaseBallotTest(UnitCase):
 
     def test_from_jsobj(self):
         cases = [
-            ('3 1 2', {'weight': 3, 'choices': (1, 5)}),
+            ('3 1 2', {'weight': 3, 'choices': (1, 2)}),
             # Test an undervote.
             ('3', {'weight': 3}),
         ]

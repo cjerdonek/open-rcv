@@ -131,27 +131,6 @@ class JsonCaseBallotTest(UnitCase):
                 self.assertEqual(jc_ballot.to_jsobj(), expected)
 
 
-# TODO: remove this case after moving the tests.
-class JsonBallotTest(object):
-
-    def test_to_ballot_stream(self):
-        ballots = [JsonBallot(weight=3),
-                   JsonBallot(choices=[1, 2])]
-        stream = JsonBallot.to_ballot_stream(ballots)
-        self.assertTrue(isinstance(stream, StreamInfo))
-        self.assertEqual(stream.value, "3\n1 1 2\n")
-
-    def test_from_ballot_stream(self):
-        ballot_stream = StringInfo(dedent("""\
-        2
-        3 1 2
-        """))
-        ballots = JsonBallot.from_ballot_stream(ballot_stream)
-        expected = [JsonBallot(weight=2),
-                    JsonBallot(weight=3, choices=(1, 2))]
-        self.assertEqual(ballots, expected)
-
-
 class JsonCaseContestInputTest(UnitCase):
 
     cls = JsonCaseContestInput

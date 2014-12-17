@@ -23,7 +23,7 @@
 from textwrap import dedent
 
 from openrcv.jsonlib import JsonableError, JsonDeserializeError, JS_NULL
-from openrcv.jcmodels import (from_jsobj, JsonBallot, JsonCaseBallot, JsonCaseContestInput,
+from openrcv.jcmodels import (from_jsobj, JsonCaseBallot, JsonCaseContestInput,
                               JsonRoundResults, JsonTestCaseOutput)
 from openrcv.models import ContestInput
 from openrcv.streams import ListResource
@@ -102,9 +102,17 @@ class JsonCaseBallotTest(UnitCase):
         self.assertEqual(ballot, (3, (1, 2)))
 
     def test_from_jsobj(self):
-        jc_ballot = JsonCaseBallot.from_jsobj("2 3 4")
-        expected = JsonCaseBallot(choices=(3, 4), weight=2)
-        jc_ballot.assert_equal(expected)
+        cases = [
+            ('3 1 2', {'weight': 3, 'choices': (1, 5)}),
+            # Test an undervote.
+            ('3', {'weight': 3}),
+        ]
+        # kwargs is the kwargs for the "expected" JsonCaseBallot.
+        for jsobj, kwargs in cases:
+            with self.subTest(jsobj=jsobj, kwargs=kwargs):
+                jc_ballot = JsonCaseBallot.from_jsobj(jsobj)
+                expected = JsonCaseBallot(**kwargs)
+                jc_ballot.assert_equal(expected)
 
     def test_from_jsobj__bad_format(self):
         """Check a string that does not parse."""
@@ -112,36 +120,19 @@ class JsonCaseBallotTest(UnitCase):
             jc_ballot = JsonCaseBallot.from_jsobj("2 a 4")
 
     def test_to_jsobj(self):
-        jc_ballot = JsonCaseBallot(choices=(1, 2), weight=3)
-        expected = "3 1 2"
-        self.assertEqual(jc_ballot.to_jsobj(), expected)
+        cases = [
+            ({'weight': 3, 'choices': (1, 2)}, '3 1 2'),
+            # Test an undervote.
+            ({'weight': 3}, '3'),
+        ]
+        for kwargs, expected in cases:
+            with self.subTest(kwargs=kwargs, expected=expected):
+                jc_ballot = JsonCaseBallot(**kwargs)
+                self.assertEqual(jc_ballot.to_jsobj(), expected)
 
 
 # TODO: remove this case after moving the tests.
-class JsonBallotTest(UnitCase):
-
-    def test_to_jsobj__undervote(self):
-        ballot = JsonBallot(weight=3)
-        jsobj = ballot.to_jsobj()
-        self.assertEqual(jsobj, "3")
-
-    def test_save_from_jsobj(self):
-        ballot = JsonBallot()
-        ballot.save_from_jsobj("2")
-        self.assertEqual(ballot, JsonBallot(weight=2))
-
-    # TODO: add tests for pure from_jsobj() function.
-
-    def test_save_from_jsobj(self):
-        ballot = JsonBallot()
-        ballot.save_from_jsobj("2 3 4")
-        self.assertEqual(ballot, JsonBallot(choices=(3, 4), weight=2))
-
-    def test_save_from_jsobj__bad_format(self):
-        """Check a string that does not parse."""
-        ballot = JsonBallot()
-        with self.assertRaises(JsonableError):
-            ballot.save_from_jsobj("1 a 2")
+class JsonBallotTest(object):
 
     def test_to_ballot_stream(self):
         ballots = [JsonBallot(weight=3),
@@ -251,7 +242,7 @@ class JsonCaseContestInputTest(UnitCase):
 
 # TODO: move the tests in here into JsonCaseContestInputTest, after
 # checking for redundancy, etc.
-class JsonCaseContestInputTest2(UnitCase):
+class JsonCaseContestInputTest2(object):
 
     def make_ballots(self):
         ballots = [JsonBallot(choices=[1, 2]),

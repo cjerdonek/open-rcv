@@ -108,6 +108,15 @@ class CommandBase(object):
         """
         self.formats = formats
 
+    @property
+    def raw_desc(self):
+        # Default to the short help message.
+        return self.help
+
+    @property
+    def desc(self):
+        return fill(self.raw_desc)
+
     def add_arguments(self, parser):
         raise utils.NoImplementation(self)
 
@@ -126,12 +135,13 @@ class CountCommand(CommandBase):
 
     name = "count"
     help = "Tally one or more contests."
+    raw_desc = """\
+        Tally the contests specified by the contests file at INPUT_PATH.
+        """
 
     @property
     def func(self):
         return commands.count
-
-    desc = "Tally the contests specified by the contests file at INPUT_PATH."
 
     def add_arguments(self, parser):
         parser.add_argument('input_path', metavar='INPUT_PATH',
@@ -143,6 +153,17 @@ class RandContestCommand(CommandBase):
 
     name = "randcontest"
     help = "Make a random contest."
+
+    @property
+    def raw_desc(self):
+        return ("""\
+            Create a random contest.
+
+            This command creates a contest with random ballot data and writes the
+            contest to stdout in the format {output_format}. If {output_dir} is provided,
+            then only the paths to the output files are written to stdout.
+            """.format(output_format=OPTION_OUTPUT_FORMAT.metavar,
+                       output_dir=OPTION_OUTPUT_DIR.metavar))
 
     def func(self, ns, stdout):
         ballot_count = ns.ballot_count
@@ -158,17 +179,6 @@ class RandContestCommand(CommandBase):
                             normalize=normalize,
                             output_dir=output_dir,
                             stdout=stdout)
-
-    @property
-    def desc(self):
-        return fill("""\
-            Create a random contest.
-
-            This command creates a contest with random ballot data and writes the
-            contest to stdout in the format {output_format}. If {output_dir} is provided,
-            then only the paths to the output files are written to stdout.
-            """.format(output_format=OPTION_OUTPUT_FORMAT.metavar,
-                       output_dir=OPTION_OUTPUT_DIR.metavar))
 
     def add_arguments(self, parser):
         default_candidates = 6
@@ -202,8 +212,6 @@ class RandContestCommand(CommandBase):
                   "choices using the weight."))
 
 
-# TODO: allow passing a contest ID to clean up just one contest.
-# TODO: accept a normalize option and default to not normalizing ballots.
 class CleanContestsCommand(CommandBase):
 
     name = "cleancontests"
@@ -220,10 +228,6 @@ class CleanContestsCommand(CommandBase):
         json_path = ns.json_contests_path
         return jcmanage.clean_contests(json_path)
 
-    @property
-    def desc(self):
-        return textwrap.dedent(self.raw_desc)
-
     def add_arguments(self, parser):
         parser.add_argument('json_contests_path', metavar='JSON_PATH',
             help=("path to a contests.json file."))
@@ -233,7 +237,6 @@ class GenExpectedCommand(CommandBase):
 
     name = "genexpected"
     help = "Generate JSON test expectations."
-    desc = help
 
     def func(self):
         return commands.clean_contests

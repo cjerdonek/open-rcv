@@ -25,6 +25,7 @@
 import argparse2 as argparse
 from argparse2 import RawDescriptionHelpFormatter
 import logging
+import os
 import textwrap
 
 from openrcv.formats.blt import BLTFormat
@@ -53,6 +54,8 @@ DESCRIPTION = """\
 OpenRCV command-line tool.
 
 """
+
+DEFAULT_CONTESTS_JSON_PATH = "submodules/open-rcv-tests/contests.json"
 
 OPTION_HELP = Option(('-h', '--help'))
 OPTION_OUTPUT_DIR = Option(('-o', '--output-dir'), "OUTPUT_DIR")
@@ -130,9 +133,21 @@ class CommandBase(object):
                 "(choose from: %s)" % (label, ", ".join(labels)))
         return format.cls
 
+    # TODO: expose two variants of this method: one where contests.json
+    #   is always necessary, and one where it is optional.
     def add_contests_path_argument(self, parser):
-        parser.add_argument('json_contests_path', metavar='JSON_PATH',
-            help=("path to a contests.json file."))
+        file_dir = os.path.dirname(__file__)
+        repo_root = os.path.join(file_dir, os.pardir, os.pardir)
+        default_contests_path = os.path.join(repo_root, DEFAULT_CONTESTS_JSON_PATH)
+        rel_default_path = os.path.relpath(default_contests_path)
+        parser.add_argument('-j', '--json-contests', metavar='JSON_PATH',
+            dest='json_contests_path', nargs='?', const=rel_default_path,
+            help=("path to a contests.json file.  Defaults to the contests.json "
+                  "file located at {0:s} relative to the source root.  "
+                  "Using the default requires running this command from "
+                  "a source checkout with the open-rcv-tests submodule "
+                  "checked out.".format(DEFAULT_CONTESTS_JSON_PATH)))
+
 
 class CountCommand(CommandBase):
 
@@ -204,6 +219,7 @@ class RandContestCommand(CommandBase):
             type=self.writer_type, default=OUTPUT_FORMAT_DEFAULT,
             help=('the output format.  Choose from: {!s}. Defaults to: "{!s}".'
                   .format(list_desc, OUTPUT_FORMAT_DEFAULT)))
+        # TODO: DRY up with add_contests_path_argument().
         parser.add_argument('-j', '--json-contests', metavar='JSON_PATH',
             dest='json_contests_path',
             help=("path to a contests.json file.  If provided, also adds the contest "
@@ -240,8 +256,9 @@ class UpdateTestInputsCommand(CommandBase):
     name = "updatetestinputs"
     help = "Update test inputs from a contests.json file."
 
-    def func(self):
-        return commands.clean_contests
+    def func(self, ns, stdout):
+        json_path = ns.json_contests_path
+        return commands.update_test_inputs(json_path)
 
     def add_arguments(self, parser):
         self.add_contests_path_argument(parser)

@@ -43,7 +43,6 @@ def make_jc_ballots(seq):
     return ballots
 
 
-# TODO: move/convert tests from JsonBallotTest to JsonCaseBallotTest.
 class JsonCaseBallotTest(UnitCase):
 
     def test_init(self):

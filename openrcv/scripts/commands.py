@@ -88,3 +88,7 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
             jcmanage.add_contest_to_contests_file(contest, json_contests_path)
 
     return "\n".join(output_paths) + "\n" if output_paths else None
+
+
+def update_test_inputs(json_contests_path):
+    print(json_contests_path)

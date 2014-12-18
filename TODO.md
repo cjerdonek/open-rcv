@@ -1,12 +1,22 @@
 TODO
 ====
 
+* Double-check usages of --json-contests.
+* Fix up remaining PyPI release instructions and commit.
+* Implement commands:
+  - updatetestinputs
+  - updatetestoutputs
+  - checktests
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)
-* Make a reST long description for PyPI
-* Fix up remaining PyPI release instructions and commit.
-* Work on cleancontests command (need to examine add'l JsonCase* objects).
+
+Technical debt
+--------------
+* Then refactor JsonCaseContestInputTest2 away.
 * Remove cruft from utils.py (specifically StreamInfo).
+
+Uncategorized
+-------------
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
 * Define a BLT ballot stream resource that shares code with the internal one.

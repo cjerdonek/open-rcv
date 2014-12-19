@@ -20,12 +20,10 @@
 # DEALINGS IN THE SOFTWARE.
 #
 
-"""
-Support for generating and managing election data.
+"""Support for generating and managing election data.
 
 This module provides functions to help work with the test cases
 in the open-rcv-tests repo.
-
 """
 
 from contextlib import contextmanager
@@ -33,9 +31,12 @@ import datetime
 import logging
 from random import random, sample
 
-from openrcv import jcmodels, jsonlib, models, utils
 from openrcv.formats import jscase
+from openrcv import jcmodels
+from openrcv.jcmodels import JsonCaseContestInput
+from openrcv import jsonlib, models
 from openrcv.models import ContestInput
+from openrcv import utils
 
 
 STOP_CHOICE = object()
@@ -81,21 +82,27 @@ def add_contest_to_contests_file(contest, contests_path):
     jsonlib.write_json(data, path=contests_path)
 
 
-# TODO: log normalization conversions (e.g. if they are unequal).
-# TODO: use an equality check on the JSON object to know if there was a difference.
+def clean_contest(contest):
+    """Normalize a contest in a JSON contests file."""
+    if contest.should_normalize_ballots:
+        contest.ballots_resource.normalize()
+    if not contest.rule_sets:
+        contest.rule_sets = []
+
+
+# TODO: log normalization conversions (e.g. if they are unequal), and use
+#   an equality check on the JSON object to know if there was a difference.
 def clean_contests(json_path):
     jsobj = jsonlib.read_json_path(json_path)
     test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
+    cleaned_contests = []
     for id_, jc_contest in enumerate(test_file.contests, start=1):
-        jc_contest.id = id_
         contest = jc_contest.to_model()
-        ballots = contest.ballots_resource
-        if contest.should_normalize_ballots:
-            ballots.normalize()
-        with ballots.reading() as gen:
-            cls = jcmodels.JsonCaseBallot
-            jc_ballots = [cls.from_model(b) for b in gen]
-        jc_contest.ballots = jc_ballots
+        contest.id = id_
+        clean_contest(contest)
+        jc_contest = JsonCaseContestInput.from_model(contest)
+        cleaned_contests.append(jc_contest)
+    test_file.contests = cleaned_contests
     jsonlib.write_json(test_file, path=json_path)
 
 
@@ -110,7 +117,6 @@ class BallotGenerator(object):
           max_length: the maximum length of a ballot.  Defaults to the
             number of choices.
           undervote: probability of selecting an undervote.
-
         """
         if max_length is None:
             max_length = len(choices)
@@ -120,12 +126,10 @@ class BallotGenerator(object):
         self.undervote = undervote
 
     def choose(self, choices):
-        """
-        Choose a single element of choices at random.
+        """Choose a single element of choices at random.
 
         Arguments:
           choices: a sequence or set of objects.
-
         """
         # random.sample() returns a k-length list.
         return sample(choices, 1)[0]
@@ -164,7 +168,6 @@ class BallotGenerator(object):
         """
         Arguments:
           choices: a sequence of integers.
-
         """
         with ballots_resource.writing() as gen:
             for i in range(count):

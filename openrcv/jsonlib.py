@@ -152,12 +152,9 @@ class JsonDeserializeError(Exception):
 
 class Attribute(object):
 
-    """Represents an attribute of a jsonable class that should be
-    serialized and deserialized to JSON.
+    """Represents a serializable attribute of a jsonable class."""
 
-    """
-
-    def __init__(self, name, cls=None):
+    def __init__(self, name, cls=None, keyword=None):
         """
         Arguments:
           name: the attribute name.
@@ -165,9 +162,17 @@ class Attribute(object):
             deserializing the attribute value.  None means that no
             class is applicable: the attribute value is an instance of a
             Python built-in type.
+          keyword: the keyword to use when including this attribute
+            in the constructor of both the jsonable class and the
+            corresponding model class.  Defaults to the attribute
+            name.  A value of False means that the attribute should
+            be excluded from the dict of keyword arguments.
         """
-        self.name = name
+        if keyword is None:
+            keyword = name
         self.cls = cls
+        self.keyword = keyword
+        self.name = name
 
 
 class JsonableMixin(ReprMixin):
@@ -298,6 +303,13 @@ class JsonableMixin(ReprMixin):
         meta = {}
         self._attrs_to_jsdict(self.meta_attrs, meta)
         return meta
+
+    def make_attr_kwargs(self, obj):
+        kwargs = {}
+        for attr in (attr for attr in self.attrs() if attr.keyword):
+            value = getattr(obj, attr.name)
+            kwargs[attr.keyword] = value
+        return kwargs
 
     @classmethod
     def from_model(cls, model_obj):

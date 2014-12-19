@@ -47,7 +47,7 @@ from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin,
                              JsonDeserializeError)
 from openrcv import models
-from openrcv.models import make_candidates, RoundResults
+from openrcv.models import make_candidate_numbers, RoundResults
 from openrcv import streams
 from openrcv.utils import StringInfo
 
@@ -108,15 +108,17 @@ class JsonCaseContestInput(JsonableMixin):
 
     """Contest input for a JSON test case."""
 
-    meta_attrs = (Attribute('id'),
+    meta_attrs = (Attribute('id', keyword='id_'),
                   Attribute('name'),
                   Attribute('normalize_ballots'),
-                  Attribute('notes'))
-    data_attrs = (Attribute('ballots', cls=JsonCaseBallot),
-                  Attribute('candidate_count'))
+                  Attribute('rule_sets'),
+                  Attribute('notes'),)
+    data_attrs = (Attribute('ballots', cls=JsonCaseBallot, keyword=False),
+                  Attribute('candidate_count', keyword=False))
 
     def __init__(self, id_=None, candidate_count=None, ballots=None,
-                 name=None, normalize_ballots=None, notes=None):
+                 name=None, normalize_ballots=None, notes=None,
+                 rule_sets=None):
         """
         Arguments:
           ballots: an iterable of JsonCaseBallot objects.
@@ -131,6 +133,7 @@ class JsonCaseContestInput(JsonableMixin):
         self.name = name
         self.normalize_ballots = normalize_ballots
         self.notes = notes
+        self.rule_sets = rule_sets
 
     def repr_info(self):
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
@@ -143,25 +146,23 @@ class JsonCaseContestInput(JsonableMixin):
         candidate_count = None if contest.candidates is None else len(contest.candidates)
         with contest.ballots_resource.reading() as ballots:
             ballots = [JsonCaseBallot.from_model(b) for b in ballots]
-        self.__init__(id_=contest.id, candidate_count=candidate_count, ballots=ballots,
-                      name=contest.name, notes=contest.notes,
-                      normalize_ballots=contest.normalize_ballots)
+        kwargs = self.make_attr_kwargs(contest)
+        self.__init__(candidate_count=candidate_count, ballots=ballots, **kwargs)
 
     # TODO: implement and unit test this.
     # TODO: think about how the creation of a new ballots resource should
     # be handled, since it involves managing another resource.
     def to_model(self):
         """Return a ContestInput object."""
-        candidates = make_candidates(self.candidate_count)
+        candidates = make_candidate_numbers(self.candidate_count)
         ballots = [b.to_model() for b in self.ballots]
         # We use a list resource as the backing store for now because the
         # number of ballots is small.
         resource = streams.ListResource(ballots)
         ballots_resource = models.BallotsResource(resource)
-        contest = models.ContestInput(id_=self.id,name=self.name, notes=self.notes,
-                                      candidates=candidates,
-                                      ballots_resource=ballots_resource,
-                                      normalize_ballots=self.normalize_ballots)
+        kwargs = self.make_attr_kwargs(self)
+        contest = models.ContestInput(candidates=candidates,
+                                      ballots_resource=ballots_resource, **kwargs)
         return contest
 
     # def save_from_jsobj(self, jsobj):

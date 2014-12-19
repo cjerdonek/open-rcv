@@ -150,7 +150,7 @@ class ContestInputTest(UnitCase):
         with self.assertRaises(TypeError):
             resource.writing()
 
-    def test_get_candidates(self):
+    def test_get_candidate_numbers(self):
         contest = ContestInput()
         contest.candidates = ["Alice", "Bob", "Carl"]
-        self.assertEqual(contest.get_candidates(), range(1, 4))
+        self.assertEqual(contest.get_candidate_numbers(), range(1, 4))

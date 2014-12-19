@@ -247,7 +247,7 @@ def count_contest_file(argv):
         test_case.input.contest = contest
 
         # Tabulate results.
-        candidates = contest.get_candidates()
+        candidates = contest.get_candidate_numbers()
         ballot_stream = JsonBallot.to_ballot_stream(contest.ballots)
         contest_results = count_irv_contest(ballot_stream, candidates)
 

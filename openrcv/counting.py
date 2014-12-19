@@ -151,7 +151,7 @@ def _count_irv(sub_dir, blt_path):
 
     parser = BLTParser(ballot_stream)
     contest = parser.parse(blt_stream)
-    candidates = set(contest.get_candidates())
+    candidates = set(contest.get_candidate_numbers())
 
     results = count_irv_contest(ballot_stream, candidates)
 

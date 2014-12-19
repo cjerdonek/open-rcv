@@ -43,17 +43,14 @@ from openrcv.utils import ReprMixin
 log = logging.getLogger(__name__)
 
 
-def make_candidates(candidate_count):
-    """
-    Return an iterable of candidate numbers.
-    """
+def make_candidate_numbers(candidate_count):
+    """Return an iterable of candidate numbers."""
     return range(1, candidate_count + 1)
 
 
 # TODO: allow ordering and compressing to be done separately.
 def normalize_ballots_to(source, target):
-    """
-    Normalize ballots by ordering and "compressing" them.
+    """Normalize ballots by ordering and "compressing" them.
 
     This function orders the ballots lexicographically by the list of
     choices on each ballot, and also uses the weight component to "compress"
@@ -127,7 +124,8 @@ class ContestInput(ReprMixin):
     # We include an underscore at the end of id_ since id() is a built-in.
     # TODO: test defaults -- especially properties of default ballots resource.
     def __init__(self, id_=None, name=None, candidates=None, seat_count=None,
-                 ballots_resource=None, notes=None, normalize_ballots=None):
+                 ballots_resource=None, notes=None, normalize_ballots=None,
+                 rule_sets=None):
         if ballots_resource is None:
             ballots_resource = streams.NullStreamResource()
         if candidates is None:
@@ -143,15 +141,15 @@ class ContestInput(ReprMixin):
         self.name = name
         self.normalize_ballots = normalize_ballots
         self.notes = notes
+        self.rule_sets = rule_sets
         self.seat_count = seat_count
 
     def repr_info(self):
         return "id=%r, name=%r" % (self.id, self.name)
 
-    # TODO: give this method a more accurate name.
-    def get_candidates(self):
+    def get_candidate_numbers(self):
         """Return an iterable of the candidate numbers."""
-        return make_candidates(len(self.candidates))
+        return make_candidate_numbers(len(self.candidates))
 
     @property
     def should_normalize_ballots(self):
@@ -160,9 +158,7 @@ class ContestInput(ReprMixin):
 
 class RoundResults(object):
 
-    """
-    Represents contest results.
-    """
+    """Represents contest results."""
 
     def __init__(self, totals):
         """
@@ -174,9 +170,7 @@ class RoundResults(object):
 
 class ContestResults(ReprMixin):
 
-    """
-    Represents contest results.
-    """
+    """Represents contest results."""
 
     def __init__(self, rounds=None):
         self.rounds = rounds

@@ -55,7 +55,9 @@ OpenRCV command-line tool.
 
 """
 
-DEFAULT_CONTESTS_JSON_PATH = "submodules/open-rcv-tests/contests.json"
+RCV_TESTS_DIR = "submodules/open-rcv-tests/"
+DEFAULT_CONTESTS_JSON_PATH = "contests.json"
+DEFAULT_TESTS_DIR = "tests"
 
 OPTION_HELP = Option(('-h', '--help'))
 OPTION_OUTPUT_DIR = Option(('-o', '--output-dir'), "OUTPUT_DIR")
@@ -66,6 +68,19 @@ OUTPUT_FORMAT_INTERNAL = 'internal'
 OUTPUT_FORMAT_TEST = 'jscase'
 # TODO: default to OpenRCV format.
 OUTPUT_FORMAT_DEFAULT = OUTPUT_FORMAT_BLT
+
+HELP_DEFAULT_PATHS = """\
+Using the default requires running this command from a source checkout with
+a clone of the open-rcv-tests submodule located at: "{0}".
+""".format(RCV_TESTS_DIR)
+
+HELP_DEFAULT_CONTESTS_PATH = """\
+The contests path defaults to the following path inside the submodule: "{0}".
+""".format(DEFAULT_CONTESTS_JSON_PATH)
+
+HELP_DEFAULT_TESTS_DIR = """\
+The tests directory defaults to the following path inside the submodule: "{0}".
+""".format(DEFAULT_TESTS_DIR)
 
 
 # TODO: use this function throughout this module.
@@ -133,33 +148,45 @@ class CommandBase(object):
                 "(choose from: %s)" % (label, ", ".join(labels)))
         return format.cls
 
-    def _default_contests_path(self):
+    def _default_contests_paths(self):
+        """Return the default contests path and tests directory."""
         file_dir = os.path.dirname(__file__)
         repo_root = os.path.join(file_dir, os.pardir, os.pardir)
-        contests_path = os.path.join(repo_root, DEFAULT_CONTESTS_JSON_PATH)
-        rel_contests_path = os.path.relpath(contests_path)
-        return rel_contests_path
+        paths = (os.path.join(repo_root, path) for path in
+                 (DEFAULT_CONTESTS_JSON_PATH, DEFAULT_TESTS_DIR))
+        # We return relative paths because they are more concise.
+        contests_path, tests_dir = map(os.path.relpath, paths)
+        return contests_path, tests_dir
 
-    def _add_contests_path_argument(self, parser, help, **kwargs):
+    def _add_contests_path_argument(self, parser, help, metavar=None, **kwargs):
         """
         Arguments:
           help: a format string.
         """
-        default_path = self._default_contests_path()
-        parser.add_argument('-j', '--json-contests', metavar='JSON_PATH',
-            dest='json_contests_path',
-            help=help.format(DEFAULT_CONTESTS_JSON_PATH), **kwargs)
+        if metavar is None:
+            metavar = 'CONTESTS_PATH'
+        default_path = self._default_contests_paths()
+        parser.add_argument('-j', '--json-location', dest='json_paths',
+                            metavar=metavar, help=help.format(), **kwargs)
 
-    def add_contests_path_argument_required(self, parser):
+    def add_contests_path_arg_required(self, parser):
         """Add a contests path argument where the path is required."""
-        default_path = self._default_contests_path()
+        default_path = self._default_contests_paths()
         help = """\
-        custom path to the contests.json file. If not present, the path
-        defaults to the following relative to the source root: {0:s}. Using
-        the default requires running this command from a source checkout with
-        a clone of the open-rcv-tests submodule.
-        """
+        custom path to the JSON contests file.  If not present, the default
+        is used.  {0:s}
+        """.format(HELP_DEFAULT_CONTESTS_PATH)
         self._add_contests_path_argument(parser, help, default=default_path)
+
+    def add_contests_path_arg_required_with_tests_dir(self, parser):
+        """Add an argument for the contests path and tests directory."""
+        default_path = self._default_contests_paths()
+        help = """\
+        custom paths to the JSON contests file and tests directory.  If not
+        present, the defaults are used.  {0}{1}{2}
+        """.format(HELP_DEFAULT_PATHS, HELP_DEFAULT_CONTESTS_PATH, HELP_DEFAULT_TESTS_DIR)
+        self._add_contests_path_argument(parser, help, nargs=2,
+                            metavar=('JSON_PATH', 'TESTS_DIR'), default=default_path)
 
     def add_contests_path_argument_optional(self, parser):
         """Add a contests path argument where the path is optional."""
@@ -275,7 +302,7 @@ class CleanContestsCommand(CommandBase):
         return jcmanage.clean_contests(json_path)
 
     def add_arguments(self, parser):
-        self.add_contests_path_argument_required(parser)
+        self.add_contests_path_arg_required(parser)
 
 
 class UpdateTestInputsCommand(CommandBase):
@@ -284,11 +311,12 @@ class UpdateTestInputsCommand(CommandBase):
     help = "Update test inputs from a contests.json file."
 
     def func(self, ns, stdout):
-        json_path = ns.json_contests_path
-        return commands.update_test_inputs(json_path)
+#        contests_path, tests_dir = ns.json_paths
+        json_paths = ns.json_paths
+        return commands.update_test_inputs(json_paths)
 
     def add_arguments(self, parser):
-        self.add_contests_path_argument_required(parser)
+        self.add_contests_path_arg_required_with_tests_dir(parser)
 
 
 class GenExpectedCommand(CommandBase):
@@ -300,7 +328,7 @@ class GenExpectedCommand(CommandBase):
         return commands.clean_contests
 
     def add_arguments(self, parser):
-        self.add_contests_path_argument_required(parser)
+        self.add_contests_path_arg_required(parser)
 
 
 class ArgBuilder(object):

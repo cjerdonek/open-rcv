@@ -168,7 +168,7 @@ class JsonCaseContestInputTest(UnitCase):
         cases = [
             ("candidate_count", None),
             ("ballots", None),
-            ("id", 0),
+            ("id", None),
             ("notes", None),
         ]
         # TODO: make a assertAttrsEqual method.
@@ -178,13 +178,13 @@ class JsonCaseContestInputTest(UnitCase):
                 self.assertEqual(actual, expected)
 
     def test_from_model(self):
-        contest = ContestInput()
+        contest = ContestInput(id_=2)
         contest.candidates = ['Ann', 'Bob']
         ballots = [(2, (3, 1))]
         contest.ballots_resource = ListResource(ballots)
         jc_contest = JsonCaseContestInput.from_model(contest)
 
-        expected = JsonCaseContestInput(candidate_count=2)
+        expected = JsonCaseContestInput(id_=2, candidate_count=2)
         expected.ballots = [JsonCaseBallot(weight=2, choices=(3, 1))]
         jc_contest.assert_equal(expected)
 
@@ -213,8 +213,8 @@ class JsonCaseContestInputTest(UnitCase):
         jc_ballots = [
             JsonCaseBallot(choices=(1, 2), weight=3),
         ]
-        jc_contest = JsonCaseContestInput(ballots=jc_ballots)
-        expected = {'_meta': {'id': 0}, 'ballots': ['3 1 2']}
+        jc_contest = JsonCaseContestInput(id_=2, ballots=jc_ballots)
+        expected = {'_meta': {'id': 2}, 'ballots': ['3 1 2']}
         self.assertEqual(jc_contest.to_jsobj(), expected)
 
 

@@ -123,9 +123,9 @@ class ContestInput(ReprMixin):
 
     # We include an underscore at the end of id_ since id() is a built-in.
     # TODO: test defaults -- especially properties of default ballots resource.
-    def __init__(self, id_=None, name=None, candidates=None, seat_count=None,
-                 ballots_resource=None, notes=None, normalize_ballots=None,
-                 rule_sets=None):
+    def __init__(self, id_=None, name=None, notes=None, perm_id=None,
+                 candidates=None, seat_count=None, rule_sets=None,
+                 ballots_resource=None, normalize_ballots=None):
         if ballots_resource is None:
             ballots_resource = streams.NullStreamResource()
         if candidates is None:
@@ -141,6 +141,7 @@ class ContestInput(ReprMixin):
         self.name = name
         self.normalize_ballots = normalize_ballots
         self.notes = notes
+        self.perm_id = perm_id
         self.rule_sets = rule_sets
         self.seat_count = seat_count
 

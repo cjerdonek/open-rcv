@@ -29,22 +29,21 @@ from openrcv.jsonlib import from_jsobj, Attribute, JsonableMixin, JS_NULL
 from openrcv.utiltest.helpers import UnitCase
 
 
-class JsonSample(JsonableMixin):
+class _SampleJsonable(JsonableMixin):
 
     data_attrs = (Attribute('bar'),
-                  Attribute('foo'))
-
-    def __init__(self, bar=None, foo=None):
-        self.bar = bar
-        self.foo = foo
-
-    def repr_info(self):
-        return "bar=%r foo=%r" % (self.bar, self.foo)
+                  # We include one use of the keyword argument.
+                  Attribute('foo', keyword='fizz'))
 
 
-class ComplexJsonSample(JsonableMixin):
+class _SampleParentJsonable(JsonableMixin):
 
-    data_attrs = (Attribute('simple', JsonSample), )
+    """A sample nested jsonable class.
+
+    In other words, one of the attributes is itself a jsonable.
+    """
+
+    data_attrs = (Attribute('simple', _SampleJsonable), )
 
     def __init__(self, simple=None):
         self.simple = simple
@@ -59,8 +58,8 @@ class ModuleTest(UnitCase):
         self.assertEqual(from_jsobj(None), JS_NULL)
 
     def test_from_jsobj__with_cls(self):
-        expected_sample = JsonSample(foo="fooval")
-        self.assertEqual(from_jsobj({'foo': 'fooval'}, cls=JsonSample), expected_sample)
+        expected_sample = _SampleJsonable(foo="fooval")
+        self.assertEqual(from_jsobj({'foo': 'fooval'}, cls=_SampleJsonable), expected_sample)
 
     def test_from_jsobj__with_complex_attr(self):
         """
@@ -68,20 +67,41 @@ class ModuleTest(UnitCase):
         JSON object.
 
         """
-        simple = JsonSample(foo="fooval")
-        expected_sample = ComplexJsonSample(simple=simple)
-        self.assertEqual(from_jsobj({'simple': {'foo': 'fooval'}}, cls=ComplexJsonSample), expected_sample)
+        simple = _SampleJsonable(foo="fooval")
+        expected_sample = _SampleParentJsonable(simple=simple)
+        self.assertEqual(from_jsobj({'simple': {'foo': 'fooval'}}, cls=_SampleParentJsonable), expected_sample)
 
 
 class JsonableMixinTest(UnitCase):
 
+    def test_init(self):
+        j = _SampleJsonable(bar=3, fizz=4)
+        self.assertEqual(j.bar, 3)
+        self.assertEqual(j.foo, 4)
+
+    def test_init__default(self):
+        j = _SampleJsonable(bar=3)
+        self.assertEqual(j.foo, None)
+
+    def test_init__bad_kwarg(self):
+        with self.assertRaises(TypeError) as cm:
+            _SampleJsonable(bad=3, badder=4, bar=5)
+        err = cm.exception
+        # This checks that both bad keywords are shown.
+        expected = "invalid keyword argument(s): 'bad', 'badder' (valid are: bar, fizz)"
+        self.assertEqual(str(err), expected)
+
+    def test_repr_info(self):
+        j = _SampleJsonable(fizz=3)
+        self.assertEqual(j.repr_info(), "bar=None foo=3")
+
     def test_eq(self):
-        sample1 = JsonSample()
-        sample2 = JsonSample()
+        sample1 = _SampleJsonable()
+        sample2 = _SampleJsonable()
         self.assertEqual(sample1, sample2)
 
     def test_eq__wrong_type(self):
-        sample = JsonSample()
+        sample = _SampleJsonable()
         self.assertNotEqual(sample, "abc")
 
     def test_eq__missing_attribute(self):
@@ -89,19 +109,19 @@ class JsonableMixinTest(UnitCase):
         Check if the objects don't have one of the attributes set.
 
         """
-        sample1 = JsonSample()
-        sample2 = JsonSample()
+        sample1 = _SampleJsonable()
+        sample2 = _SampleJsonable()
         sample1.foo = "abc"
         self.assertNotEqual(sample1, sample2)
-        sample1 = JsonSample()
+        sample1 = _SampleJsonable()
         sample2.foo = "abc"
         self.assertNotEqual(sample1, sample2)
         sample1.foo = "abc"
         self.assertEqual(sample1, sample2)
 
     def test_assert_equal(self):
-        sample1 = JsonSample()
-        sample2 = JsonSample()
+        sample1 = _SampleJsonable()
+        sample2 = _SampleJsonable()
         sample1.assert_equal(sample2)
         sample1.foo = "abc"
         with self.assertRaises(AssertionError) as cm:

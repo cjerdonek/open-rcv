@@ -224,10 +224,6 @@ class JsonableMixin(ReprMixin):
             kwargs[attr.keyword] = value
         return kwargs
 
-    # TODO: test this constructor.  Include edge cases:
-    #  * unrecognized kwargs
-    #  * default kwarg
-    #  * normally supplied kwarg
     def __init__(self, **kwargs):
         defaults = self.keywords_to_init_defaults()
         # Make a copy in case defaults is a reference to a global object.
@@ -235,14 +231,21 @@ class JsonableMixin(ReprMixin):
         values.update(kwargs)
         if len(values) != len(defaults):
             # Then there is at least one invalid keyword.
-            valid = defaults.keys()
-            invalid = set(values.keys()) - set(valid)
-            raise TypeError("invalid keyword argument(s): {0!r} (valid are: {1!r})".
-                            format(sorted(invalid), sorted(valid)))
+            valid = sorted(defaults.keys())
+            invalid = sorted(set(values.keys()) - set(valid))
+            raise TypeError("invalid keyword argument(s): {0} (valid are: {1})".
+                            format(", ".join(repr(k) for k in invalid),
+                                   ", ".join(valid)))
         attrs = self.keywords_to_attrs()
         for keyword, value in values.items():
             attr = attrs[keyword]
             setattr(self, attr.name, value)
+
+    def repr_info(self):
+        """Return additional info for __repr__()."""
+        attrs = self.attrs()
+        return " ".join("{0}={1!r}".format(attr.name, getattr(self, attr.name))
+                        for attr in attrs)
 
     def return_false(self, *args):
         return False
@@ -285,10 +288,6 @@ class JsonableMixin(ReprMixin):
     # __ne__() is not implemented.
     def __ne__(self, other):
         return not self.__eq__(other)
-
-    def repr_info(self):
-        """Return additional info for __repr__()."""
-        return ""
 
     def _attrs_from_jsdict(self, attrs, jsdict):
         """Read in attribute values from a JSON object dict.

@@ -1,9 +1,9 @@
 TODO
 ====
 
-* Get version detection going from molt.
 * Make `normalize_contests()` read the perm_id's in advance and then
   create new ones which are 8-character hex strings.
+* Get version detection going from molt.
 * Double-check usages of --json-contests.
 * Fix up remaining PyPI release instructions and commit.
 * Implement commands:
@@ -13,13 +13,17 @@ TODO
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)
 
+
 Technical debt
 --------------
-* Then refactor JsonCaseContestInputTest2 away.
+
+* Refactor JsonCaseContestInputTest2 away.
 * Remove cruft from utils.py (specifically StreamInfo).
+
 
 Uncategorized
 -------------
+
 * Improve the random ballot generation by removing undervotes and
   providing an option for not having duplicates.
 * Define a BLT ballot stream resource that shares code with the internal one.

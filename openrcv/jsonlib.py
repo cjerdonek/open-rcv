@@ -154,7 +154,7 @@ class Attribute(object):
 
     """Represents a serializable attribute of a jsonable class."""
 
-    def __init__(self, name, cls=None, keyword=None):
+    def __init__(self, name, cls=None, keyword=None, model=True):
         """
         Arguments:
           name: the attribute name.
@@ -167,11 +167,14 @@ class Attribute(object):
             corresponding model class.  Defaults to the attribute
             name.  A value of False means that the attribute should
             be excluded from the dict of keyword arguments.
+          model: whether the attribute is also an attribute of the
+            model object corresponding to the jsonable class.
         """
         if keyword is None:
             keyword = name
         self.cls = cls
         self.keyword = keyword
+        self.model = model
         self.name = name
 
 
@@ -193,9 +196,53 @@ class JsonableMixin(ReprMixin):
 
     meta_attrs = ()
 
+    # TODO: see if there is a reasonable way to compute this (and the related
+    #   class methods below) when the interpreter is first processing the
+    #   class definition.
     @classmethod
     def attrs(cls):
         return list(cls.meta_attrs) + list(cls.data_attrs)
+
+    @classmethod
+    def keywords_to_attrs(cls):
+        """Return a mapping from keyword to Attribute for this class."""
+        return {attr.keyword: attr for attr in cls.attrs()}
+
+    @classmethod
+    def keywords_to_init_defaults(cls):
+        """Return a mapping from keyword to default __init__() value."""
+        mapping = cls.keywords_to_attrs()
+        # For now, all keyword defaults are None.
+        return dict.fromkeys(mapping.keys())
+
+    @classmethod
+    def make_attr_kwargs(cls, obj):
+        """Return a map from keyword to attribute name."""
+        kwargs = {}
+        for attr in (attr for attr in cls.attrs() if attr.model):
+            value = getattr(obj, attr.name)
+            kwargs[attr.keyword] = value
+        return kwargs
+
+    # TODO: test this constructor.  Include edge cases:
+    #  * unrecognized kwargs
+    #  * default kwarg
+    #  * normally supplied kwarg
+    def __init__(self, **kwargs):
+        defaults = self.keywords_to_init_defaults()
+        # Make a copy in case defaults is a reference to a global object.
+        values = defaults.copy()
+        values.update(kwargs)
+        if len(values) != len(defaults):
+            # Then there is at least one invalid keyword.
+            valid = defaults.keys()
+            invalid = set(values.keys()) - set(valid)
+            raise TypeError("invalid keyword argument(s): {0!r} (valid are: {1!r})".
+                            format(sorted(invalid), sorted(valid)))
+        attrs = self.keywords_to_attrs()
+        for keyword, value in values.items():
+            attr = attrs[keyword]
+            setattr(self, attr.name, value)
 
     def return_false(self, *args):
         return False
@@ -303,13 +350,6 @@ class JsonableMixin(ReprMixin):
         meta = {}
         self._attrs_to_jsdict(self.meta_attrs, meta)
         return meta
-
-    def make_attr_kwargs(self, obj):
-        kwargs = {}
-        for attr in (attr for attr in self.attrs() if attr.keyword):
-            value = getattr(obj, attr.name)
-            kwargs[attr.keyword] = value
-        return kwargs
 
     @classmethod
     def from_model(cls, model_obj):

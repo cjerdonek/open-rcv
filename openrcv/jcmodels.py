@@ -123,20 +123,8 @@ class JsonCaseContestInput(JsonableMixin):
                   Attribute('perm_id'),
                   Attribute('rule_sets'),
                   Attribute('notes'),)
-    data_attrs = (Attribute('ballots', cls=JsonCaseBallot, keyword=False),
-                  Attribute('candidate_count', keyword=False))
-
-    def __init__(self, id_=None, candidate_count=None, ballots=None,
-                 name=None, normalize_ballots=None, notes=None, perm_id=None,
-                 rule_sets=None):
-        self.ballots = ballots
-        self.candidate_count = candidate_count
-        self.id = id_
-        self.name = name
-        self.normalize_ballots = normalize_ballots
-        self.notes = notes
-        self.perm_id = perm_id
-        self.rule_sets = rule_sets
+    data_attrs = (Attribute('ballots', cls=JsonCaseBallot, model=False),
+                  Attribute('candidate_count', model=False))
 
     def repr_info(self):
         return "id=%s candidate_count=%s" % (self.id, self.candidate_count)

@@ -1,6 +1,9 @@
 TODO
 ====
 
+* Get version detection going from molt.
+* Make `normalize_contests()` read the perm_id's in advance and then
+  create new ones which are 8-character hex strings.
 * Double-check usages of --json-contests.
 * Fix up remaining PyPI release instructions and commit.
 * Implement commands:

@@ -58,8 +58,8 @@ class ModuleTest(UnitCase):
         self.assertEqual(from_jsobj(None), JS_NULL)
 
     def test_from_jsobj__with_cls(self):
-        expected_sample = _SampleJsonable(foo="fooval")
-        self.assertEqual(from_jsobj({'foo': 'fooval'}, cls=_SampleJsonable), expected_sample)
+        expected_sample = _SampleJsonable(bar="bar_value")
+        self.assertEqual(from_jsobj({'bar': 'bar_value'}, cls=_SampleJsonable), expected_sample)
 
     def test_from_jsobj__with_complex_attr(self):
         """
@@ -67,9 +67,9 @@ class ModuleTest(UnitCase):
         JSON object.
 
         """
-        simple = _SampleJsonable(foo="fooval")
-        expected_sample = _SampleParentJsonable(simple=simple)
-        self.assertEqual(from_jsobj({'simple': {'foo': 'fooval'}}, cls=_SampleParentJsonable), expected_sample)
+        child = _SampleJsonable(bar="bar_value")
+        expected_sample = _SampleParentJsonable(simple=child)
+        self.assertEqual(from_jsobj({'simple': {'bar': 'bar_value'}}, cls=_SampleParentJsonable), expected_sample)
 
 
 class JsonableMixinTest(UnitCase):

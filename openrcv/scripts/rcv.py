@@ -182,7 +182,6 @@ class CommandBase(object):
         """Add an argument for the JSON path or paths."""
         if metavar is None:
             metavar = OPTION_JSON_LOCATION.metavar.contests_path
-        default_path = self._default_contests_paths()
         parser.add_argument(*OPTION_JSON_LOCATION, dest='json_location',
                             metavar=metavar, help=help, **kwargs)
 
@@ -197,15 +196,14 @@ class CommandBase(object):
 
     def add_json_location_optional(self, parser):
         """Add a contests path argument where the path is optional."""
-        default_path = self._default_contests_paths()
         help = """\
         use a JSON contests file.  If {contests_path_metavar} is not provided,
         the default location is used.  {0}{1}
         """.format(HELP_DEFAULT_PATHS,
                    HELP_DEFAULT_CONTESTS_PATH,
                    contests_path_metavar=OPTION_JSON_LOCATION.metavar.contests_path)
-        self._add_argument_json_location(parser, help, default=default_path,
-                                         nargs='?', const=default_path)
+        default_path = self._default_contests_paths()
+        self._add_argument_json_location(parser, help, nargs='?', const=default_path)
 
     def add_contests_path_arg_required_with_tests_dir(self, parser):
         """Add an argument for the contests path and tests directory."""

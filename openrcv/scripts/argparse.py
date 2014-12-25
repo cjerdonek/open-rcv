@@ -43,6 +43,13 @@ class Option(object):
     def __getitem__(self, i):
         return self.flags[i]
 
+    @property
+    def long(self):
+        for option in self.flags:
+            if option.startswith("--"):
+                return option
+        raise ValueError("no long option available")
+
     def display(self, glue):
         return glue.join(self.flags)
 

@@ -127,6 +127,102 @@ def main():
     _main(parser)
 
 
+class ArgBuilder(object):
+
+    def __init__(self, formats):
+        self.formats = formats
+
+    def add_command(self, group, command_class):
+        """Add the command to a sub-command group."""
+        command = command_class(self.formats)
+        parser = group.add_parser(command.name, help=command.help, description=command.desc,
+                                  add_help=False)
+        command.add_arguments(parser)
+        # The RawDescriptionHelpFormatter preserves line breaks in the
+        # description and epilog strings.
+        parser.formatter_class = RawDescriptionHelpFormatter
+        parser.set_defaults(run_command=command.func)
+        add_help(parser)
+
+    def add_commands(self, group, cmd_classes):
+        for cls in cmd_classes:
+            self.add_command(group, cls)
+
+# TODO: unit-test print_help().
+def create_argparser(prog="rcv"):
+    """Return an ArgumentParser object."""
+    parser = RcvArgumentParser(prog=prog, description=DESCRIPTION, add_help=False,
+                               formatter_class=RawDescriptionHelpFormatter)
+    parser.add_argument('--log-level', metavar='LEVEL',
+        default=LOG_LEVEL_DEFAULT, type=parse_log_level,
+        help=("logging level name or number (e.g. CRITICAL, ERROR, WARNING, "
+              "INFO, DEBUG, 10, 20, etc). "
+              "Defaults to %s." % LOG_LEVEL_DEFAULT_NAME))
+    add_help(parser)
+
+    desc = textwrap.dedent("""\
+    Available commands are below.
+
+    For help with a particular command, pass %s after the command name.
+    For example, `%s count %s`.
+    """ % (OPTION_HELP.display(' or '), prog, OPTION_HELP[0]))
+    metavar = 'COMMAND'
+    subparsers = parser.add_subparsers(title='commands', metavar=metavar,
+                                       description=desc)
+    subparsers.formatter_class = RawDescriptionHelpFormatter
+
+    formats = make_output_formats()
+    builder = ArgBuilder(formats)
+
+    builder.add_command(subparsers, CountCommand)
+
+    group = subparsers.add_parser_group("Test-case management")
+    classes = (
+        RandContestCommand,
+        CleanContestsCommand,
+        UpdateTestInputsCommand,
+        UpdateTestOutputsCommand,
+    )
+    builder.add_commands(group, classes)
+
+    return parser
+
+
+# TODO: move this to openrcv.formats.common.
+class OutputFormat(object):
+
+    def __init__(self, label, desc=None, cls=None):
+        self.cls = cls
+        self.desc = desc
+        self.label = label
+
+    def __str__(self):
+        return '"{!s}" ({!s})'.format(self.label, self.desc)
+
+
+class RcvArgumentParser(ArgParser):
+
+    option_help = OPTION_HELP
+
+    def safe_get_log_level(self, args, error_level=None):
+        """Get the user-requested log level without raising an exception.
+
+        Returns the log level as an integer.
+
+        Arguments:
+          error_level: the log level that should be used if a UsageException occurs.
+        """
+        if error_level is None:
+            error_level = LOG_LEVEL_USAGE_ERROR
+        try:
+            ns = self.parse_args(args=args)  # Namespace object
+        except UsageException:
+            level = parse_log_level(error_level)
+        else:
+            level = ns.log_level
+        return level
+
+
 class CommandBase(object):
 
     def __init__(self, formats):
@@ -356,99 +452,3 @@ class UpdateTestOutputsCommand(CommandBase):
 
     def func(self):
         return commands.normalize_contests_file
-
-
-class ArgBuilder(object):
-
-    def __init__(self, formats):
-        self.formats = formats
-
-    def add_command(self, group, command_class):
-        """Add the command to a sub-command group."""
-        command = command_class(self.formats)
-        parser = group.add_parser(command.name, help=command.help, description=command.desc,
-                                  add_help=False)
-        command.add_arguments(parser)
-        # The RawDescriptionHelpFormatter preserves line breaks in the
-        # description and epilog strings.
-        parser.formatter_class = RawDescriptionHelpFormatter
-        parser.set_defaults(run_command=command.func)
-        add_help(parser)
-
-    def add_commands(self, group, cmd_classes):
-        for cls in cmd_classes:
-            self.add_command(group, cls)
-
-# TODO: unit-test print_help().
-def create_argparser(prog="rcv"):
-    """Return an ArgumentParser object."""
-    parser = RcvArgumentParser(prog=prog, description=DESCRIPTION, add_help=False,
-                               formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('--log-level', metavar='LEVEL',
-        default=LOG_LEVEL_DEFAULT, type=parse_log_level,
-        help=("logging level name or number (e.g. CRITICAL, ERROR, WARNING, "
-              "INFO, DEBUG, 10, 20, etc). "
-              "Defaults to %s." % LOG_LEVEL_DEFAULT_NAME))
-    add_help(parser)
-
-    desc = textwrap.dedent("""\
-    Available commands are below.
-
-    For help with a particular command, pass %s after the command name.
-    For example, `%s count %s`.
-    """ % (OPTION_HELP.display(' or '), prog, OPTION_HELP[0]))
-    metavar = 'COMMAND'
-    subparsers = parser.add_subparsers(title='commands', metavar=metavar,
-                                       description=desc)
-    subparsers.formatter_class = RawDescriptionHelpFormatter
-
-    formats = make_output_formats()
-    builder = ArgBuilder(formats)
-
-    builder.add_command(subparsers, CountCommand)
-
-    group = subparsers.add_parser_group("Test-case management")
-    classes = (
-        RandContestCommand,
-        CleanContestsCommand,
-        UpdateTestInputsCommand,
-        UpdateTestOutputsCommand,
-    )
-    builder.add_commands(group, classes)
-
-    return parser
-
-
-# TODO: move this to openrcv.formats.common.
-class OutputFormat(object):
-
-    def __init__(self, label, desc=None, cls=None):
-        self.cls = cls
-        self.desc = desc
-        self.label = label
-
-    def __str__(self):
-        return '"{!s}" ({!s})'.format(self.label, self.desc)
-
-
-class RcvArgumentParser(ArgParser):
-
-    option_help = OPTION_HELP
-
-    def safe_get_log_level(self, args, error_level=None):
-        """Get the user-requested log level without raising an exception.
-
-        Returns the log level as an integer.
-
-        Arguments:
-          error_level: the log level that should be used if a UsageException occurs.
-        """
-        if error_level is None:
-            error_level = LOG_LEVEL_USAGE_ERROR
-        try:
-            ns = self.parse_args(args=args)  # Namespace object
-        except UsageException:
-            level = parse_log_level(error_level)
-        else:
-            level = ns.log_level
-        return level

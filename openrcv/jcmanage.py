@@ -29,11 +29,12 @@ in the open-rcv-tests repo.
 from contextlib import contextmanager
 import datetime
 import logging
+import os.path
 from random import choice, random, sample
 
 from openrcv.formats import jscase
 from openrcv import jcmodels
-from openrcv.jcmodels import JsonCaseContestInput
+from openrcv.jcmodels import JsonCaseContestInput, JsonCaseTestsFile
 from openrcv import jsonlib, models
 from openrcv.models import ContestInput
 from openrcv import utils
@@ -110,6 +111,17 @@ def _get_jc_contests_file(contests_path):
     return jc_contests_file
 
 
+def _get_jc_tests_file(tests_dir, rule_set):
+    test_case_path = os.path.join(tests_dir, "{0}.json".format(rule_set))
+    try:
+        js_tests_file = jsonlib.read_json_path(test_case_path)
+    except FileNotFoundError:
+        jc_tests_file = JsonCaseTestsFile()
+    else:
+        jc_tests_file = JsonCaseTestsFile.from_jsobj(js_tests_file)
+    return jc_tests_file
+
+
 # TODO: log normalization conversions (e.g. if they are unequal), and use
 #   an equality check on the JSON object to know if there was a difference.
 def normalize_contests_file(contests_path):
@@ -134,16 +146,30 @@ def normalize_contests_file(contests_path):
     jsonlib.write_json(contests_file, path=contests_path)
 
 
+def update_tests_file(contests_file, tests_dir, rule_set):
+    tests_file = _get_jc_tests_file(tests_dir, rule_set)
+    tests_file.version = contests_file.version
+    tests_file.rule_set = rule_set
+    # Create a mapping from perm_id to existing JsonCaseTestInstance objects.
+    existing_tests = {}
+    # TODO
+    for jc_contest in jc_contests:
+        for rule_set in jc_contest.rule_sets:
+            seq = rule_sets.setdefault(rule_set, [])
+            seq.append(jc_contest)
+
+
 def update_test_inputs(contests_path, tests_dir):
     contests_file = _get_jc_contests_file(contests_path)
     jc_contests = contests_file.contests
+    # Create a mapping from rule set to list of JsonCaseContestInput objects.
     rule_sets = {}
     for jc_contest in jc_contests:
         for rule_set in jc_contest.rule_sets:
             seq = rule_sets.setdefault(rule_set, [])
             seq.append(jc_contest)
     for rule_set in sorted(rule_sets.keys()):
-        print(rule_set)
+        update_tests_file(contests_file, tests_dir, rule_set)
 
 
 class BallotGenerator(object):
@@ -263,7 +289,7 @@ def count_contest_file(argv):
     jsobj = read_json_path(TEST_INPUT_PATH)
     contest_file = JsonContestFile.from_jsobj(jsobj)
 
-    results = JsonTestCaseFile()
+    results = JsonCaseTestsFile()
     results.version = contest_file.version
     results.rule_set = rule_set
     test_cases = []

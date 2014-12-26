@@ -86,8 +86,9 @@ def logged_open(*args, **kwargs):
 
     try:
         return open(*args, **kwargs)
-    except (OSError, TypeError):
-        raise Exception("arguments: open(*%r, **%r)" % (args, kwargs))
+    except (OSError, TypeError) as exc:
+        # TODO: DRY this up with StreamInfo.open().
+        raise type(exc)("arguments: open(*%r, **%r)" % (args, kwargs))
 
 
 def make_dirs(path):

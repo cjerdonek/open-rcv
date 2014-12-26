@@ -195,7 +195,7 @@ class JsonRoundResults(RoundResults, JsonableMixin):
         self.totals = totals
 
 
-class JsonTestCaseOutput(JsonableMixin):
+class JsonCaseTestOutput(JsonableMixin):
 
     meta_attrs = ()
     data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
@@ -211,7 +211,7 @@ class JsonTestCaseOutput(JsonableMixin):
             json_round = JsonRoundResults()
             json_round.totals = round_results.totals
             json_rounds.append(json_round)
-        return JsonTestCaseOutput(rounds=json_rounds)
+        return JsonCaseTestOutput(rounds=json_rounds)
 
     def __init__(self, rounds=None):
         if rounds is None:
@@ -219,19 +219,19 @@ class JsonTestCaseOutput(JsonableMixin):
         self.rounds = rounds
 
 
-class JsonTestCase(JsonableMixin):
+class JsonCaseTestInstance(JsonableMixin):
 
     """An RCV test case (input and expected output)."""
 
     meta_attrs = (Attribute('index'), )
     data_attrs = (Attribute('input', cls=JsonCaseContestInput),
-                  Attribute('output', cls=JsonTestCaseOutput), )
+                  Attribute('output', cls=JsonCaseTestOutput), )
 
 
-class JsonTestCaseFile(JsonableMixin):
+class JsonCaseTestsFile(JsonableMixin):
 
     """A file of test cases (input and expected output)."""
 
     meta_attrs = (Attribute('version'),
                   Attribute('rule_set'), )
-    data_attrs = (Attribute('test_cases', cls=JsonTestCase), )
+    data_attrs = (Attribute('test_cases', cls=JsonCaseTestInstance), )

@@ -126,7 +126,7 @@ class JsonCaseContestInput(JsonableMixin):
                   Attribute('candidate_count', model=False))
 
     def repr_info(self):
-        return "id=%s candidate_count=%s" % (self.id, self.candidate_count)
+        return "index=%s perm_id=%s" % (self.index, self.perm_id)
 
     def save_from_model(self, contest):
         """
@@ -223,16 +223,9 @@ class JsonTestCase(JsonableMixin):
 
     """An RCV test case (input and expected output)."""
 
-    meta_attrs = (Attribute('id'),
-                  Attribute('contest_id'), )
+    meta_attrs = (Attribute('index'), )
     data_attrs = (Attribute('input', cls=JsonCaseContestInput),
                   Attribute('output', cls=JsonTestCaseOutput), )
-
-    def __init__(self):
-        self.id = None
-        self.contest_id = None
-        self.input = JsonTestCaseInput()
-        self.output = JsonTestCaseOutput()
 
 
 class JsonTestCaseFile(JsonableMixin):
@@ -242,8 +235,3 @@ class JsonTestCaseFile(JsonableMixin):
     meta_attrs = (Attribute('version'),
                   Attribute('rule_set'), )
     data_attrs = (Attribute('test_cases', cls=JsonTestCase), )
-
-    def __init__(self):
-        self.rule_set = None
-        self.version = None
-        self.test_cases = []

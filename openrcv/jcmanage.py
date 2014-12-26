@@ -104,13 +104,22 @@ def clean_contest(contest):
         contest.rule_sets = []
 
 
+def _get_jc_contests_file(contests_path):
+    js_contests_file = jsonlib.read_json_path(contests_path)
+    jc_contests_file = jcmodels.JsonCaseContestsFile.from_jsobj(js_contests_file)
+    return jc_contests_file
+
+
 # TODO: log normalization conversions (e.g. if they are unequal), and use
 #   an equality check on the JSON object to know if there was a difference.
-def normalize_contests_file(json_contests_path):
-    jsobj = jsonlib.read_json_path(json_contests_path)
-    test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
-    jc_contests = test_file.contests
-    perm_ids = set((c.perm_id for c in jc_contests if c.perm_id))
+def normalize_contests_file(contests_path):
+    contests_file = _get_jc_contests_file(contests_path)
+    jc_contests = contests_file.contests
+    perm_ids = set()
+    for perm_id in (c.perm_id.lower() for c in jc_contests if c.perm_id):
+        if perm_id in perm_ids:
+            raise Exception("duplicate perm_id: {0} (lower-cased)".format(perm_id))
+        perm_ids.add(perm_id)
     for index, jc_contest in enumerate(jc_contests, start=1):
         jc_contest.index = index
         if not jc_contest.perm_id:
@@ -122,7 +131,19 @@ def normalize_contests_file(json_contests_path):
             jc_contest.ballots = normalized.ballots
         if not jc_contest.rule_sets:
             jc_contest.rule_sets = []
-    jsonlib.write_json(test_file, path=json_contests_path)
+    jsonlib.write_json(contests_file, path=contests_path)
+
+
+def update_test_inputs(contests_path, tests_dir):
+    contests_file = _get_jc_contests_file(contests_path)
+    jc_contests = contests_file.contests
+    rule_sets = {}
+    for jc_contest in jc_contests:
+        for rule_set in jc_contest.rule_sets:
+            seq = rule_sets.setdefault(rule_set, [])
+            seq.append(jc_contest)
+    for rule_set in sorted(rule_sets.keys()):
+        print(rule_set)
 
 
 class BallotGenerator(object):
@@ -237,20 +258,6 @@ class ContestCreator(object):
         return contest
 
 
-# TODO: consider removing this.
-def create_json_tests():
-    contests = []
-    for id_, candidate_count in enumerate(range(3, 6), start=1):
-        contest = random_contest(candidate_count)
-        contest.id = id_
-        contest.notes = ("Random contest with {0:d} candidates".
-                         format(candidate_count))
-        contests.append(contest)
-
-    test_file = JsonContestFile(contests, version="0.2.0-alpha")
-    return test_file
-
-
 def count_contest_file(argv):
     rule_set = "san_francisco_irv"
     jsobj = read_json_path(TEST_INPUT_PATH)
@@ -285,15 +292,3 @@ def count_contest_file(argv):
     print(results.to_json())
     path = os.path.join(TEST_CASE_DIR, "%s.json" % rule_set)
     write_json(results, path=path)
-
-
-def make_input_test_file(argv):
-    # target_path="sub/open-rcv-tests/contests.json"
-
-    test_file = create_json_tests()
-    stream_info = PathInfo("temp.json")
-    models.write_json(test_file.to_jsobj(), stream_info)
-
-    with stream_info.open() as f:
-        json = f.read()
-    print(json)

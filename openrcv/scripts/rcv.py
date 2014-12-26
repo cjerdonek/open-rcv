@@ -80,12 +80,11 @@ OUTPUT_FORMAT_DEFAULT = OUTPUT_FORMAT_BLT
 
 HELP_DEFAULT_CONTESTS_PATH = """\
 The JSON contests file defaults to the path "{path}" inside the submodule.
-""".format(metavar=OPTION_JSON_LOCATION.metavar.contests_path,
-           path=DEFAULT_CONTESTS_JSON_PATH)
+""".format(path=DEFAULT_CONTESTS_JSON_PATH)
 
 HELP_DEFAULT_TESTS_DIR = """\
-The tests directory defaults to the following path inside the submodule: "{0}".
-""".format(DEFAULT_TESTS_DIR)
+The tests directory defaults to the path "{path}" inside the submodule.
+""".format(path=DEFAULT_TESTS_DIR)
 
 HELP_DEFAULT_JSON_LOCATION = """\
 Using the default requires running this command from a source checkout with
@@ -169,14 +168,21 @@ class CommandBase(object):
         """
         return os.path.relpath(os.path.join(REPO_ROOT, path))
 
+    def _make_rel_submodule_path(self, rel_path):
+        """
+        Arguments:
+          rel_path: a path relative to the submodule directory.
+        """
+        path = os.path.join(TESTS_SUBMODULE_DIR, rel_path)
+        return self._make_path_relative(path)
+
     def _default_contests_paths(self):
         """Return the default contests path."""
-        contests_path = os.path.join(TESTS_SUBMODULE_DIR, DEFAULT_CONTESTS_JSON_PATH)
-        return self._make_path_relative(contests_path)
+        return self._make_rel_submodule_path(DEFAULT_CONTESTS_JSON_PATH)
 
     def _default_tests_dir(self):
         """Return the default tests directory."""
-        return self._make_path_relative(DEFAULT_TESTS_DIR)
+        return self._make_rel_submodule_path(DEFAULT_TESTS_DIR)
 
     def _add_argument_json_location(self, parser, help, metavar=None, **kwargs):
         """Add an argument for the JSON path or paths."""
@@ -184,16 +190,6 @@ class CommandBase(object):
             metavar = OPTION_JSON_LOCATION.metavar.contests_path
         parser.add_argument(*OPTION_JSON_LOCATION, dest='json_location',
                             metavar=metavar, help=help, **kwargs)
-
-    def add_json_location_required(self, parser):
-        """Add a contests path argument where the path is required."""
-        help = """\
-        specify a custom JSON contests file.  If the option is not provided,
-        the default location is used.  {0}{1}
-        """.format(HELP_DEFAULT_JSON_LOCATION,
-                   HELP_DEFAULT_CONTESTS_PATH)
-        default_path = self._default_contests_paths()
-        self._add_argument_json_location(parser, help, default=default_path)
 
     def add_json_location_optional(self, parser):
         """Add a contests path argument where the path is optional."""
@@ -206,17 +202,28 @@ class CommandBase(object):
         default_path = self._default_contests_paths()
         self._add_argument_json_location(parser, help, nargs='?', const=default_path)
 
+    def add_json_location_required(self, parser):
+        """Add a contests path argument where the path is required."""
+        help = """\
+        specify a custom JSON contests file.  If the option is not provided,
+        the default location is used.  {0}{1}
+        """.format(HELP_DEFAULT_JSON_LOCATION,
+                   HELP_DEFAULT_CONTESTS_PATH)
+        default_path = self._default_contests_paths()
+        self._add_argument_json_location(parser, help, default=default_path)
+
     def add_json_location_required_with_tests_dir(self, parser):
         """Add an argument for the contests path and tests directory."""
         help = """\
-        custom paths to the JSON contests file and tests directory.  If not
-        present, the defaults are used.  {0}{1}{2}
+        specify a custom JSON contests file and tests directory.  If the option
+        is not provided, the default location is used.  {0}{1}{2}
         """.format(HELP_DEFAULT_JSON_LOCATION,
                    HELP_DEFAULT_CONTESTS_PATH,
                    HELP_DEFAULT_TESTS_DIR)
-        default_path = self._default_contests_paths()
+        default_paths = (self._default_contests_paths(), self._default_tests_dir())
         self._add_argument_json_location(parser, help, nargs=2,
-                            metavar=('JSON_PATH', 'TESTS_DIR'), default=default_path)
+                                         metavar=OPTION_JSON_LOCATION.metavar,
+                                         default=default_paths)
 
 
 class CountCommand(CommandBase):
@@ -263,12 +270,12 @@ class RandContestCommand(CommandBase):
         candidate_count = ns.candidate_count
         output_dir = ns.output_dir
         format_cls = ns.output_format
-        json_contests_path = ns.json_location
+        contests_path = ns.json_location
         normalize = ns.normalize_ballots
         return commands.make_random_contest(ballot_count=ballot_count,
                             candidate_count=candidate_count,
                             format_cls=format_cls,
-                            json_contests_path=json_contests_path,
+                            json_contests_path=contests_path,
                             normalize=normalize,
                             output_dir=output_dir,
                             stdout=stdout)
@@ -316,8 +323,8 @@ class CleanContestsCommand(CommandBase):
     """
 
     def func(self, ns, stdout):
-        json_contests_path = ns.json_location
-        return jcmanage.normalize_contests_file(json_contests_path)
+        contests_path = ns.json_location
+        return jcmanage.normalize_contests_file(contests_path)
 
     def add_arguments(self, parser):
         self.add_json_location_required(parser)
@@ -329,9 +336,8 @@ class UpdateTestInputsCommand(CommandBase):
     help = "Update test inputs from a JSON contests file."
 
     def func(self, ns, stdout):
-#        contests_path, tests_dir = ns.json_paths
-        json_paths = ns.json_paths
-        return commands.update_test_inputs(json_paths)
+        contests_path, tests_dir = ns.json_location
+        return jcmanage.update_test_inputs(contests_path, tests_dir)
 
     def add_arguments(self, parser):
         self.add_json_location_required_with_tests_dir(parser)

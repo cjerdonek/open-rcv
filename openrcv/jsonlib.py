@@ -154,7 +154,7 @@ class Attribute(object):
 
     """Represents a serializable attribute of a jsonable class."""
 
-    def __init__(self, name, cls=None, keyword=None, model=True):
+    def __init__(self, name, cls=None, keyword=None, model=False):
         """
         Arguments:
           name: the attribute name.

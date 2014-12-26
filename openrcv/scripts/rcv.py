@@ -67,7 +67,8 @@ DEFAULT_TESTS_DIR = "tests"
 
 
 OPTION_HELP = Option(('-h', '--help'))
-OPTION_JSON_LOCATION = Option(('-j', '--json-location'), JsonLocationMetavar("CONTESTS_PATH", "TESTS_DIR"))
+OPTION_JSON_LOCATION = Option(('-j', '--json-location'),
+                              JsonLocationMetavar("CONTESTS_PATH", "TESTS_DIR"))
 OPTION_OUTPUT_DIR = Option(('-o', '--output-dir'), "OUTPUT_DIR")
 OPTION_OUTPUT_FORMAT = Option(('-f', '--output-format'), "OUTPUT_FORMAT")
 
@@ -234,14 +235,14 @@ class CountCommand(CommandBase):
         Tally the contests specified by the contests file at INPUT_PATH.
         """
 
-    @property
-    def func(self):
-        return commands.count
-
     def add_arguments(self, parser):
         parser.add_argument('input_path', metavar='INPUT_PATH',
             help=("path to a contests configuration file. Supported file "
                   "formats are JSON (*.json) and YAML (*.yaml or *.yml)."))
+
+    @property
+    def func(self):
+        return commands.count
 
 
 class RandContestCommand(CommandBase):
@@ -264,21 +265,6 @@ class RandContestCommand(CommandBase):
             """.format(json_contests_option=OPTION_JSON_LOCATION.long,
                        output_format=OPTION_OUTPUT_FORMAT.metavar,
                        output_dir=OPTION_OUTPUT_DIR.metavar)
-
-    def func(self, ns, stdout):
-        ballot_count = ns.ballot_count
-        candidate_count = ns.candidate_count
-        output_dir = ns.output_dir
-        format_cls = ns.output_format
-        contests_path = ns.json_location
-        normalize = ns.normalize_ballots
-        return commands.make_random_contest(ballot_count=ballot_count,
-                            candidate_count=candidate_count,
-                            format_cls=format_cls,
-                            json_contests_path=contests_path,
-                            normalize=normalize,
-                            output_dir=output_dir,
-                            stdout=stdout)
 
     def add_arguments(self, parser):
         default_candidates = 6
@@ -309,6 +295,21 @@ class RandContestCommand(CommandBase):
                   "ordering the ballots lexicographically and then grouping identical "
                   "choices using the weight."))
 
+    def func(self, ns, stdout):
+        ballot_count = ns.ballot_count
+        candidate_count = ns.candidate_count
+        output_dir = ns.output_dir
+        format_cls = ns.output_format
+        contests_path = ns.json_location
+        normalize = ns.normalize_ballots
+        return commands.make_random_contest(ballot_count=ballot_count,
+                            candidate_count=candidate_count,
+                            format_cls=format_cls,
+                            json_contests_path=contests_path,
+                            normalize=normalize,
+                            output_dir=output_dir,
+                            stdout=stdout)
+
 
 class CleanContestsCommand(CommandBase):
 
@@ -322,25 +323,25 @@ class CleanContestsCommand(CommandBase):
     permanent IDs, and normalizing the ballots if needed.
     """
 
+    def add_arguments(self, parser):
+        self.add_json_location_required(parser)
+
     def func(self, ns, stdout):
         contests_path = ns.json_location
         return jcmanage.normalize_contests_file(contests_path)
-
-    def add_arguments(self, parser):
-        self.add_json_location_required(parser)
 
 
 class UpdateTestInputsCommand(CommandBase):
 
     name = "updatetestinputs"
-    help = "Update test inputs from a JSON contests file."
+    help = "Update all test files from a JSON contests file."
+
+    def add_arguments(self, parser):
+        self.add_json_location_required_with_tests_dir(parser)
 
     def func(self, ns, stdout):
         contests_path, tests_dir = ns.json_location
         return jcmanage.update_test_inputs(contests_path, tests_dir)
-
-    def add_arguments(self, parser):
-        self.add_json_location_required_with_tests_dir(parser)
 
 
 class GenExpectedCommand(CommandBase):
@@ -348,11 +349,11 @@ class GenExpectedCommand(CommandBase):
     name = "genexpected"
     help = "Generate JSON test expectations."
 
-    def func(self):
-        return commands.normalize_contests_file
-
     def add_arguments(self, parser):
         self.add_json_location_required(parser)
+
+    def func(self):
+        return commands.normalize_contests_file
 
 
 class ArgBuilder(object):

@@ -116,17 +116,17 @@ class JsonCaseContestInput(JsonableMixin):
       candidate_count: integer number of candidates.
     """
 
-    meta_attrs = (Attribute('index', keyword='index', model=False),
-                  Attribute('name'),
-                  Attribute('normalize_ballots', model=False),
-                  Attribute('perm_id', model=False),
-                  Attribute('rule_sets', model=False),
-                  Attribute('notes'),)
-    data_attrs = (Attribute('ballots', cls=JsonCaseBallot, model=False),
-                  Attribute('candidate_count', model=False))
+    meta_attrs = (Attribute('id'),
+                  Attribute('index', keyword='index'),
+                  Attribute('name', model=True),
+                  Attribute('normalize_ballots'),
+                  Attribute('rule_sets'),
+                  Attribute('notes', model=True), )
+    data_attrs = (Attribute('ballots', cls=JsonCaseBallot),
+                  Attribute('candidate_count'), )
 
     def repr_info(self):
-        return "index=%s perm_id=%s" % (self.index, self.perm_id)
+        return "index=%s id=%s" % (self.index, self.id)
 
     def save_from_model(self, contest):
         """
@@ -223,7 +223,8 @@ class JsonCaseTestInstance(JsonableMixin):
 
     """An RCV test case (input and expected output)."""
 
-    meta_attrs = (Attribute('index'), )
+    meta_attrs = (Attribute('index'),
+                  Attribute('rules'), )
     data_attrs = (Attribute('input', cls=JsonCaseContestInput),
                   Attribute('output', cls=JsonCaseTestOutput), )
 

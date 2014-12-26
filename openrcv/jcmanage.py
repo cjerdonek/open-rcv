@@ -34,7 +34,7 @@ from random import choice, random, sample
 
 from openrcv.formats import jscase
 from openrcv import jcmodels
-from openrcv.jcmodels import JsonCaseContestInput, JsonCaseTestsFile
+from openrcv.jcmodels import JsonCaseContestInput, JsonCaseTestInstance, JsonCaseTestsFile
 from openrcv import jsonlib, models
 from openrcv.models import ContestInput
 from openrcv import utils
@@ -63,16 +63,16 @@ Leo
 log = logging.getLogger(__name__)
 
 
-def generate_perm_id(perm_ids):
+def generate_id(ids):
     """
     Arguments:
-      perm_ids: a set of the current perm_id's.
+      ids: a set of the current IDs.
     """
     while True:
-        perm_id = "".join(choice(PERM_ID_CHARS) for i in range(8))
-        if perm_id not in perm_ids:
+        id_ = "".join(choice(PERM_ID_CHARS) for i in range(8))
+        if id_ not in ids:
             break
-    return perm_id
+    return id_
 
 
 # TODO: test this.
@@ -112,14 +112,14 @@ def _get_jc_contests_file(contests_path):
 
 
 def _get_jc_tests_file(tests_dir, rule_set):
-    test_case_path = os.path.join(tests_dir, "{0}.json".format(rule_set))
+    tests_path = os.path.join(tests_dir, "{0}.json".format(rule_set))
     try:
-        js_tests_file = jsonlib.read_json_path(test_case_path)
+        js_tests_file = jsonlib.read_json_path(tests_path)
     except FileNotFoundError:
         jc_tests_file = JsonCaseTestsFile()
     else:
         jc_tests_file = JsonCaseTestsFile.from_jsobj(js_tests_file)
-    return jc_tests_file
+    return tests_path, jc_tests_file
 
 
 # TODO: log normalization conversions (e.g. if they are unequal), and use
@@ -127,15 +127,15 @@ def _get_jc_tests_file(tests_dir, rule_set):
 def normalize_contests_file(contests_path):
     contests_file = _get_jc_contests_file(contests_path)
     jc_contests = contests_file.contests
-    perm_ids = set()
-    for perm_id in (c.perm_id.lower() for c in jc_contests if c.perm_id):
-        if perm_id in perm_ids:
-            raise Exception("duplicate perm_id: {0} (lower-cased)".format(perm_id))
-        perm_ids.add(perm_id)
+    ids = set()
+    for id_ in (c.id.lower() for c in jc_contests if c.id):
+        if id_ in ids:
+            raise Exception("duplicate id_: {0} (lower-cased)".format(id_))
+        ids.add(id_)
     for index, jc_contest in enumerate(jc_contests, start=1):
         jc_contest.index = index
-        if not jc_contest.perm_id:
-            jc_contest.perm_id = generate_perm_id(perm_ids)
+        if not jc_contest.id:
+            jc_contest.id = generate_id(ids)
         if jc_contest.normalize_ballots:
             contest = jc_contest.to_model()
             contest.ballots_resource.normalize()
@@ -146,17 +146,47 @@ def normalize_contests_file(contests_path):
     jsonlib.write_json(contests_file, path=contests_path)
 
 
-def update_tests_file(contests_file, tests_dir, rule_set):
-    tests_file = _get_jc_tests_file(tests_dir, rule_set)
+def update_tests_file(contests_file, contest_inputs, tests_dir, rule_set):
+    """
+    Arguments:
+      contests_file: a JsonCaseContestsFile object.
+      rule_set: the name of a rule set.
+      tests_dir: path to the tests directory.
+    """
+    tests_path, tests_file = _get_jc_tests_file(tests_dir, rule_set)
+
+    # Create a mapping from ID to list of JsonCaseTestInstance objects.
+    id_to_tests = {}
+    # Add the existing tests, while preserving their current order.
+    for test in tests_file.test_cases:
+        jc_contest = test.input
+        jc_contest_id = jc_contest.id
+        seq = id_to_tests.setdefault(jc_contest_id, [])
+        seq.append(test)
+    # Make sure all IDs occur in the mapping.
+    for jc_contest in contest_inputs:
+        jc_contest_id = jc_contest.id
+        try:
+            id_to_tests[jc_contest_id]
+        except KeyError:
+            test = JsonCaseTestInstance()
+            id_to_tests[jc_contest_id] = [test]
+
+    # Update the file before saving.
     tests_file.version = contests_file.version
     tests_file.rule_set = rule_set
-    # Create a mapping from perm_id to existing JsonCaseTestInstance objects.
-    existing_tests = {}
-    # TODO
-    for jc_contest in jc_contests:
-        for rule_set in jc_contest.rule_sets:
-            seq = rule_sets.setdefault(rule_set, [])
-            seq.append(jc_contest)
+    tests = []
+    index = 1
+    # Add the contests in the order they appear in the contests file.
+    for jc_contest in contests_file.contests:
+        jc_contest_id = jc_contest.id
+        for test in id_to_tests[jc_contest_id]:
+            test.index = index
+            test.input = jc_contest
+            tests.append(test)
+            index += 1
+    tests_file.test_cases = tests
+    jsonlib.write_json(tests_file, path=tests_path)
 
 
 def update_test_inputs(contests_path, tests_dir):
@@ -169,7 +199,8 @@ def update_test_inputs(contests_path, tests_dir):
             seq = rule_sets.setdefault(rule_set, [])
             seq.append(jc_contest)
     for rule_set in sorted(rule_sets.keys()):
-        update_tests_file(contests_file, tests_dir, rule_set)
+        contest_inputs = rule_sets[rule_set]
+        update_tests_file(contests_file, contest_inputs, tests_dir, rule_set)
 
 
 class BallotGenerator(object):

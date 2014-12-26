@@ -92,9 +92,11 @@ def clean_contest(contest):
 
 # TODO: log normalization conversions (e.g. if they are unequal), and use
 #   an equality check on the JSON object to know if there was a difference.
-def clean_contests(json_path):
-    jsobj = jsonlib.read_json_path(json_path)
+def normalize_contests_file(json_contests_path):
+    jsobj = jsonlib.read_json_path(json_contests_path)
     test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
+    print(repr(test_file))
+    exit()
     cleaned_contests = []
     for id_, jc_contest in enumerate(test_file.contests, start=1):
         contest = jc_contest.to_model()
@@ -103,7 +105,7 @@ def clean_contests(json_path):
         jc_contest = JsonCaseContestInput.from_model(contest)
         cleaned_contests.append(jc_contest)
     test_file.contests = cleaned_contests
-    jsonlib.write_json(test_file, path=json_path)
+    jsonlib.write_json(test_file, path=json_contests_path)
 
 
 class BallotGenerator(object):

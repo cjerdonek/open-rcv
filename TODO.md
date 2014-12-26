@@ -1,6 +1,7 @@
 TODO
 ====
 
+* Rename id to index.
 * Make `normalize_contests()` read the perm_id's in advance and then
   create new ones which are 8-character hex strings.
 * Get version detection going from molt.

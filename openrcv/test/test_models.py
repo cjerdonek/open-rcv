@@ -138,10 +138,9 @@ class ContestInputTest(UnitCase):
     def test_init__defaults(self):
         contest = ContestInput()
         self.assertEqual(contest.candidates, [])
-        self.assertEqual(contest.id, 0)
+        self.assertEqual(contest.id, None)
         self.assertEqual(contest.name, None)
         self.assertEqual(contest.notes, None)
-        self.assertEqual(contest.seat_count, 1)
 
         # Check default ballots resource.
         resource = contest.ballots_resource

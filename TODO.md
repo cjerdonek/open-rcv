@@ -1,15 +1,13 @@
 TODO
 ====
 
-* Get version detection going from molt.
-* Double-check usages of --json-contests.
-* Fix up remaining PyPI release instructions and commit.
 * Implement commands:
-  - updatetestinputs
   - updatetestoutputs
   - checktests
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)
+* Get version detection going from molt.
+* Fix up remaining PyPI release instructions and commit.
 
 
 Technical debt

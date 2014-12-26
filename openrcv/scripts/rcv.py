@@ -137,13 +137,13 @@ class CommandBase(object):
         self.formats = formats
 
     @property
-    def raw_desc(self):
-        # Default to the short help message.
-        return self.help
+    def help_details(self):
+        return ""
 
     @property
     def desc(self):
-        return fill(self.raw_desc)
+        details = fill(self.help_details)
+        return "{help}\n\n{details}".format(help=self.help, details=details)
 
     def add_arguments(self, parser):
         raise utils.NoImplementation(self)
@@ -231,9 +231,10 @@ class CountCommand(CommandBase):
 
     name = "count"
     help = "Tally one or more contests."
-    raw_desc = """\
-        Tally the contests specified by the contests file at INPUT_PATH.
-        """
+
+    help_details = """\
+    Tally the contests specified by the contests file at INPUT_PATH.
+    """
 
     def add_arguments(self, parser):
         parser.add_argument('input_path', metavar='INPUT_PATH',
@@ -248,13 +249,11 @@ class CountCommand(CommandBase):
 class RandContestCommand(CommandBase):
 
     name = "randcontest"
-    help = "Make a random contest."
+    help = "Create a random contest."
 
     @property
-    def raw_desc(self):
+    def help_details(self):
         return """\
-            Create a random contest.
-
             This command creates a contest with random ballot data and writes
             the contest to stdout in the format specified by {output_format}.
             If {output_dir} is provided, then the data is instead written to
@@ -316,9 +315,7 @@ class CleanContestsCommand(CommandBase):
     name = "cleancontests"
     help = "Clean and normalize a JSON contests file."
 
-    raw_desc = """\
-    Clean and normalize a JSON contests file.
-
+    help_details = """\
     Normalizations include updating the integer indices, setting the
     permanent IDs, and normalizing the ballots if needed.
     """
@@ -334,7 +331,7 @@ class CleanContestsCommand(CommandBase):
 class UpdateTestInputsCommand(CommandBase):
 
     name = "updatetestinputs"
-    help = "Update all test files from a JSON contests file."
+    help = "Update test files from a JSON contests file."
 
     def add_arguments(self, parser):
         self.add_json_location_required_with_tests_dir(parser)
@@ -344,10 +341,15 @@ class UpdateTestInputsCommand(CommandBase):
         return jcmanage.update_test_inputs(contests_path, tests_dir)
 
 
-class GenExpectedCommand(CommandBase):
+class UpdateTestOutputsCommand(CommandBase):
 
-    name = "genexpected"
-    help = "Generate JSON test expectations."
+    name = "updatetestoutputs"
+    help = "Update the test outputs in a tests directory."
+
+    help_details = """\
+    Normalizations include updating the integer indices, setting the
+    permanent IDs, and normalizing the ballots if needed.
+    """
 
     def add_arguments(self, parser):
         self.add_json_location_required(parser)
@@ -410,7 +412,7 @@ def create_argparser(prog="rcv"):
         RandContestCommand,
         CleanContestsCommand,
         UpdateTestInputsCommand,
-        GenExpectedCommand,
+        UpdateTestOutputsCommand,
     )
     builder.add_commands(group, classes)
 

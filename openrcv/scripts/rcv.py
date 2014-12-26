@@ -61,8 +61,7 @@ JsonLocationMetavar = collections.namedtuple('JsonLocationMetavar', ('contests_p
 # TODO: move this to a utility module?
 REPO_ROOT = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
 
-# TODO: rename this variable.
-RCV_TESTS_DIR = "submodules/open-rcv-tests/"
+TESTS_SUBMODULE_DIR = "submodules/open-rcv-tests/"
 DEFAULT_CONTESTS_JSON_PATH = "contests.json"
 DEFAULT_TESTS_DIR = "tests"
 
@@ -172,7 +171,8 @@ class CommandBase(object):
 
     def _default_contests_paths(self):
         """Return the default contests path."""
-        return self._make_path_relative(DEFAULT_CONTESTS_JSON_PATH)
+        contests_path = os.path.join(TESTS_SUBMODULE_DIR, DEFAULT_CONTESTS_JSON_PATH)
+        return self._make_path_relative(contests_path)
 
     def _default_tests_dir(self):
         """Return the default tests directory."""
@@ -311,13 +311,13 @@ class CleanContestsCommand(CommandBase):
     raw_desc = """\
     Clean and normalize a JSON contests file.
 
-    Normalizations include updating the integer contest IDs and
-    normalizing any ballot data that needs it.
+    Normalizations include updating the integer indices, setting the
+    permanent IDs, and normalizing the ballots if needed.
     """
 
     def func(self, ns, stdout):
-        json_path = ns.json_contests_path
-        return jcmanage.normalize_contests_file(json_path)
+        json_contests_path = ns.json_location
+        return jcmanage.normalize_contests_file(json_contests_path)
 
     def add_arguments(self, parser):
         self.add_json_location_required(parser)

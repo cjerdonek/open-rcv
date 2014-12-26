@@ -116,11 +116,11 @@ class JsonCaseContestInput(JsonableMixin):
       candidate_count: integer number of candidates.
     """
 
-    meta_attrs = (Attribute('id', keyword='id_'),
+    meta_attrs = (Attribute('index', keyword='index', model=False),
                   Attribute('name'),
-                  Attribute('normalize_ballots'),
+                  Attribute('normalize_ballots', model=False),
                   Attribute('perm_id', model=False),
-                  Attribute('rule_sets'),
+                  Attribute('rule_sets', model=False),
                   Attribute('notes'),)
     data_attrs = (Attribute('ballots', cls=JsonCaseBallot, model=False),
                   Attribute('candidate_count', model=False))

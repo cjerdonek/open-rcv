@@ -29,7 +29,7 @@ in the open-rcv-tests repo.
 from contextlib import contextmanager
 import datetime
 import logging
-from random import random, sample
+from random import choice, random, sample
 
 from openrcv.formats import jscase
 from openrcv import jcmodels
@@ -38,6 +38,8 @@ from openrcv import jsonlib, models
 from openrcv.models import ContestInput
 from openrcv import utils
 
+
+PERM_ID_CHARS = "0123456789abcdef"
 
 STOP_CHOICE = object()
 
@@ -58,6 +60,18 @@ Leo
 
 
 log = logging.getLogger(__name__)
+
+
+def generate_perm_id(perm_ids):
+    """
+    Arguments:
+      perm_ids: a set of the current perm_id's.
+    """
+    while True:
+        perm_id = "".join(choice(PERM_ID_CHARS) for i in range(8))
+        if perm_id not in perm_ids:
+            break
+    return perm_id
 
 
 # TODO: test this.
@@ -95,16 +109,19 @@ def clean_contest(contest):
 def normalize_contests_file(json_contests_path):
     jsobj = jsonlib.read_json_path(json_contests_path)
     test_file = jcmodels.JsonCaseContestsFile.from_jsobj(jsobj)
-    print(repr(test_file))
-    exit()
-    cleaned_contests = []
-    for id_, jc_contest in enumerate(test_file.contests, start=1):
-        contest = jc_contest.to_model()
-        contest.id = id_
-        clean_contest(contest)
-        jc_contest = JsonCaseContestInput.from_model(contest)
-        cleaned_contests.append(jc_contest)
-    test_file.contests = cleaned_contests
+    jc_contests = test_file.contests
+    perm_ids = set((c.perm_id for c in jc_contests if c.perm_id))
+    for index, jc_contest in enumerate(jc_contests, start=1):
+        jc_contest.index = index
+        if not jc_contest.perm_id:
+            jc_contest.perm_id = generate_perm_id(perm_ids)
+        if jc_contest.normalize_ballots:
+            contest = jc_contest.to_model()
+            contest.ballots_resource.normalize()
+            normalized = JsonCaseContestInput.from_model(contest)
+            jc_contest.ballots = normalized.ballots
+        if not jc_contest.rule_sets:
+            jc_contest.rule_sets = []
     jsonlib.write_json(test_file, path=json_contests_path)
 
 

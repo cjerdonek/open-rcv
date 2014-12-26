@@ -145,7 +145,7 @@ class JsonCaseContestInputTest(UnitCase):
         """Return a test contest."""
         if ballots is None:
             ballots = self.make_ballots()
-        contest = JsonCaseContestInput(candidate_count=2, ballots=ballots, id_=3, notes="foo")
+        contest = JsonCaseContestInput(candidate_count=2, ballots=ballots, notes="foo")
         return contest
 
     def test_init(self):
@@ -155,7 +155,6 @@ class JsonCaseContestInputTest(UnitCase):
         cases = [
             ("candidate_count", 2),
             ("ballots", ballots),
-            ("id", 3),
             ("notes", "foo"),
         ]
         for attr, expected in cases:
@@ -168,7 +167,6 @@ class JsonCaseContestInputTest(UnitCase):
         cases = [
             ("candidate_count", None),
             ("ballots", None),
-            ("id", None),
             ("notes", None),
         ]
         # TODO: make a assertAttrsEqual method.
@@ -178,24 +176,23 @@ class JsonCaseContestInputTest(UnitCase):
                 self.assertEqual(actual, expected)
 
     def test_from_model(self):
-        contest = ContestInput(id_=2)
+        contest = ContestInput()
         contest.candidates = ['Ann', 'Bob']
         ballots = [(2, (3, 1))]
         contest.ballots_resource = ListResource(ballots)
         jc_contest = JsonCaseContestInput.from_model(contest)
 
-        expected = JsonCaseContestInput(id_=2, candidate_count=2)
+        expected = JsonCaseContestInput(candidate_count=2)
         expected.ballots = [JsonCaseBallot(weight=2, choices=(3, 1))]
         jc_contest.assert_equal(expected)
 
     def test_to_model(self):
         cls = self.cls
         ballots = make_jc_ballots([(3, (2, 1))])
-        jc_contest = cls(id_=2, name="My Name", notes="Notes...", candidate_count=3,
+        jc_contest = cls(name="My Name", notes="Notes...", candidate_count=3,
                          ballots=ballots, normalize_ballots=False)
         contest = jc_contest.to_model()
         expected_attrs = [
-            ("id", 2),
             ("name", "My Name"),
             ("notes", "Notes..."),
         ]
@@ -213,8 +210,8 @@ class JsonCaseContestInputTest(UnitCase):
         jc_ballots = [
             JsonCaseBallot(choices=(1, 2), weight=3),
         ]
-        jc_contest = JsonCaseContestInput(id_=2, ballots=jc_ballots)
-        expected = {'_meta': {'id': 2}, 'ballots': ['3 1 2']}
+        jc_contest = JsonCaseContestInput(index=2, ballots=jc_ballots)
+        expected = {'_meta': {'index': 2}, 'ballots': ['3 1 2']}
         self.assertEqual(jc_contest.to_jsobj(), expected)
 
 

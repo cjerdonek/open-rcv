@@ -138,7 +138,6 @@ class ContestInputTest(UnitCase):
     def test_init__defaults(self):
         contest = ContestInput()
         self.assertEqual(contest.candidates, [])
-        self.assertEqual(contest.id, None)
         self.assertEqual(contest.name, None)
         self.assertEqual(contest.notes, None)
 

@@ -2,8 +2,9 @@ TODO
 ====
 
 * Implement commands:
-  - updatetestoutputs
+  - updateoutputs
   - checktests
+* Move changelog to rst (following argparse2).
 * Get unit tests checking JSON test cases (after normalizing and generating
   files)
 * Get version detection going from molt.

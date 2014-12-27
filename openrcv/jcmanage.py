@@ -205,10 +205,10 @@ def update_test_inputs(contests_path, tests_dir):
 def count_test_case(test):
     """Count a test case, and return a JsonCaseTestOutput object."""
     jc_contest = test.input
-    # TODO
-    candidates = contest.get_candidate_numbers()
-    ballot_stream = JsonBallot.to_ballot_stream(contest.ballots)
-    contest_results = count_irv_contest(ballot_stream, candidates)
+    contest = jc_contest.to_model()
+    contest_results = counting.count_irv_contest(contest)
+    print(contest_results.to_json())
+    exit()
 
     # Add results to output.
     output_rounds = test_case.output.rounds

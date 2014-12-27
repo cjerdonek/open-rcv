@@ -51,15 +51,16 @@ def any_value(dict_):
         raise ValueError("dict has no values")
 
 
-def count_internal_ballots(ballot_stream, candidates):
+# TODO: remove this function.
+def count_internal_ballots(ballots_resource, candidate_numbers):
     """Count one round, and return a RoundResults object.
 
     Arguments:
-      ballot_stream: a StreamInfo object for an internal ballot file.
+      ballots_resource: a BallotsResource object.
       candidates: iterable of candidates eligible to receive votes.
     """
-    parser = InternalBallotsCounter(candidates)
-    round_results = parser.parse(ballot_stream)
+    parser = InternalBallotsCounter(candidate_numbers)
+    round_results = parser.parse(ballots_resource)
     return round_results
 
 
@@ -109,10 +110,11 @@ def count_irv_contest(contest):
     """
     # TODO: handle case of 0 total (no winner, probably)?  And add a test case.
     # TODO: add tests for degenerate cases (0 candidates, 1 candidate, 0 votes, etc).
-    candidates = set(candidates)
+    candidate_numbers = set(contest.get_candidate_numbers())
+    tabulator = Tabulator(contest.ballots_resource)
     rounds = []
     while True:
-        round_results = count_internal_ballots(ballot_stream, candidates)
+        round_results = tabulator.count(candidate_numbers)
         rounds.append(round_results)
         totals = round_results.totals
         winner = get_winner(totals)
@@ -125,7 +127,7 @@ def count_irv_contest(contest):
             raise NotImplementedError("tie for last place occurred in round %d: %r" %
                                       (round_number, eliminated))
 
-        candidates -= eliminated
+        candidate_numbers -= eliminated
 
     results = ContestResults(rounds)
     return results
@@ -157,58 +159,27 @@ def count_irv(blt_path, temp_dir=None):
     return results
 
 
-# TODO: this class should take the "count" function as an argument.
-class InternalBallotsCounter(Parser):
+class Tabulator(object):
 
-    # TODO: document how to include undervotes.
-    """Parses an internal ballots file.
+    def __init__(self, ballots_resource):
+        self.ballots_resource = ballots_resource
 
-    The file format is as follows:
+    def count(self, candidate_numbers):
+        """Count one round, and return a RoundResults object.
 
-    Each line is a space-delimited string of integers.  The first integer
-    is the weight of the ballot, which is 1 for a single voter.  The
-    remaining numbers are the candidates in the order in which they
-    were ranked.
-
-    A sample file:
-
-    2 2
-    1 2 4 3 1
-    2 1 3 4
-    3 1
-    """
-
-    name = "internal ballots"
-
-    def __init__(self, candidates):
-        """
         Arguments:
-          candidates: iterable of candidate numbers.
+          candidate_numbers: a set of candidates eligible to receive votes.
         """
-        self.candidates = candidates
-
-    def get_parse_return_value(self):
-        totals = RoundResults(self.candidate_totals)
-        return totals
-
-    def count_ballot(self, weight, choices):
-        raise NotImplementedError()
-
-    def parse_lines(self, lines):
-        candidates = self.candidates
         totals = {}
-        for candidate in candidates:
-            totals[candidate] = 0
+        for candidate_number in candidate_numbers:
+            totals[candidate_number] = 0
 
-        candidate_set = set(candidates)
-        for line in lines:
-            ints = parse_integer_line(line)
-            weight = next(ints)
-            # TODO: use parse_internal_ballot()
-            # TODO: replace with call to self.count_ballot().
-            for i in ints:
-                if i in candidate_set:
-                    totals[i] += weight
-                    break
+        with self.ballots_resource.reading() as ballots:
+            for weight, choices in ballots:
+                # TODO: replace with call to self.count_ballot().
+                for choice in choices:
+                    if choice in candidate_numbers:
+                        totals[choice] += weight
+                        break
 
-        self.candidate_totals = totals
+        return RoundResults(totals)

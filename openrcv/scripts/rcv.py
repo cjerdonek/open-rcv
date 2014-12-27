@@ -79,6 +79,11 @@ OUTPUT_FORMAT_TEST = 'jscase'
 OUTPUT_FORMAT_DEFAULT = OUTPUT_FORMAT_BLT
 
 
+HELP_DEFAULT_JSON_LOCATION = """\
+Using the default requires running this command from a source checkout with
+the `open-rcv-tests` submodule checked out.
+"""
+
 HELP_DEFAULT_CONTESTS_PATH = """\
 The JSON contests file defaults to the path "{path}" inside the submodule.
 """.format(path=DEFAULT_CONTESTS_JSON_PATH)
@@ -86,11 +91,6 @@ The JSON contests file defaults to the path "{path}" inside the submodule.
 HELP_DEFAULT_TESTS_DIR = """\
 The tests directory defaults to the path "{path}" inside the submodule.
 """.format(path=DEFAULT_TESTS_DIR)
-
-HELP_DEFAULT_JSON_LOCATION = """\
-Using the default requires running this command from a source checkout with
-the `open-rcv-tests` submodule checked out.
-"""
 
 
 # TODO: use this function throughout this module.
@@ -126,27 +126,6 @@ def main():
     parser = create_argparser()
     _main(parser)
 
-
-class ArgBuilder(object):
-
-    def __init__(self, formats):
-        self.formats = formats
-
-    def add_command(self, group, command_class):
-        """Add the command to a sub-command group."""
-        command = command_class(self.formats)
-        parser = group.add_parser(command.name, help=command.help, description=command.desc,
-                                  add_help=False)
-        command.add_arguments(parser)
-        # The RawDescriptionHelpFormatter preserves line breaks in the
-        # description and epilog strings.
-        parser.formatter_class = RawDescriptionHelpFormatter
-        parser.set_defaults(run_command=command.func)
-        add_help(parser)
-
-    def add_commands(self, group, cmd_classes):
-        for cls in cmd_classes:
-            self.add_command(group, cls)
 
 # TODO: unit-test print_help().
 def create_argparser(prog="rcv"):
@@ -186,6 +165,28 @@ def create_argparser(prog="rcv"):
     builder.add_commands(group, classes)
 
     return parser
+
+
+class ArgBuilder(object):
+
+    def __init__(self, formats):
+        self.formats = formats
+
+    def add_command(self, group, command_class):
+        """Add the command to a sub-command group."""
+        command = command_class(self.formats)
+        parser = group.add_parser(command.name, help=command.help, description=command.desc,
+                                  add_help=False)
+        command.add_arguments(parser)
+        # The RawDescriptionHelpFormatter preserves line breaks in the
+        # description and epilog strings.
+        parser.formatter_class = RawDescriptionHelpFormatter
+        parser.set_defaults(run_command=command.func)
+        add_help(parser)
+
+    def add_commands(self, group, cmd_classes):
+        for cls in cmd_classes:
+            self.add_command(group, cls)
 
 
 # TODO: move this to openrcv.formats.common.
@@ -299,17 +300,29 @@ class CommandBase(object):
         default_path = self._default_contests_paths()
         self._add_argument_json_location(parser, help, nargs='?', const=default_path)
 
-    def add_json_location_required(self, parser):
+    def add_required_contests_path(self, parser):
         """Add a contests path argument where the path is required."""
         help = """\
         specify a custom JSON contests file.  If the option is not provided,
         the default location is used.  {0}{1}
         """.format(HELP_DEFAULT_JSON_LOCATION,
                    HELP_DEFAULT_CONTESTS_PATH)
-        default_path = self._default_contests_paths()
-        self._add_argument_json_location(parser, help, default=default_path)
+        default_contests_path = self._default_contests_paths()
+        self._add_argument_json_location(parser, help, default=default_contests_path)
 
-    def add_json_location_required_with_tests_dir(self, parser):
+    def add_required_tests_dir(self, parser):
+        """Add a contests path argument where the path is required."""
+        help = """\
+        specify a custom JSON tests directory.  If the option is not provided,
+        the default location is used.  {0}{1}
+        """.format(HELP_DEFAULT_JSON_LOCATION,
+                   HELP_DEFAULT_TESTS_DIR)
+        default_tests_dir = self._default_tests_dir()
+        self._add_argument_json_location(parser, help,
+                                         metavar=OPTION_JSON_LOCATION.metavar.tests_dir,
+                                         default=default_tests_dir)
+
+    def add_required_contests_path_and_tests_dir(self, parser):
         """Add an argument for the contests path and tests directory."""
         help = """\
         specify a custom JSON contests file and tests directory.  If the option
@@ -409,6 +422,7 @@ class RandContestCommand(CommandBase):
 class CleanContestsCommand(CommandBase):
 
     name = "cleancontests"
+
     help = "Clean and normalize a JSON contests file."
 
     help_details = """\
@@ -417,7 +431,7 @@ class CleanContestsCommand(CommandBase):
     """
 
     def add_arguments(self, parser):
-        self.add_json_location_required(parser)
+        self.add_required_contests_path(parser)
 
     def func(self, ns, stdout):
         contests_path = ns.json_location
@@ -427,10 +441,11 @@ class CleanContestsCommand(CommandBase):
 class UpdateTestInputsCommand(CommandBase):
 
     name = "updatetestinputs"
+
     help = "Update test files from a JSON contests file."
 
     def add_arguments(self, parser):
-        self.add_json_location_required_with_tests_dir(parser)
+        self.add_required_contests_path_and_tests_dir(parser)
 
     def func(self, ns, stdout):
         contests_path, tests_dir = ns.json_location
@@ -439,16 +454,12 @@ class UpdateTestInputsCommand(CommandBase):
 
 class UpdateTestOutputsCommand(CommandBase):
 
-    name = "updatetestoutputs"
+    name = "updateoutputs"
+
     help = "Update the test outputs in a tests directory."
 
-    help_details = """\
-    Normalizations include updating the integer indices, setting the
-    permanent IDs, and normalizing the ballots if needed.
-    """
-
     def add_arguments(self, parser):
-        self.add_json_location_required(parser)
+        self.add_required_tests_dir(parser)
 
     def func(self):
         return commands.normalize_contests_file

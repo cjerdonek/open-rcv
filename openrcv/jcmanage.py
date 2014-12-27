@@ -29,15 +29,14 @@ in the open-rcv-tests repo.
 from contextlib import contextmanager
 import datetime
 import logging
+import os
 import os.path
 from random import choice, random, sample
 
+from openrcv import counting, jcmodels, jsonlib, models, utils
 from openrcv.formats import jscase
-from openrcv import jcmodels
 from openrcv.jcmodels import JsonCaseContestInput, JsonCaseTestInstance, JsonCaseTestsFile
-from openrcv import jsonlib, models
 from openrcv.models import ContestInput
-from openrcv import utils
 
 
 PERM_ID_CHARS = "0123456789abcdef"
@@ -203,6 +202,36 @@ def update_test_inputs(contests_path, tests_dir):
         update_tests_file(contests_file, contest_inputs, tests_dir, rule_set)
 
 
+def count_test_case(test):
+    """Count a test case, and return a JsonCaseTestOutput object."""
+    jc_contest = test.input
+    # TODO
+    candidates = contest.get_candidate_numbers()
+    ballot_stream = JsonBallot.to_ballot_stream(contest.ballots)
+    contest_results = count_irv_contest(ballot_stream, candidates)
+
+    # Add results to output.
+    output_rounds = test_case.output.rounds
+    for round_results in contest_results.rounds:
+        json_round = JsonRoundResults()
+        json_round.totals = round_results.totals
+        output_rounds.append(json_round)
+    print(repr(jc_contest))
+
+
+def update_test_outputs_file(file_path):
+    js_tests_file = jsonlib.read_json_path(file_path)
+    jc_tests_file = JsonCaseTestsFile.from_jsobj(js_tests_file)
+    for test in jc_tests_file.test_cases:
+        count_test_case(test)
+
+
+def update_test_outputs(tests_dir):
+    for file_name in os.listdir(tests_dir):
+        file_path = os.path.join(tests_dir, file_name)
+        update_test_outputs_file(file_path)
+
+
 class BallotGenerator(object):
 
     """Generates random ballots (allowing duplicates)."""
@@ -313,39 +342,3 @@ class ContestCreator(object):
         contest = ContestInput(name=name, notes=notes, candidates=candidates,
                                ballots_resource=ballots_resource)
         return contest
-
-
-def count_contest_file(argv):
-    rule_set = "san_francisco_irv"
-    jsobj = read_json_path(TEST_INPUT_PATH)
-    contest_file = JsonContestFile.from_jsobj(jsobj)
-
-    results = JsonCaseTestsFile()
-    results.version = contest_file.version
-    results.rule_set = rule_set
-    test_cases = []
-    results.test_cases = test_cases
-
-    for id_, contest in enumerate(contest_file.contests, start=1):
-        test_case = JsonTestCase()
-        test_case.id = id_
-        test_case.contest_id = contest.id
-        test_case.input.contest = contest
-
-        # Tabulate results.
-        candidates = contest.get_candidate_numbers()
-        ballot_stream = JsonBallot.to_ballot_stream(contest.ballots)
-        contest_results = count_irv_contest(ballot_stream, candidates)
-
-        # Add results to output.
-        output_rounds = test_case.output.rounds
-        for round_results in contest_results.rounds:
-            json_round = JsonRoundResults()
-            json_round.totals = round_results.totals
-            output_rounds.append(json_round)
-
-        test_cases.append(test_case)
-
-    print(results.to_json())
-    path = os.path.join(TEST_CASE_DIR, "%s.json" % rule_set)
-    write_json(results, path=path)

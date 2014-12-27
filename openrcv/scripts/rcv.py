@@ -440,9 +440,9 @@ class CleanContestsCommand(CommandBase):
 
 class UpdateTestInputsCommand(CommandBase):
 
-    name = "updatetestinputs"
+    name = "updateinputs"
 
-    help = "Update test files from a JSON contests file."
+    help = "Update the test inputs in a tests directory."
 
     def add_arguments(self, parser):
         self.add_required_contests_path_and_tests_dir(parser)
@@ -461,5 +461,6 @@ class UpdateTestOutputsCommand(CommandBase):
     def add_arguments(self, parser):
         self.add_required_tests_dir(parser)
 
-    def func(self):
-        return commands.normalize_contests_file
+    def func(self, ns, stdout):
+        tests_dir = ns.json_location
+        return jcmanage.update_test_outputs(tests_dir)

@@ -44,21 +44,6 @@ PERM_ID_CHARS = "0123456789abcdef"
 
 STOP_CHOICE = object()
 
-CANDIDATE_NAMES = """\
-Ann
-Bob
-Carol
-Dave
-Ellen
-Fred
-Gwen
-Hank
-Irene
-Joe
-Katy
-Leo
-""".split()
-
 
 log = logging.getLogger(__name__)
 
@@ -73,16 +58,6 @@ def generate_id(ids):
         if id_ not in ids:
             break
     return id_
-
-
-# TODO: test this.
-def make_standard_candidate_names(count, names=None):
-    if names is None:
-        names = CANDIDATE_NAMES
-    names = CANDIDATE_NAMES[:count]
-    for n in range(len(names) + 1, count + 1):
-        names.append("Candidate %d" % n)
-    return names
 
 
 def add_contest_to_contests_file(contest, contests_path):
@@ -330,7 +305,7 @@ class ContestCreator(object):
         if ballot_count is None:
             ballot_count = 20
 
-        candidates = make_standard_candidate_names(candidate_count)
+        candidates = models.make_standard_candidate_names(candidate_count)
 
         choices = range(1, candidate_count + 1)
         chooser = BallotGenerator(choices=choices)

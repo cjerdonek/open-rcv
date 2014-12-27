@@ -1,6 +1,7 @@
 TODO
 ====
 
+* Unit-test models.make_standard_candidate_names().
 * Implement commands:
   - updateoutputs
   - checktests

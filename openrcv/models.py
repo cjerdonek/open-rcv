@@ -34,10 +34,25 @@ from contextlib import contextmanager
 import logging
 import tempfile
 
-# It is deliberate that this module does not depend on any modules
-# in openrcv.formats.
+# The current module should not depend on any modules in openrcv.formats.
 from openrcv import streams, utils
 from openrcv.utils import ReprMixin
+
+
+CANDIDATE_NAMES = """\
+Ann
+Bob
+Carol
+Dave
+Ellen
+Fred
+Gwen
+Hank
+Irene
+Joe
+Katy
+Leo
+""".split()
 
 
 log = logging.getLogger(__name__)
@@ -46,6 +61,14 @@ log = logging.getLogger(__name__)
 def make_candidate_numbers(candidate_count):
     """Return an iterable of candidate numbers."""
     return range(1, candidate_count + 1)
+
+
+# TODO: test this.
+def make_standard_candidate_names(count):
+    names = CANDIDATE_NAMES[:count]
+    for n in range(len(names) + 1, count + 1):
+        names.append("Candidate %d" % n)
+    return names
 
 
 # TODO: allow ordering and compressing to be done separately.
@@ -154,23 +177,23 @@ class ContestInput(ReprMixin):
 
 class ContestOutcome(object):
 
-    def __init__(self, last_round=None, winners=None, tied_last_place=None,
-                 completed=None):
-        self.completed = completed
-        self.last_round = last_round
-        self.tied_last_place = tied_last_place
-        self.winners = winners
+    def __init__(self, interrupted=None):
+        self.interrupted = interrupted
 
 
 class RoundResults(object):
 
     """Represents contest results."""
 
-    def __init__(self, totals):
+    def __init__(self, elected=None, eliminated=None, tied_last_place=None,
+                 totals=None, ):
         """
         Arguments:
           totals: dict of candidate number to vote total.
         """
+        self.elected = elected
+        self.eliminated = eliminated
+        self.tied_last_place = tied_last_place
         self.totals = totals
 
 

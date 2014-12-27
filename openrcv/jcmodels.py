@@ -46,9 +46,7 @@ all at once.
 from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin,
                              JsonDeserializeError)
-from openrcv import models
-from openrcv.models import make_candidate_numbers, RoundResults
-from openrcv import streams
+from openrcv import models, streams
 from openrcv.utils import StringInfo
 
 
@@ -128,6 +126,10 @@ class JsonCaseContestInput(JsonableMixin):
     def repr_info(self):
         return "index=%s id=%s" % (self.index, self.id)
 
+    def make_candidate_names(self):
+        # TODO: use self.candidate_count
+        pass
+
     def save_from_model(self, contest):
         """
         Arguments:
@@ -144,7 +146,7 @@ class JsonCaseContestInput(JsonableMixin):
     # be handled, since it involves managing another resource.
     def to_model(self):
         """Return a ContestInput object."""
-        candidates = make_candidate_numbers(self.candidate_count)
+        candidates = self.make_candidate_names()
         ballots = [b.to_model() for b in self.ballots]
         # We use a list resource as the backing store for now because the
         # number of ballots is small.

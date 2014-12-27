@@ -20,10 +20,7 @@
 # DEALINGS IN THE SOFTWARE.
 #
 
-"""
-Support for counting ballots.
-
-"""
+"""Support for counting ballots."""
 
 import logging
 import os
@@ -55,13 +52,11 @@ def any_value(dict_):
 
 
 def count_internal_ballots(ballot_stream, candidates):
-    """
-    Count one round, and return a RoundResults object.
+    """Count one round, and return a RoundResults object.
 
     Arguments:
       ballot_stream: a StreamInfo object for an internal ballot file.
       candidates: iterable of candidates eligible to receive votes.
-
     """
     parser = InternalBallotsCounter(candidates)
     round_results = parser.parse(ballot_stream)
@@ -72,18 +67,15 @@ def get_majority(total):
     """Return the majority threshold for a single-winner election.
 
     Note that this returns 1 for a 0 total.
-
     """
     return total // 2 + 1
 
 
 def get_winner(totals):
-    """
-    Return the candidate with a majority, or None.
+    """Return the candidate with a majority, or None.
 
     Arguments:
       totals: dict of candidate to vote total.
-
     """
     total = sum(totals.values())
     threshold = get_majority(total)
@@ -94,11 +86,9 @@ def get_winner(totals):
 
 
 def get_lowest(totals):
-    """
-    Return which candidate to eliminate.
+    """Return which candidate to eliminate.
 
     Raises a NotImplementedError if there is a tie.
-
     """
     lowest_total = any_value(totals)
     lowest_candidates = set()
@@ -111,14 +101,11 @@ def get_lowest(totals):
     return lowest_candidates
 
 
-def count_irv_contest(ballot_stream, candidates):
-    """
-    Tabulate a contest using IRV, and return a ContestResults object.
+def count_irv_contest(contest):
+    """Tabulate a contest using IRV, and return a ContestResults object.
 
     Arguments:
-      ballot_stream: a StreamInfo object for an internal ballot file.
-      candidates: an iterable of candidates eligible to receive votes.
-
+      contest: a ContestInput object.
     """
     # TODO: handle case of 0 total (no winner, probably)?  And add a test case.
     # TODO: add tests for degenerate cases (0 candidates, 1 candidate, 0 votes, etc).
@@ -174,8 +161,7 @@ def count_irv(blt_path, temp_dir=None):
 class InternalBallotsCounter(Parser):
 
     # TODO: document how to include undervotes.
-    """
-    Parses an internal ballots file.
+    """Parses an internal ballots file.
 
     The file format is as follows:
 
@@ -190,7 +176,6 @@ class InternalBallotsCounter(Parser):
     1 2 4 3 1
     2 1 3 4
     3 1
-
     """
 
     name = "internal ballots"
@@ -199,7 +184,6 @@ class InternalBallotsCounter(Parser):
         """
         Arguments:
           candidates: iterable of candidate numbers.
-
         """
         self.candidates = candidates
 

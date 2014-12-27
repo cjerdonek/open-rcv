@@ -6,7 +6,8 @@ OpenRCV
 [![Read the Docs Status](https://readthedocs.org/projects/openrcv/badge/?version=latest)](http://docs.openrcv.org)
 
 OpenRCV is an open source software project for tallying ranked-choice
-voting elections like instant runoff voting and the single transferable vote.
+voting elections like [instant runoff voting][IRV] and the
+[single transferable vote][STV].
 
 OpenRCV supports auditing, reporting, and converting files.  It can be used
 as either a command-line tool or as a Python library.
@@ -112,9 +113,11 @@ Chris Jerdonek (<chris.jerdonek@gmail.com>)
 
 
 [doc-develop]: docs/develop.md
+[IRV]: http://en.wikipedia.org/wiki/Instant-runoff_voting
 [openrcv_docs]: http://openrcv.readthedocs.org/
 [openrcv_github]: https://github.com/cjerdonek/open-rcv
 [openrcv_issues]: https://github.com/cjerdonek/open-rcv/issues
 [openrcv_pypi]: https://pypi.python.org/pypi/OpenRCV
 [open-rcv-tests]: https://github.com/cjerdonek/open-rcv-tests
 [python-download]: https://www.python.org/downloads/
+[STV]: http://en.wikipedia.org/wiki/Single_transferable_vote

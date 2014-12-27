@@ -185,14 +185,11 @@ class JsonCaseContestsFile(JsonableMixin):
         return "version=%s contests=%d" % (self.version, len(self.contests))
 
 
-class JsonRoundResults(RoundResults, JsonableMixin):
+class JsonRoundResults(JsonableMixin):
 
     """Represents the results of a round for testing purposes."""
 
     data_attrs = (Attribute('totals'), )
-
-    def __init__(self, totals=None):
-        self.totals = totals
 
 
 class JsonCaseTestOutput(JsonableMixin):
@@ -206,17 +203,8 @@ class JsonCaseTestOutput(JsonableMixin):
         Arguments:
           results: a ContestResults object.
         """
-        json_rounds = []
-        for round_results in results.rounds:
-            json_round = JsonRoundResults()
-            json_round.totals = round_results.totals
-            json_rounds.append(json_round)
+        json_rounds = [JsonRoundResults(totals=r.totals) for r in results.rounds]
         return JsonCaseTestOutput(rounds=json_rounds)
-
-    def __init__(self, rounds=None):
-        if rounds is None:
-            rounds = []
-        self.rounds = rounds
 
 
 class JsonCaseTestInstance(JsonableMixin):

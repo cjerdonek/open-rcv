@@ -35,7 +35,8 @@ from random import choice, random, sample
 
 from openrcv import counting, jcmodels, jsonlib, models, utils
 from openrcv.formats import jscase
-from openrcv.jcmodels import JsonCaseContestInput, JsonCaseTestInstance, JsonCaseTestsFile
+from openrcv.jcmodels import (JsonCaseContestInput, JsonCaseTestInstance,
+                              JsonCaseTestOutput, JsonCaseTestsFile)
 from openrcv.models import ContestInput
 
 
@@ -203,27 +204,25 @@ def update_test_inputs(contests_path, tests_dir):
 
 
 def count_test_case(test):
-    """Count a test case, and return a JsonCaseTestOutput object."""
+    """Count a test case, and return a JsonCaseTestOutput object.
+
+    Arguments:
+      test: a JsonCaseTestInstance object.
+    """
     jc_contest = test.input
     contest = jc_contest.to_model()
     contest_results = counting.count_irv_contest(contest)
-    print(contest_results.to_json())
-    exit()
-
-    # Add results to output.
-    output_rounds = test_case.output.rounds
-    for round_results in contest_results.rounds:
-        json_round = JsonRoundResults()
-        json_round.totals = round_results.totals
-        output_rounds.append(json_round)
-    print(repr(jc_contest))
+    jc_output = JsonCaseTestOutput.from_contest_results(contest_results)
+    return jc_output
 
 
 def update_test_outputs_file(file_path):
     js_tests_file = jsonlib.read_json_path(file_path)
     jc_tests_file = JsonCaseTestsFile.from_jsobj(js_tests_file)
     for test in jc_tests_file.test_cases:
-        count_test_case(test)
+        jc_output = count_test_case(test)
+        test.output = jc_output
+    jsonlib.write_json(jc_tests_file, path=file_path)
 
 
 def update_test_outputs(tests_dir):

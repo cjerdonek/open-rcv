@@ -152,6 +152,16 @@ class ContestInput(ReprMixin):
         return (self.normalize_ballots is None) or self.normalize_ballots
 
 
+class ContestOutcome(object):
+
+    def __init__(self, last_round=None, winners=None, tied_last_place=None,
+                 completed=None):
+        self.completed = completed
+        self.last_round = last_round
+        self.tied_last_place = tied_last_place
+        self.winners = winners
+
+
 class RoundResults(object):
 
     """Represents contest results."""
@@ -168,7 +178,8 @@ class ContestResults(ReprMixin):
 
     """Represents contest results."""
 
-    def __init__(self, rounds=None):
+    def __init__(self, outcome=None, rounds=None):
+        self.outcome = outcome
         self.rounds = rounds
 
     def repr_info(self):

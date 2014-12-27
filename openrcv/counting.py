@@ -33,11 +33,10 @@ import string
 # and not depend on serialization, etc.  Serialization is supplemental
 # to any counting and not a prerequisite.
 
+from openrcv import models
 from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
 from openrcv.models import ContestResults, RoundResults
 from openrcv.parsing import BLTParser, Parser
-from openrcv import utils
-from openrcv.utils import parse_integer_line, PathInfo, ENCODING_INTERNAL_BALLOTS
 
 
 log = logging.getLogger(__name__)
@@ -112,6 +111,8 @@ def count_irv_contest(contest):
     # TODO: add tests for degenerate cases (0 candidates, 1 candidate, 0 votes, etc).
     candidate_numbers = set(contest.get_candidate_numbers())
     tabulator = Tabulator(contest.ballots_resource)
+
+    outcome = models.ContestOutcome()
     rounds = []
     while True:
         round_results = tabulator.count(candidate_numbers)
@@ -120,16 +121,16 @@ def count_irv_contest(contest):
         winner = get_winner(totals)
         if winner is not None:
             break
-        eliminated = get_lowest(totals)
-        if len(eliminated) > 1:
-            # Then there is a tie for last place.
-            round_number = len(rounds)
-            raise NotImplementedError("tie for last place occurred in round %d: %r" %
-                                      (round_number, eliminated))
+        last_place = get_lowest(totals)
+        if len(last_place) > 1:
+            # Then there is a tie.
+            outcome.tied_last_place = last_place
+            break
 
-        candidate_numbers -= eliminated
+        candidate_numbers -= last_place
 
-    results = ContestResults(rounds)
+    outcome.last_round = len(rounds)
+    results = ContestResults(outcome=outcome, rounds=rounds)
     return results
 
 

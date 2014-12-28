@@ -39,36 +39,12 @@ from openrcv import streams, utils
 from openrcv.utils import ReprMixin
 
 
-CANDIDATE_NAMES = """\
-Ann
-Bob
-Carol
-Dave
-Ellen
-Fred
-Gwen
-Hank
-Irene
-Joe
-Katy
-Leo
-""".split()
-
-
 log = logging.getLogger(__name__)
 
 
 def make_candidate_numbers(candidate_count):
     """Return an iterable of candidate numbers."""
     return range(1, candidate_count + 1)
-
-
-# TODO: test this.
-def make_standard_candidate_names(count):
-    names = CANDIDATE_NAMES[:count]
-    for n in range(len(names) + 1, count + 1):
-        names.append("Candidate %d" % n)
-    return names
 
 
 # TODO: allow ordering and compressing to be done separately.

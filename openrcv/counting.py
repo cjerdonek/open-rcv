@@ -50,19 +50,6 @@ def any_value(dict_):
         raise ValueError("dict has no values")
 
 
-# TODO: remove this function.
-def count_internal_ballots(ballots_resource, candidate_numbers):
-    """Count one round, and return a RoundResults object.
-
-    Arguments:
-      ballots_resource: a BallotsResource object.
-      candidates: iterable of candidates eligible to receive votes.
-    """
-    parser = InternalBallotsCounter(candidate_numbers)
-    round_results = parser.parse(ballots_resource)
-    return round_results
-
-
 def get_majority(total):
     """Return the majority threshold for a single-winner election.
 

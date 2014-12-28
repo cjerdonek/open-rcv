@@ -20,20 +20,16 @@
 # DEALINGS IN THE SOFTWARE.
 #
 
-"""Support for generating and managing election data.
-
-This module provides functions to help work with the test cases
-in the open-rcv-tests repo.
-"""
+"""Support for managing test cases in the open-rcv-tests repo."""
 
 from contextlib import contextmanager
 import datetime
 import logging
 import os
 import os.path
-from random import choice, random, sample
+from random import choice
 
-from openrcv import counting, jcmodels, jsonlib, models, utils
+from openrcv import contestgen, counting, jcmodels, jsonlib, models, utils
 from openrcv.formats import jscase
 from openrcv.jcmodels import (JsonCaseContestInput, JsonCaseTestInstance,
                               JsonCaseTestOutput, JsonCaseTestsFile)
@@ -41,8 +37,6 @@ from openrcv.models import ContestInput
 
 
 PERM_ID_CHARS = "0123456789abcdef"
-
-STOP_CHOICE = object()
 
 
 log = logging.getLogger(__name__)
@@ -72,14 +66,6 @@ def add_contest_to_contests_file(contest, contests_path):
     jsonlib.write_json(data, path=contests_path)
 
 
-def clean_contest(contest):
-    """Normalize a contest in a JSON contests file."""
-    if contest.should_normalize_ballots:
-        contest.ballots_resource.normalize()
-    if not contest.rule_sets:
-        contest.rule_sets = []
-
-
 def _get_jc_contests_file(contests_path):
     js_contests_file = jsonlib.read_json_path(contests_path)
     jc_contests_file = jcmodels.JsonCaseContestsFile.from_jsobj(js_contests_file)
@@ -99,6 +85,7 @@ def _get_jc_tests_file(tests_dir, rule_set):
 
 # TODO: log normalization conversions (e.g. if they are unequal), and use
 #   an equality check on the JSON object to know if there was a difference.
+# TODO: normalize the candidate names.
 def normalize_contests_file(contests_path):
     contests_file = _get_jc_contests_file(contests_path)
     jc_contests = contests_file.contests
@@ -204,115 +191,3 @@ def update_test_outputs(tests_dir):
     for file_name in os.listdir(tests_dir):
         file_path = os.path.join(tests_dir, file_name)
         update_test_outputs_file(file_path)
-
-
-class BallotGenerator(object):
-
-    """Generates random ballots (allowing duplicates)."""
-
-    def __init__(self, choices, max_length=None, undervote=0.1):
-        """
-        Arguments:
-          choices: an iterable of choices from which to choose.
-          max_length: the maximum length of a ballot.  Defaults to the
-            number of choices.
-          undervote: probability of selecting an undervote.
-        """
-        if max_length is None:
-            max_length = len(choices)
-
-        self.choices = set(choices)
-        self.max_length = max_length
-        self.undervote = undervote
-
-    def choose(self, choices):
-        """Choose a single element of choices at random.
-
-        Arguments:
-          choices: a sequence or set of objects.
-        """
-        # random.sample() returns a k-length list.
-        return sample(choices, 1)[0]
-
-    def after_choice(self, choices, choice):
-        pass
-
-    def make_choices(self):
-        chosen = []
-        # random.random() returns a float in the range: [0.0, 1.0).
-        # A strict inequality is used so that the edge case of 0 undervote
-        # is handled correctly.
-        if random() < self.undervote:
-            return chosen
-
-        choices = self.choices.copy()
-
-        # Choose one choice before adding the "stop" choice.  This ensures
-        # that the ballot is not an undervote.
-        choice = self.choose(choices)
-        chosen.append(choice)
-        self.after_choice(choices, choice)
-
-        choices.add(STOP_CHOICE)
-
-        for i in range(self.max_length - 1):
-            choice = self.choose(choices)
-            if choice is STOP_CHOICE:
-                break
-            chosen.append(choice)
-            self.after_choice(choices, choice)
-
-        return chosen
-
-    def add_random_ballots(self, ballots_resource, count):
-        """
-        Arguments:
-          choices: a sequence of integers.
-        """
-        with ballots_resource.writing() as gen:
-            for i in range(count):
-                choices = self.make_choices()
-                ballot = 1, choices
-                gen.send(ballot)
-
-
-class UniqueBallotGenerator(BallotGenerator):
-
-    def after_choice(self, choices, choice):
-        choices.remove(choice)
-
-
-class ContestCreator(object):
-
-    def make_notes(self, candidate_count, ballot_count):
-        now = datetime.datetime.now()
-        # We call int() to remove leading zero-padding.
-        dt_string = ('{0:%B} {0:%d}, {0:%Y} at {1:d}:{0:%M:%S%p}'
-                     .format(now, int(now.strftime("%I"))))
-        # TODO: allow for extra notes.
-        notes = [
-            "Random contest with {0:d} candidates and {1:d} ballots.  "
-                                .format(candidate_count, ballot_count),
-            "Created on {0}.".format(dt_string),
-        ]
-        return notes
-
-    def create_random(self, ballots_resource, candidate_count=None, ballot_count=None):
-        """Create a random contest.
-
-        Returns a ContestInput object.
-        """
-        if ballot_count is None:
-            ballot_count = 20
-
-        candidates = models.make_standard_candidate_names(candidate_count)
-
-        choices = range(1, candidate_count + 1)
-        chooser = BallotGenerator(choices=choices)
-        chooser.add_random_ballots(ballots_resource, ballot_count)
-
-        name = "Random Contest"
-        notes = self.make_notes(candidate_count, ballot_count)
-        contest = ContestInput(name=name, notes=notes, candidates=candidates,
-                               ballots_resource=ballots_resource)
-        return contest

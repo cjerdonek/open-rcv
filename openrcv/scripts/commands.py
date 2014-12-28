@@ -30,7 +30,7 @@ import sys
 
 import yaml
 
-from openrcv import counting, jcmanage, jcmodels, jsonlib, models, streams
+from openrcv import (contestgen, counting, jcmanage, jcmodels, jsonlib, models, streams)
 from openrcv.formats import internal, jscase
 from openrcv.models import ContestInput
 from openrcv.utils import logged_open, PathInfo, StringInfo
@@ -73,7 +73,7 @@ def make_random_contest(ballot_count, candidate_count, format_cls,
         stdout = sys.stdout
 
     format = format_cls()
-    creator = jcmanage.ContestCreator()
+    creator = contestgen.ContestCreator()
 
     with temp_ballots_resource() as ballots_resource:
         contest = creator.create_random(ballots_resource, ballot_count=ballot_count,

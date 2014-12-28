@@ -160,7 +160,8 @@ def create_argparser(prog="rcv"):
         RandContestCommand,
         CleanContestsCommand,
         UpdateTestInputsCommand,
-        UpdateTestOutputsCommand,
+        CountJcTestCommand,
+        UpdateOutputsCommand,
     )
     builder.add_commands(group, classes)
 
@@ -339,6 +340,7 @@ class CommandBase(object):
 class CountCommand(CommandBase):
 
     name = "count"
+
     help = "Tally one or more contests."
 
     help_details = """\
@@ -358,6 +360,7 @@ class CountCommand(CommandBase):
 class RandContestCommand(CommandBase):
 
     name = "randcontest"
+
     help = "Create a random contest."
 
     @property
@@ -453,7 +456,29 @@ class UpdateTestInputsCommand(CommandBase):
         return jcmanage.update_test_inputs(contests_path, tests_dir)
 
 
-class UpdateTestOutputsCommand(CommandBase):
+class CountJcTestCommand(CommandBase):
+
+    name = "countjctest"
+
+    help = "Count a contest from a JSON test file."
+
+    def add_arguments(self, parser):
+        parser.add_argument('rule_set', metavar='RULE_SET',
+            help=("a rule-set string specifying which file in the tests "
+                  'directory to open (e.g. "irv" for the file "irv.py").'))
+        parser.add_argument('index', metavar='INDEX',
+            help="the integer index of the test case to count.")
+        self.add_required_tests_dir(parser)
+
+    def func(self, ns, stdout):
+        rule_set = ns.rule_set
+        index = ns.index
+        tests_dir = ns.json_location
+        # TODO
+        return jcmanage.count_json_test_case(tests_dir)
+
+
+class UpdateOutputsCommand(CommandBase):
 
     name = "updateoutputs"
 

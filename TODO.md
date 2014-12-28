@@ -1,6 +1,8 @@
 TODO
 ====
 
+* Consider a contests.json format that allows ballot data to be reused
+  across count variations.
 * Implement commands:
   - updateoutputs
   - checktests

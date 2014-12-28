@@ -73,14 +73,23 @@ def _get_jc_contests_file(contests_path):
     return jc_contests_file
 
 
+def _get_tests_file_path(tests_dir, rule_set):
+    return os.path.join(tests_dir, "{0}.json".format(rule_set))
+
+
 def _get_jc_tests_file(tests_dir, rule_set):
+    tests_path = _get_tests_file_path(tests_dir, rule_set)
+    js_tests_file = jsonlib.read_json_path(tests_path)
+    jc_tests_file = JsonCaseTestsFile.from_jsobj(js_tests_file)
+    return tests_path, jc_tests_file
+
+
+def _get_or_make_jc_tests_file_(tests_dir, rule_set):
     tests_path = os.path.join(tests_dir, "{0}.json".format(rule_set))
     try:
-        js_tests_file = jsonlib.read_json_path(tests_path)
+        jc_tests_file = _get_jc_tests_file(tests_dir, rule_set)
     except FileNotFoundError:
         jc_tests_file = JsonCaseTestsFile()
-    else:
-        jc_tests_file = JsonCaseTestsFile.from_jsobj(js_tests_file)
     return tests_path, jc_tests_file
 
 
@@ -123,7 +132,7 @@ def update_tests_file(contests_file, contest_inputs, tests_dir, rule_set):
       rule_set: the name of a rule set.
       tests_dir: path to the tests directory.
     """
-    tests_path, tests_file = _get_jc_tests_file(tests_dir, rule_set)
+    tests_path, tests_file = _get_or_make_jc_tests_file(tests_dir, rule_set)
 
     # Create a mapping from ID to list of JsonCaseTestInstance objects.
     id_to_tests = {}
@@ -184,6 +193,17 @@ def count_test_case(test):
     contest_results = counting.count_irv_contest(contest)
     jc_output = JsonCaseTestOutput.from_contest_results(contest_results)
     return jc_output
+
+
+def count_json_test_case(tests_dir, rule_set, index):
+    tests_path, jc_tests_file = _get_jc_tests_file(tests_dir, rule_set)
+    for test in jc_tests_file.test_cases:
+        if test.index == index:
+            break
+    else:
+        raise Exception("index {0} not found in: {1}".format(index, tests_path))
+    jc_output = count_test_case(test)
+    return jc_output.to_json()
 
 
 def update_test_outputs_file(file_path):

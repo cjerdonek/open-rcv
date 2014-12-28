@@ -466,7 +466,7 @@ class CountJcTestCommand(CommandBase):
         parser.add_argument('rule_set', metavar='RULE_SET',
             help=("a rule-set string specifying which file in the tests "
                   'directory to open (e.g. "irv" for the file "irv.py").'))
-        parser.add_argument('index', metavar='INDEX',
+        parser.add_argument('index', metavar='INDEX', type=int,
             help="the integer index of the test case to count.")
         self.add_required_tests_dir(parser)
 
@@ -474,8 +474,8 @@ class CountJcTestCommand(CommandBase):
         rule_set = ns.rule_set
         index = ns.index
         tests_dir = ns.json_location
-        # TODO
-        return jcmanage.count_json_test_case(tests_dir)
+        return jcmanage.count_json_test_case(tests_dir=tests_dir,
+                                             rule_set=rule_set, index=index)
 
 
 class UpdateOutputsCommand(CommandBase):

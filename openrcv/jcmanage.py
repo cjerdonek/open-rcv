@@ -29,6 +29,7 @@ import os
 import os.path
 from random import choice
 
+import openrcv
 from openrcv import contestgen, counting, jcmodels, jsonlib, models, utils
 from openrcv.formats import jscase
 from openrcv.jcmodels import (JsonCaseContestInput, JsonCaseTestInstance,
@@ -87,8 +88,15 @@ def _get_jc_tests_file(tests_dir, rule_set):
 #   an equality check on the JSON object to know if there was a difference.
 # TODO: normalize the candidate names.
 def normalize_contests_file(contests_path):
-    contests_file = _get_jc_contests_file(contests_path)
-    jc_contests = contests_file.contests
+    jc_file = _get_jc_contests_file(contests_path)
+    jc_file.version = openrcv.__version__
+
+    # Show two more than the hard-coded set to show the pattern.
+    name_count = len(contestgen.CANDIDATE_NAMES) + 2
+    names = contestgen.make_standard_candidate_names(name_count)
+    jc_file.candidate_names = names
+
+    jc_contests = jc_file.contests
     ids = set()
     for id_ in (c.id.lower() for c in jc_contests if c.id):
         if id_ in ids:
@@ -105,7 +113,7 @@ def normalize_contests_file(contests_path):
             jc_contest.ballots = normalized.ballots
         if not jc_contest.rule_sets:
             jc_contest.rule_sets = []
-    jsonlib.write_json(contests_file, path=contests_path)
+    jsonlib.write_json(jc_file, path=contests_path)
 
 
 def update_tests_file(contests_file, contest_inputs, tests_dir, rule_set):

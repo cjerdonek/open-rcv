@@ -172,16 +172,9 @@ class JsonCaseContestsFile(JsonableMixin):
 
     """Represents a contests.json file for open-rcv-tests."""
 
-    meta_attrs = (Attribute('version'), )
+    meta_attrs = (Attribute('candidate_names'),
+                  Attribute('version'), )
     data_attrs = (Attribute('contests', cls=JsonCaseContestInput), )
-
-    def __init__(self, contests=None, version=None):
-        """
-        Arguments:
-          contests: an iterable of JsonContest objects.
-        """
-        self.contests = contests
-        self.version = version
 
     def repr_info(self):
         return "version=%s contests=%d" % (self.version, len(self.contests))

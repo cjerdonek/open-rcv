@@ -426,8 +426,9 @@ class CleanContestsCommand(CommandBase):
     help = "Clean and normalize a JSON contests file."
 
     help_details = """\
-    Normalizations include updating the integer indices, setting the
-    permanent IDs, and normalizing the ballots if needed.
+    Normalizations include setting the file version number, setting
+    the standard candidate names, updating the integer indices,
+    setting the permanent IDs, and normalizing the ballots if needed.
     """
 
     def add_arguments(self, parser):

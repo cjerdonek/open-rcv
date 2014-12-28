@@ -43,10 +43,10 @@ processed one at a time -- as opposed to having to load them into memory
 all at once.
 """
 
+from openrcv import contestgen, models, streams
 from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
 from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin,
                              JsonDeserializeError)
-from openrcv import models, streams
 from openrcv.utils import StringInfo
 
 
@@ -121,14 +121,14 @@ class JsonCaseContestInput(JsonableMixin):
                   Attribute('rule_sets'),
                   Attribute('notes', model=True), )
     data_attrs = (Attribute('ballots', cls=JsonCaseBallot),
-                  Attribute('candidate_count'), )
+                  Attribute('candidate_count'),
+                  Attribute('tie_elimination_order'), )
 
     def repr_info(self):
         return "index=%s id=%s" % (self.index, self.id)
 
     def make_candidate_names(self):
-        # TODO: use self.candidate_count
-        pass
+        return contestgen.make_standard_candidate_names(self.candidate_count)
 
     def save_from_model(self, contest):
         """
@@ -141,9 +141,9 @@ class JsonCaseContestInput(JsonableMixin):
         kwargs = self.make_attr_kwargs(contest)
         self.__init__(candidate_count=candidate_count, ballots=ballots, **kwargs)
 
-    # TODO: implement and unit test this.
     # TODO: think about how the creation of a new ballots resource should
     # be handled, since it involves managing another resource.
+    # TODO: DRY this up by making last two lines part of base class.
     def to_model(self):
         """Return a ContestInput object."""
         candidates = self.make_candidate_names()

@@ -193,6 +193,7 @@ class JsonCaseContestInputTest(UnitCase):
                          ballots=ballots, normalize_ballots=False)
         contest = jc_contest.to_model()
         expected_attrs = [
+            ("candidates", ['Ann', 'Bob', 'Carol']),
             ("name", "My Name"),
             ("notes", "Notes..."),
         ]

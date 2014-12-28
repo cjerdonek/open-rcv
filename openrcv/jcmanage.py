@@ -100,7 +100,7 @@ def normalize_contests_file(contests_path):
     ids = set()
     for id_ in (c.id.lower() for c in jc_contests if c.id):
         if id_ in ids:
-            raise Exception("duplicate id_: {0} (lower-cased)".format(id_))
+            raise Exception("duplicate id: {0} (lower-cased)".format(id_))
         ids.add(id_)
     for index, jc_contest in enumerate(jc_contests, start=1):
         jc_contest.index = index

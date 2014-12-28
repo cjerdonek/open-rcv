@@ -162,7 +162,7 @@ class RoundResults(object):
     """Represents contest results."""
 
     def __init__(self, elected=None, eliminated=None, tied_last_place=None,
-                 totals=None, ):
+                 totals=None):
         """
         Arguments:
           totals: dict of candidate number to vote total.

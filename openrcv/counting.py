@@ -170,4 +170,4 @@ class Tabulator(object):
                         totals[choice] += weight
                         break
 
-        return RoundResults(totals)
+        return RoundResults(totals=totals)

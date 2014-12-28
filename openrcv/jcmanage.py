@@ -190,7 +190,10 @@ def update_test_outputs_file(file_path):
     js_tests_file = jsonlib.read_json_path(file_path)
     jc_tests_file = JsonCaseTestsFile.from_jsobj(js_tests_file)
     for test in jc_tests_file.test_cases:
-        jc_output = count_test_case(test)
+        try:
+            jc_output = count_test_case(test)
+        except Exception as exc:
+            raise type(exc)("during contest: {0!r}".format(test))
         test.output = jc_output
     jsonlib.write_json(jc_tests_file, path=file_path)
 

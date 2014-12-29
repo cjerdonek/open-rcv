@@ -89,6 +89,7 @@ def get_lowest(totals):
     return lowest_candidates
 
 
+# TODO: remove this method.
 def count_irv_contest(contest):
     """Tabulate a contest using IRV, and return a ContestResults object.
 
@@ -97,41 +98,17 @@ def count_irv_contest(contest):
     """
     # TODO: handle case of 0 total (no winner, probably)?  And add a test case.
     # TODO: add tests for degenerate cases (0 candidates, 1 candidate, 0 votes, etc).
-    candidate_numbers = set(contest.get_candidate_numbers())
-    tabulator = Tabulator(contest.ballots_resource)
+    tabulator = Tabulator(contest)
+    return tabulator.count()
 
-    outcome = models.ContestOutcome()
-    rounds = []
-    while True:
-        # TODO: move more of the logic below into Tabulator.
-        #  In particular, the tabulator should be responsible for setting
-        #  all of the attributes on the round object.
-        round_results = tabulator.count(candidate_numbers)
-        rounds.append(round_results)
-        totals = round_results.totals
-        winner = get_winner(totals)
-        if winner is not None:
-            round_results.elected = [winner]
-            break
-        last_place = get_lowest(totals)
-        if len(last_place) > 1:
-            # Then there is a tie.
-            outcome.tied_last_place = last_place
-            break
-
-        candidate_numbers -= last_place
-
-    outcome.last_round = len(rounds)
-    results = ContestResults(outcome=outcome, rounds=rounds)
-    return results
 
 
 class Tabulator(object):
 
-    def __init__(self, ballots_resource):
-        self.ballots_resource = ballots_resource
+    def __init__(self, contest):
+        self.contest = contest
 
-    def count(self, candidate_numbers):
+    def count_ballots(self, candidate_numbers):
         """Count one round, and return a RoundResults object.
 
         Arguments:
@@ -141,7 +118,7 @@ class Tabulator(object):
         for candidate_number in candidate_numbers:
             totals[candidate_number] = 0
 
-        with self.ballots_resource.reading() as ballots:
+        with self.contest.ballots_resource.reading() as ballots:
             for weight, choices in ballots:
                 # TODO: replace with call to self.count_ballot().
                 for choice in choices:
@@ -150,3 +127,30 @@ class Tabulator(object):
                         break
 
         return RoundResults(totals=totals)
+
+    def count(self):
+        candidate_numbers = set(self.contest.get_candidate_numbers())
+        outcome = models.ContestOutcome()
+        rounds = []
+        while True:
+            # TODO: move more of the logic below into Tabulator.
+            #  In particular, the tabulator should be responsible for setting
+            #  all of the attributes on the round object.
+            round_results = self.count_ballots(candidate_numbers)
+            rounds.append(round_results)
+            totals = round_results.totals
+            winner = get_winner(totals)
+            if winner is not None:
+                round_results.elected = [winner]
+                break
+            last_place = get_lowest(totals)
+            if len(last_place) > 1:
+                # Then there is a tie.
+                outcome.tied_last_place = last_place
+                break
+
+            candidate_numbers -= last_place
+
+        outcome.last_round = len(rounds)
+        results = ContestResults(outcome=outcome, rounds=rounds)
+        return results

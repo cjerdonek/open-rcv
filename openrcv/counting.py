@@ -32,6 +32,7 @@ import string
 # (2) for simplicity, the counting algorithms should be decoupled from
 # and not depend on serialization, etc.  Serialization is supplemental
 # to any counting and not a prerequisite.
+# TODO: move some of the above comments to the module docstring.
 
 from openrcv import models
 from openrcv.formats.internal import parse_internal_ballot, to_internal_ballot
@@ -102,11 +103,15 @@ def count_irv_contest(contest):
     outcome = models.ContestOutcome()
     rounds = []
     while True:
+        # TODO: move more of the logic below into Tabulator.
+        #  In particular, the tabulator should be responsible for setting
+        #  all of the attributes on the round object.
         round_results = tabulator.count(candidate_numbers)
         rounds.append(round_results)
         totals = round_results.totals
         winner = get_winner(totals)
         if winner is not None:
+            round_results.elected = [winner]
             break
         last_place = get_lowest(totals)
         if len(last_place) > 1:

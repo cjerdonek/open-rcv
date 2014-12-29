@@ -121,32 +121,6 @@ def count_irv_contest(contest):
     return results
 
 
-def _count_irv(sub_dir, blt_path):
-    ballot_path = os.path.join(sub_dir, "ballots.txt")
-    ballot_stream = PathInfo(ballot_path, encoding=utils.ENCODING_INTERNAL_BALLOTS)
-    blt_stream = PathInfo(blt_path)
-
-    parser = BLTParser(ballot_stream)
-    contest = parser.parse(blt_stream)
-    candidates = set(contest.get_candidate_numbers())
-
-    results = count_irv_contest(ballot_stream, candidates)
-
-    return results
-
-
-# This is currently just a test function rather than part of the API.
-def count_irv(blt_path, temp_dir=None):
-    """Return a ContestResults object."""
-    if temp_dir is None:
-        temp_dir = "temp"
-    utils.ensure_dir(temp_dir)
-    with utils.temp_dir_inside(temp_dir) as sub_dir:
-        results = _count_irv(sub_dir, blt_path)
-
-    return results
-
-
 class Tabulator(object):
 
     def __init__(self, ballots_resource):

@@ -96,12 +96,18 @@ def write_json(obj, resource=None, path=None):
         return call_json(json.dump, jsobj, f)
 
 
-def from_model(model_obj, cls):
-    """Create an instance of the current class from a model object."""
-    if isinstance(model_obj, LIST_TYPES):
-        return [from_model(o, cls) for o in model_obj]
+def from_model(obj, cls):
+    """Convert the given object to a jsonable.
 
-    return cls.from_model(model_obj)
+    Arguments:
+      cls: a jsonable class, or None if no conversion should be performed.
+    """
+    if cls is None:
+        return obj
+    if isinstance(obj, LIST_TYPES):
+        return [from_model(o, cls) for o in obj]
+
+    return cls.from_model(obj)
 
 # TODO: choose a less ambiguous name.
 def from_jsobj(jsobj, cls=None):
@@ -154,7 +160,7 @@ class Attribute(object):
 
     """Represents a serializable attribute of a jsonable class."""
 
-    def __init__(self, name, cls=None, keyword=None, model=False):
+    def __init__(self, name, cls=None, keyword=None, model=True):
         """
         Arguments:
           name: the attribute name.
@@ -177,10 +183,19 @@ class Attribute(object):
         self.model = model
         self.name = name
 
+    def model_value(self, model_obj):
+        """Return the attribute value as a jsonable object.
+
+        Arguments:
+          model_obj: the model object whose attribute will be accessed.
+        """
+        return from_model(getattr(model_obj, self.name), self.cls)
 
 class JsonableMixin(ReprMixin):
 
     """A class that can be serialized to and from JSON.
+
+    TODO: move the information below to the module string.
 
     Jsonable API
     ------------
@@ -204,25 +219,26 @@ class JsonableMixin(ReprMixin):
         return list(cls.meta_attrs) + list(cls.data_attrs)
 
     @classmethod
+    def model_attrs(cls):
+        return (attr for attr in cls.attrs() if attr.model)
+
+    @classmethod
     def keywords_to_attrs(cls):
-        """Return a mapping from keyword to Attribute for this class."""
+        """Return a map from keyword to Attribute for this class."""
         return {attr.keyword: attr for attr in cls.attrs()}
 
     @classmethod
     def keywords_to_init_defaults(cls):
-        """Return a mapping from keyword to default __init__() value."""
+        """Return a map from keyword to default __init__() value."""
         mapping = cls.keywords_to_attrs()
         # For now, all keyword defaults are None.
         return dict.fromkeys(mapping.keys())
 
+    # TODO: review the calls to this method and mark TODO's where it needs replacement.
     @classmethod
-    def make_attr_kwargs(cls, obj):
-        """Return a map from keyword to attribute name."""
-        kwargs = {}
-        for attr in (attr for attr in cls.attrs() if attr.model):
-            value = getattr(obj, attr.name)
-            kwargs[attr.keyword] = value
-        return kwargs
+    def model_to_kwargs(cls, model_obj):
+        """Make jsonable kwargs from the given model object."""
+        return {attr.keyword: attr.model_value(model_obj) for attr in cls.model_attrs()}
 
     def __init__(self, **kwargs):
         defaults = self.keywords_to_init_defaults()
@@ -353,12 +369,13 @@ class JsonableMixin(ReprMixin):
     @classmethod
     def from_model(cls, model_obj):
         """Create an instance of the current class from a model object."""
-        jsonable = cls()
+        kwargs = cls.model_to_kwargs(model_obj)
+        jsonable = cls(**kwargs)
         jsonable.save_from_model(model_obj)
         return jsonable
 
-    def save_from_model(self):
-        raise utils.NoImplementation(self)
+    def save_from_model(self, model_obj):
+        pass
 
     def to_model(self):
         raise utils.NoImplementation(self)

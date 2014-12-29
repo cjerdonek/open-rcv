@@ -191,7 +191,7 @@ def count_test_case(test):
     jc_contest = test.input
     contest = jc_contest.to_model()
     contest_results = counting.count_irv_contest(contest)
-    jc_output = JsonCaseTestOutput.from_contest_results(contest_results)
+    jc_output = JsonCaseTestOutput.from_model(contest_results)
     return jc_output
 
 

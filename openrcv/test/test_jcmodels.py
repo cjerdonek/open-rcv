@@ -24,7 +24,7 @@ from textwrap import dedent
 
 from openrcv.jsonlib import JsonableError, JsonDeserializeError, JS_NULL
 from openrcv.jcmodels import (from_jsobj, JsonCaseBallot, JsonCaseContestInput,
-                              JsonRoundResults, JsonCaseTestOutput)
+                              JsonCaseRoundResults, JsonCaseTestOutput)
 from openrcv.models import ContestInput
 from openrcv.streams import ListResource
 from openrcv.utils import StreamInfo, StringInfo
@@ -277,10 +277,10 @@ class JsonCaseContestInputTest2(object):
         self.assertEqual(contest.candidate_count, 5)
 
 
-class JsonRoundResultsTest(UnitCase):
+class JsonCaseRoundResultsTest(UnitCase):
 
     def test_to_jsobj(self):
-        results = JsonRoundResults(totals={1: 2})
+        results = JsonCaseRoundResults(totals={1: 2})
         self.assertEqual(results.to_jsobj(), {'totals': {1: 2}})
 
 
@@ -288,8 +288,8 @@ class JsonCaseTestOutputTest(UnitCase):
 
     def test_to_jsobj(self):
         rounds = [
-            JsonRoundResults(totals={1: 2}),
-            JsonRoundResults(totals={3: 4})
+            JsonCaseRoundResults(totals={1: 2}),
+            JsonCaseRoundResults(totals={3: 4})
         ]
         results = JsonCaseTestOutput(rounds=rounds)
         self.assertEqual(results.to_jsobj(),

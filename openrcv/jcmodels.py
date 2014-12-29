@@ -114,15 +114,16 @@ class JsonCaseContestInput(JsonableMixin):
       candidate_count: integer number of candidates.
     """
 
-    meta_attrs = (Attribute('id'),
-                  Attribute('index', keyword='index'),
-                  Attribute('name', model=True),
-                  Attribute('normalize_ballots'),
-                  Attribute('rule_sets'),
-                  Attribute('notes', model=True), )
-    data_attrs = (Attribute('ballots', cls=JsonCaseBallot),
-                  Attribute('candidate_count'),
-                  Attribute('tie_elimination_order'), )
+    meta_attrs = (Attribute('id', model=False),
+                  Attribute('index', model=False),
+                  Attribute('name'),
+                  Attribute('normalize_ballots', model=False),
+                  Attribute('rule_sets', model=False),
+                  Attribute('notes'), )
+    data_attrs = (Attribute('ballots', cls=JsonCaseBallot, model=False),
+                  Attribute('candidate_count', model=False),
+                  # TODO: make model=True.
+                  Attribute('tie_elimination_order', model=False), )
 
     def repr_info(self):
         return "index=%s id=%s" % (self.index, self.id)
@@ -130,6 +131,7 @@ class JsonCaseContestInput(JsonableMixin):
     def make_candidate_names(self):
         return contestgen.make_standard_candidate_names(self.candidate_count)
 
+    # TODO: DRY this up by making last two lines part of base class.
     def save_from_model(self, contest):
         """
         Arguments:
@@ -138,7 +140,7 @@ class JsonCaseContestInput(JsonableMixin):
         candidate_count = None if contest.candidates is None else len(contest.candidates)
         with contest.ballots_resource.reading() as ballots:
             ballots = [JsonCaseBallot.from_model(b) for b in ballots]
-        kwargs = self.make_attr_kwargs(contest)
+        kwargs = self.model_to_kwargs(contest)
         self.__init__(candidate_count=candidate_count, ballots=ballots, **kwargs)
 
     # TODO: think about how the creation of a new ballots resource should
@@ -152,7 +154,7 @@ class JsonCaseContestInput(JsonableMixin):
         # number of ballots is small.
         resource = streams.ListResource(ballots)
         ballots_resource = models.BallotsResource(resource)
-        kwargs = self.make_attr_kwargs(self)
+        kwargs = self.model_to_kwargs(self)
         contest = models.ContestInput(candidates=candidates,
                                       ballots_resource=ballots_resource, **kwargs)
         return contest
@@ -170,7 +172,7 @@ class JsonCaseContestInput(JsonableMixin):
 
 class JsonCaseContestsFile(JsonableMixin):
 
-    """Represents a contests.json file for open-rcv-tests."""
+    """Represents a JSON contests file for open-rcv-tests."""
 
     meta_attrs = (Attribute('candidate_names'),
                   Attribute('version'), )
@@ -180,26 +182,21 @@ class JsonCaseContestsFile(JsonableMixin):
         return "version=%s contests=%d" % (self.version, len(self.contests))
 
 
-class JsonRoundResults(JsonableMixin):
+class JsonCaseRoundResults(JsonableMixin):
 
     """Represents the results of a round for testing purposes."""
 
-    data_attrs = (Attribute('totals'), )
+    data_attrs = (Attribute('elected'),
+                  Attribute('eliminated'),
+                  Attribute('tie_break'),
+                  Attribute('tied_last_place'),
+                  Attribute('totals'), )
 
 
 class JsonCaseTestOutput(JsonableMixin):
 
     meta_attrs = ()
-    data_attrs = (Attribute('rounds', cls=JsonRoundResults), )
-
-    @classmethod
-    def from_contest_results(cls, results):
-        """
-        Arguments:
-          results: a ContestResults object.
-        """
-        json_rounds = [JsonRoundResults(totals=r.totals) for r in results.rounds]
-        return JsonCaseTestOutput(rounds=json_rounds)
+    data_attrs = (Attribute('rounds', cls=JsonCaseRoundResults), )
 
 
 class JsonCaseTestInstance(JsonableMixin):

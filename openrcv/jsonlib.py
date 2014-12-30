@@ -129,11 +129,7 @@ def from_jsobj(jsobj, cls=None):
 
 
 def to_jsobj(obj):
-    """Convert a Python object to a JSON object, and return it.
-
-    Arguments:
-      cls: a class that serves as a "type hint."
-    """
+    """Convert a Jsonable object to a JSON object, and return it."""
     if isinstance(obj, LIST_TYPES):
         return [to_jsobj(o) for o in obj]
     if obj.__class__.__module__ == "builtins":
@@ -336,10 +332,10 @@ class JsonableMixin(ReprMixin):
             except TypeError:
                 # Make troubleshooting easier by providing the name.
                 raise JsonableError("error getting attribute: %r" % name)
-            jsobj = to_jsobj(value)
-            if jsobj is None:
+            if value is None:
                 # Don't write None values into the JSON object.
                 continue
+            jsobj = to_jsobj(value)
             jsdict[name] = jsobj
 
     def save_from_jsobj(self, jsobj):
@@ -388,7 +384,7 @@ class JsonableMixin(ReprMixin):
         return jsonable
 
     def to_jsobj(self):
-        """Convert the current object to a JSON object."""
+        """Convert the current Jsonable object to a JSON object."""
         jsobj = {}
         meta = self.get_meta_dict()
         if meta:

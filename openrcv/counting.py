@@ -126,9 +126,11 @@ class Tabulator(object):
                         totals[choice] += weight
                         break
 
-        return RoundResults(totals=totals)
+        return totals
 
     def count(self):
+        contest = self.contest
+        candidates_info = contest.make_candidates_info()
         candidate_numbers = set(self.contest.get_candidate_numbers())
         outcome = models.ContestOutcome()
         rounds = []
@@ -136,7 +138,8 @@ class Tabulator(object):
             # TODO: move more of the logic below into Tabulator.
             #  In particular, the tabulator should be responsible for setting
             #  all of the attributes on the round object.
-            round_results = self.count_ballots(candidate_numbers)
+            totals = self.count_ballots(candidate_numbers)
+            round_results = RoundResults(candidates_info=candidates_info, totals=totals)
             rounds.append(round_results)
             totals = round_results.totals
             winner = get_winner(totals)

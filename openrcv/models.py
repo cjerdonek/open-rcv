@@ -109,6 +109,24 @@ class BallotsResource(streams.WrapperResource, BallotsResourceMixin):
     pass
 
 
+class CandidatesInfo(object):
+
+    """Represents the collection of candidates."""
+
+    def __init__(self, candidates):
+        """
+        Arguments:
+          candidates: an iterable of the candidate names.
+        """
+        self.candidates = candidates
+
+    def from_number(self, number):
+        return self.candidates[number - 1]
+
+    def from_numbers(self, numbers):
+        return [self.from_number(n) for n in numbers]
+
+
 class ContestInput(ReprMixin):
 
     """
@@ -141,6 +159,11 @@ class ContestInput(ReprMixin):
     def repr_info(self):
         return "name=%r" % (self.name, )
 
+    def make_candidates_info(self):
+        """Return a CandidatesInfo object."""
+        return CandidatesInfo(self.candidates)
+
+    # TODO: remove this.
     def get_candidate_numbers(self):
         """Return an iterable of the candidate numbers."""
         return make_candidate_numbers(len(self.candidates))
@@ -161,12 +184,13 @@ class RoundResults(object):
 
     """Represents contest results."""
 
-    def __init__(self, elected=None, eliminated=None, tied_last_place=None,
-                 totals=None, tie_break=None):
+    def __init__(self, candidates_info=None, elected=None, eliminated=None,
+                 tied_last_place=None, totals=None, tie_break=None):
         """
         Arguments:
           totals: dict of candidate number to vote total.
         """
+        self.candidates_info = candidates_info
         self.elected = elected
         self.eliminated = eliminated
         self.tie_break = tie_break

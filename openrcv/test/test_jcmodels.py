@@ -22,9 +22,10 @@
 
 from textwrap import dedent
 
+from openrcv import models
 from openrcv.jsonlib import JsonableError, JsonDeserializeError, JS_NULL
 from openrcv.jcmodels import (from_jsobj, JsonCaseBallot, JsonCaseContestInput,
-                              JsonCaseRoundResults, JsonCaseTestOutput)
+                              JsonCaseRoundResult, JsonCaseTestOutput)
 from openrcv.models import ContestInput
 from openrcv.streams import ListResource
 from openrcv.utils import StreamInfo, StringInfo
@@ -277,20 +278,33 @@ class JsonCaseContestInputTest2(object):
         self.assertEqual(contest.candidate_count, 5)
 
 
-class JsonCaseRoundResultsTest(UnitCase):
+class JsonCaseRoundResultTest(UnitCase):
 
     def test_to_jsobj(self):
-        results = JsonCaseRoundResults(totals={1: 2})
-        self.assertEqual(results.to_jsobj(), {'totals': {1: 2}})
+        info = models.CandidatesInfo(["Ann", "Bob", "Carl"])
+        totals = {1: 2, 3: 5}
+        result = JsonCaseRoundResult(candidates_info=info,
+                                      elected=[1], eliminated=[2],
+                                      tied_last_place=[3],
+                                      totals=totals)
+        expected = {
+            'elected': ['Ann'],
+            'eliminated': ['Bob'],
+            'tied_last_place': ['Carl'],
+            'totals': {
+                'Ann': 2,
+                'Carl': 5
+            }
+        }
+        self.assertEqual(result.to_jsobj(), expected)
 
 
 class JsonCaseTestOutputTest(UnitCase):
 
     def test_to_jsobj(self):
-        rounds = [
-            JsonCaseRoundResults(totals={1: 2}),
-            JsonCaseRoundResults(totals={3: 4})
-        ]
+        info = models.CandidatesInfo(["Ann", "Bob", "Carl"])
+        rounds = [JsonCaseRoundResult(candidates_info=info, totals=t) for t
+                  in ({1: 2}, {3: 4})]
         results = JsonCaseTestOutput(rounds=rounds)
         self.assertEqual(results.to_jsobj(),
-                         {'rounds': [{'totals': {1: 2}}, {'totals': {3: 4}}]})
+                         {'rounds': [{'totals': {'Ann': 2}}, {'totals': {'Carl': 4}}]})

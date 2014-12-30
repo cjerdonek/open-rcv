@@ -2,8 +2,6 @@ TODO
 ====
 
 * Store the model object for a jsonable class with the class.
-* Consider a contests.json format that allows ballot data to be reused
-  across count variations.
 * Implement commands:
   - updateoutputs
   - checktests
@@ -12,6 +10,8 @@ TODO
   files)
 * Get version detection going from molt.
 * Fix up remaining PyPI release instructions and commit.
+* Consider a contests.json format that allows ballot data to be reused
+  across count variations.
 
 
 Technical debt

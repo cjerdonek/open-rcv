@@ -59,6 +59,14 @@ class JsonCaseBallot(JsonableMixin):
     data_attrs = (Attribute('choices'),
                   Attribute('weight'))
 
+    # We need to override model_to_kwargs() since the model object is a
+    # tuple rather than a class with attributes.
+    @classmethod
+    def model_to_kwargs(cls, model_obj):
+        """Make jsonable kwargs from the given model object."""
+        weight, choices = model_obj
+        return {'weight': weight, 'choices': choices}
+
     def __init__(self, choices=None, weight=1):
         if choices is None:
             choices = ()
@@ -182,21 +190,49 @@ class JsonCaseContestsFile(JsonableMixin):
         return "version=%s contests=%d" % (self.version, len(self.contests))
 
 
-class JsonCaseRoundResults(JsonableMixin):
+class JsonCaseRoundResult(JsonableMixin):
 
-    """Represents the results of a round for testing purposes."""
+    """Represents the results of a round for testing purposes.
 
-    data_attrs = (Attribute('elected'),
+    Attributes:
+      candidates_info: a CandidatesInfo object.
+    """
+
+    data_attrs = (Attribute('candidates_info'),
+                  Attribute('elected'),
                   Attribute('eliminated'),
                   Attribute('tie_break'),
                   Attribute('tied_last_place'),
                   Attribute('totals'), )
 
+    # TODO: move this functionality to the base class (and DRY up with related methods).
+    def save_attrs_to_jsobj(self, jsobj, names, convert=lambda x: x):
+        for name in names:
+            value = getattr(self, name)
+            if value is None:
+                continue
+            jsobj[name] = convert(value)
+
+    def numbers_to_names(self, numbers):
+        from_number = self.candidates_info.from_number
+        return [from_number(n) for n in numbers]
+
+    def totals_to_named_totals(self, totals):
+        from_number = self.candidates_info.from_number
+        return {from_number(number): total for number, total in totals.items()}
+
+    def to_jsobj(self):
+        jsobj = {}
+        self.save_attrs_to_jsobj(jsobj, ('tie_break', ))
+        self.save_attrs_to_jsobj(jsobj, ('elected', 'eliminated', 'tied_last_place'), self.numbers_to_names)
+        self.save_attrs_to_jsobj(jsobj, ('totals', ), self.totals_to_named_totals)
+        return jsobj
+
 
 class JsonCaseTestOutput(JsonableMixin):
 
     meta_attrs = ()
-    data_attrs = (Attribute('rounds', cls=JsonCaseRoundResults), )
+    data_attrs = (Attribute('rounds', cls=JsonCaseRoundResult), )
 
 
 class JsonCaseTestInstance(JsonableMixin):

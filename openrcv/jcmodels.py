@@ -50,6 +50,13 @@ from openrcv.jsonlib import (from_jsobj, Attribute, JsonableError, JsonableMixin
 from openrcv.utils import StringInfo
 
 
+class JsonCaseConstants(JsonableMixin):
+
+    meta_attrs = (Attribute('name'),
+                  Attribute('notes'), )
+    data_attrs = (Attribute('candidate_names'), )
+
+
 class JsonCaseBallot(JsonableMixin):
 
     """The serialization format is a space-delimited string of integers of
@@ -182,12 +189,8 @@ class JsonCaseContestsFile(JsonableMixin):
 
     """Represents a JSON contests file for open-rcv-tests."""
 
-    meta_attrs = (Attribute('candidate_names'),
-                  Attribute('version'), )
+    meta_attrs = (Attribute('version'), )
     data_attrs = (Attribute('contests', cls=JsonCaseContestInput), )
-
-    def repr_info(self):
-        return "version=%s contests=%d" % (self.version, len(self.contests))
 
 
 class JsonCaseRoundResult(JsonableMixin):

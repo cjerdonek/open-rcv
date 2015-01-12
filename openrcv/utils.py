@@ -33,6 +33,7 @@ import os
 import shutil
 import timeit
 import sys
+import textwrap
 
 
 # We only need ascii for the internal ballot file.
@@ -51,6 +52,16 @@ def coroutine(func):
         next(cr)
         return cr
     return start
+
+
+# We choose 70 because the textwrap default is 70.
+def fill(text, width=70):
+    """Wrap paragraphs individually, and return a string."""
+    text = textwrap.dedent(text)
+    paras = text.split("\n\n")
+    fill_ = lambda line: textwrap.fill(line, width=width)
+    text = "\n\n".join(fill_(p) for p in paras)
+    return text
 
 
 def join_values(values):

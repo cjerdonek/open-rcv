@@ -38,6 +38,7 @@ from openrcv.scripts.argparse import (parse_log_level, ArgParser, HelpAction,
 from openrcv.scripts import commands
 from openrcv.scripts.run import main as _main
 from openrcv import utils
+from openrcv.utils import fill
 
 
 # For increased compatibility (specifically with Python 3.4 <= 3.4.1),
@@ -91,15 +92,6 @@ The JSON contests file defaults to the path "{path}" inside the submodule.
 HELP_DEFAULT_TESTS_DIR = """\
 The tests directory defaults to the path "{path}" inside the submodule.
 """.format(path=DEFAULT_TESTS_DIR)
-
-
-# TODO: use this function throughout this module.
-def fill(text):
-    text = textwrap.dedent(text)
-    paras = text.split("\n\n")
-    fill_ = textwrap.fill
-    text = "\n\n".join(fill_(p) for p in paras)
-    return text
 
 
 def make_output_formats():
@@ -240,6 +232,7 @@ class CommandBase(object):
 
     @property
     def desc(self):
+        # TODO: use fill() throughout this module.
         details = fill(self.help_details)
         return "{help}\n\n{details}".format(help=self.help, details=details)
 
@@ -446,7 +439,7 @@ class UpdateTestInputsCommand(CommandBase):
 
     name = "updateinputs"
 
-    help = "Update the test inputs in a tests directory."
+    help = "Update all test data except for test outputs."
 
     def add_arguments(self, parser):
         self.add_required_contests_path_and_tests_dir(parser)
